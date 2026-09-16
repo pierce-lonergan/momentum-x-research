@@ -1,6 +1,6 @@
 # The research log
 
-305 documents, numbered 00–297, written in chronological order as the work happened. Each one records
+298 documents, numbered 00–297, written in chronological order as the work happened. Each one records
 what was attempted, what was measured, and what the measurement licensed concluding — including, often,
 that an earlier document was wrong.
 
@@ -11,7 +11,7 @@ truth and everything here is subordinate to them.
 
 ## A reading path
 
-You do not need to read 305 documents. This is the spine of the argument, in order:
+You do not need to read 298 documents. This is the spine of the argument, in order:
 
 | # | Document | Why it matters |
 |---|---|---|

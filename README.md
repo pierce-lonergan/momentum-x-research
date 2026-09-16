@@ -1,7 +1,7 @@
 # Momentum-X
 
 **A falsification-driven research program in systematic equity trading.**
-It ran for 311 documented experiments and did not find a tradeable edge — and the interesting part
+It ran for 298 documented experiments and did not find a tradeable edge — and the interesting part
 is how thoroughly it established that.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -20,7 +20,7 @@ including several the author believed in.
 
 The headline result, stated the way the repository's own evidence supports it:
 
-> Across 39 hypothesis families and 33 registered trials, **zero** produced a positive, cost-net,
+> Across 35 hypothesis families and 33 registered trials, **zero** produced a positive, cost-net,
 > denominator-honest effect whose confidence interval excludes zero. Over the same 2016–2026 window,
 > **buy-and-hold SPY returned +14.91%/yr** — more than the program's own target. The active strategy
 > underperformed a passive index position.
@@ -57,7 +57,7 @@ This is why nothing here is certified — and why reporting a "Sharpe 1.4 strate
 
 ## What was tested, and what it cost to find out
 
-A selection from [`docs/ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (39 families, all closed):
+A selection from [`docs/ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (35 families):
 
 | Family | Verdict |
 |---|---|
@@ -101,12 +101,33 @@ project-specific bug classes, Bayesian changepoint detection on the equity curve
 config-truth reconciliation comparing intended configuration against what the broker actually did.
 That last one fired nine genuine breaches on the day it was first enabled.
 
+### The test suite, honestly
+
+`pytest -m "not slow"` runs 4,500+ tests. It is **not fully green**, and the README would be worth
+less if it claimed otherwise. Current state and what the failures are:
+
+| | count |
+|---|---|
+| passing | 4,466 |
+| failing | 46 |
+
+Every remaining failure is a **test** that encodes an older shape of the system, not a defect in the
+system: fixtures built before a dependency was added, assertions hardcoding a schema list that has
+since grown, and order-dependent state leakage between tests. Where a failure did indicate a real
+bug it has been fixed — a `NameError` that crashed every sub-$500M candidate, a stop-loss
+calculation that could go negative and leave a position unprotected, and two cwd-dependent paths
+that broke whenever a script was launched from anywhere but the repo root.
+
+The static-analysis ratchets (`tests/static_analysis/`) are green and worth a look: they are
+"no new violations" gates with a committed baseline, covering silent exception handlers, relative
+paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound rule.
+
 ## Repository map
 
 ```
 docs/ATTEMPTS_LEDGER.md    every hypothesis family, its verdict, and the doc that closed it
 docs/TARGET.md             the requirements ledger - what a result must clear, and why
-docs/research-log/         305 ship documents, 00-297, in chronological order
+docs/research-log/         298 research documents, 00-297, in chronological order
 docs/research-log/README.md  a curated reading path through them
 scripts/trial_registry.py  the multiplicity counter
 src/                       the trading system: agents, execution, risk, monitoring

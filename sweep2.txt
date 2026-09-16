@@ -1,0 +1,60 @@
+tests/unit/test_sec_prefetcher.py::TestUserAgentCompliance::test_session_headers_include_user_agent
+tests/unit/test_sec_prefetcher.py::TestSessionManagement::test_closed_session_is_recreated
+tests/unit/test_sec_prefetcher.py::TestSessionManagement::test_closed_session_is_recreated
+tests/unit/test_sec_prefetcher.py::TestSessionManagement::test_double_close_is_safe
+  C:\Users\Pierce Lonergan\AppData\Roaming\Python\Python313\site-packages\aiohttp\connector.py:963: DeprecationWarning: enable_cleanup_closed ignored because https://github.com/python/cpython/pull/118960 is fixed in Python version sys.version_info(major=3, minor=13, micro=4, releaselevel='final', serial=0)
+    super().__init__(
+
+tests/unit/test_sentiment_velocity.py: 95 warnings
+  C:\Users\Pierce Lonergan\Documents\GitHub\momentum-x-research\src\data\sentiment_velocity.py:219: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/integration/test_pipeline.py::TestFullPipeline::test_pipeline_risk_veto_blocks_trade
+FAILED tests/unit/test_bug_as_stop_oid_corruption.py::test_every_exit_ladder_call_site_mirrors_new_stop_oid_to_in_memory_position
+FAILED tests/unit/test_bug_as_stop_oid_corruption.py::test_fast_path_mirror_line_is_present_as_parity_baseline
+FAILED tests/unit/test_competition_mode.py::TestD37ExecutionConfigDefaults::test_max_positions_default
+FAILED tests/unit/test_competition_mode.py::TestPositionManagerLimits::test_can_enter_up_to_8_positions
+FAILED tests/unit/test_d124_anna_postmortem.py::TestStopConversionPositionIntent::test_position_intent_disabled_not_in_payload
+FAILED tests/unit/test_d124_anna_postmortem.py::TestStopConversionPositionIntent::test_position_intent_omitted_when_none
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumActivation::test_high_composite_activates
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumActivation::test_moderate_gap_high_vol_activates
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumActivation::test_low_composite_no_momentum
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumActivation::test_low_rvol_no_momentum
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumActivation::test_low_gap_no_momentum
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumSignals::test_vwap_above_strong_signal
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumSignals::test_vwap_below_still_bull
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumSignals::test_rsi_75_no_penalty
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumDecay::test_full_strength_at_5min
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumDecay::test_blending_at_20min
+FAILED tests/unit/test_d126_gap_momentum.py::TestGapMomentumDecay::test_no_momentum_at_30min
+FAILED tests/unit/test_d126_gap_momentum.py::TestTimeDecayOverride::test_confidence_at_t0_momentum
+FAILED tests/unit/test_d126_gap_momentum.py::TestTimeDecayOverride::test_confidence_at_t5_momentum
+FAILED tests/unit/test_d220_day0_fixes.py::TestD112FloatEscapeHatch::test_router_rejects_large_float_with_weak_mfcs
+FAILED tests/unit/test_d220_day0_fixes.py::TestD112FloatEscapeHatch::test_router_rejects_large_float_with_no_mfcs
+FAILED tests/unit/test_d24_bug_w_exit_ladder_stop.py::TestBugW_ExitLadderCallSites::test_no_exit_ladder_call_uses_verdict_stop_loss
+FAILED tests/unit/test_d281_tiered_cascade.py::test_specialists_artifact_files_exist_and_load
+FAILED tests/unit/test_doc163_followup_shadow_runner_timing.py::test_exit_code_zero_when_no_data_for_date_in_live_mode
+FAILED tests/unit/test_doc163_followup_shadow_runner_timing.py::test_exit_code_zero_when_only_skip_is_already_exists
+FAILED tests/unit/test_incident_synth.py::test_day1_phantom_and_ghost_are_detected
+FAILED tests/unit/test_incident_synth.py::test_equity_out_of_tolerance_alone_is_warn
+FAILED tests/unit/test_llm_arena_live.py::TestLiveSingleParseFailure::test_live_single_parse_failure
+FAILED tests/unit/test_manipulation_detection.py::TestAgentRegistration::test_manipulation_classifier_instantiated
+FAILED tests/unit/test_manipulation_detection.py::TestAgentRegistration::test_manipulation_classifier_in_replay_map
+FAILED tests/unit/test_news_agent.py::TestNewsAgentAnalyzePreFilter::test_mixed_headlines_filters_and_calls_llm
+FAILED tests/unit/test_phase0_instrumentation.py::TestFullOrderLifecycleIntegration::test_full_lifecycle_writes_all_four_schemas
+FAILED tests/unit/test_recovery.py::TestSyncFromStateAndOrders::test_short_positions_skipped
+FAILED tests/unit/test_s022_historical_tranche.py::TestHistoricalDataLoader::test_offline_mode_raises_without_cache
+FAILED tests/unit/test_s022_historical_tranche.py::TestCmdPaperMetricsServerWiring::test_cmd_paper_logs_metrics_url
+FAILED tests/unit/test_s024_cli_stop_report.py::TestStopResubmitter::test_resubmit_success
+FAILED tests/unit/test_s024_cli_stop_report.py::TestStopResubmitter::test_ratchet_down_blocked
+FAILED tests/unit/test_s024_cli_stop_report.py::TestStopResubmitter::test_unknown_ticker_fails
+FAILED tests/unit/test_s024_cli_stop_report.py::TestStopResubmitter::test_cancel_failure_keeps_old_stop
+FAILED tests/unit/test_s025_stream_multi_docker.py::TestFillStreamBridge::test_drain_and_resubmit_processes_pending
+FAILED tests/unit/test_s025_stream_multi_docker.py::TestMultiTickerBacktest::test_load_and_merge_handles_failures
+FAILED tests/unit/test_s026_bridge_risk_github.py::TestGitHubReadiness::test_readme_has_current_test_count
+FAILED tests/unit/test_s026_bridge_risk_github.py::TestGitHubReadiness::test_readme_has_new_features
+FAILED tests/unit/test_sec_prefetcher.py::TestWeekendHolidayLookback::test_friday_dilution_caught_on_monday
+FAILED tests/unit/test_sec_prefetcher.py::TestWeekendHolidayLookback::test_four_day_old_filing_not_caught
+= 46 failed, 4466 passed, 23 skipped, 4 deselected, 3 xfailed, 111 warnings in 434.82s (0:07:14) =

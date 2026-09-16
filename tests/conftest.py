@@ -28,3 +28,23 @@ def _isolate_incident_bus(tmp_path, monkeypatch):
     # fresh in-process dedup per test so cross-test order can't suppress emits
     incident_bus._recent.clear()
     yield
+
+
+@pytest.fixture(autouse=True)
+def _isolate_verdict_ledger(tmp_path, monkeypatch):
+    """Same hazard as the incident bus, one module over.
+
+    vll_emit() appends to data/ops/verdict_trace_<today>.jsonl using a module-level
+    _DIR. The bus was isolated; the ledger was not, so every suite run wrote real-
+    looking lifecycle rows into the production ops directory. Evidence found in the
+    working tree: 23 rows reading
+
+        "'>' not supported between instances of 'MagicMock' and 'int'"
+
+    plus orders named order-001 and auud-test-1 - unmistakably test artifacts sitting
+    in operational data that pipeline_health_check and the operator both read.
+    """
+    from src.ops import verdict_ledger
+
+    monkeypatch.setattr(verdict_ledger, "_DIR", str(tmp_path / "_isolated_vll"))
+    yield

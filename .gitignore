@@ -71,3 +71,9 @@ docs/**/Project Gaps*
 !data/scenarios/**
 !data/selection_arena/
 !data/selection_arena/**
+
+# The multiplicity ledger IS the research artifact: the README quotes the trial
+# count and the promotion bar derived from it, and `trial_registry.py --status`
+# must reproduce those numbers for a reader. Ship it despite the blanket /data/ rule.
+!data/research/
+!data/research/trial_registry.jsonl
