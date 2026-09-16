@@ -194,7 +194,7 @@ class TestOrchestratorAgentWrapping:
                                       "deep_search_agent": {}, "risk_agent": {}})
 
         # Call analyze on wrapped agent — should return NEUTRAL (cache miss)
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             orch._news_agent.analyze("TEST")
         )
 

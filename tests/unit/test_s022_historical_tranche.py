@@ -213,7 +213,7 @@ class TestHistoricalDataLoader:
 
         with pytest.raises(ValueError, match="No client provided"):
             import asyncio
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 loader.load("AAPL", days=252, use_cache=True)
             )
 

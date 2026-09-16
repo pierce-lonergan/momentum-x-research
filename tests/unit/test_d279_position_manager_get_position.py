@@ -134,7 +134,7 @@ def test_position_manager_api_surface_includes_d91_dependencies():
 
 def _async(coro):
     """Run an async coroutine in tests without pytest-asyncio."""
-    return asyncio.get_event_loop().run_until_complete(coro)
+    return asyncio.run(coro)
 
 
 @pytest.mark.asyncio

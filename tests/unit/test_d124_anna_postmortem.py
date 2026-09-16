@@ -40,7 +40,7 @@ class TestStopConversionPositionIntent:
 
         client._trading_post = mock_post
 
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             client.submit_stop_order(
                 symbol="ANNA", qty=719, side="sell",
                 stop_price=4.83, position_intent="close",
@@ -66,7 +66,7 @@ class TestStopConversionPositionIntent:
 
         client._trading_post = mock_post
 
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             client.submit_stop_order(
                 symbol="TEST", qty=100, side="sell", stop_price=9.50,
             )

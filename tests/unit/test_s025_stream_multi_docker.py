@@ -234,7 +234,7 @@ class TestFillStreamBridge:
         event = FakeEvent(event_type=OrderEvent.FILL)
         bridge.on_trade_update(event)
 
-        events = asyncio.get_event_loop().run_until_complete(
+        events = asyncio.run(
             bridge.drain_and_resubmit()
         )
         assert len(events) == 1
@@ -335,7 +335,7 @@ class TestMultiTickerBacktest:
         loader.load = mock_load
         multi = MultiTickerBacktest(loader=loader)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             multi.load_and_merge(tickers=["AAPL", "BAD"], days=252)
         )
         assert "BAD" in result.failed_tickers

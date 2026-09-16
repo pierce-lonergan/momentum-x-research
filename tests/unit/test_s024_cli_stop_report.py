@@ -129,7 +129,7 @@ class TestStopResubmitter:
         resubmitter = StopResubmitter(client=client)
         resubmitter.register_stop("AAPL", "stop-001", 145.0, 99)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             resubmitter.resubmit("AAPL", new_stop_price=150.0, new_qty=66)
         )
 
@@ -149,7 +149,7 @@ class TestStopResubmitter:
         resubmitter = StopResubmitter(client=client)
         resubmitter.register_stop("AAPL", "stop-001", 150.0, 99)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             resubmitter.resubmit("AAPL", new_stop_price=145.0)
         )
 
@@ -162,7 +162,7 @@ class TestStopResubmitter:
         client = MagicMock()
         resubmitter = StopResubmitter(client=client)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             resubmitter.resubmit("UNKNOWN", new_stop_price=150.0)
         )
 
@@ -179,7 +179,7 @@ class TestStopResubmitter:
         resubmitter = StopResubmitter(client=client)
         resubmitter.register_stop("AAPL", "stop-001", 145.0, 99)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             resubmitter.resubmit("AAPL", new_stop_price=150.0)
         )
 

@@ -945,7 +945,7 @@ class TestWeekendHolidayLookback:
 
         # With 3-day lookback, Friday filing is caught on Monday
         import asyncio
-        dilution, atm, matching = asyncio.get_event_loop().run_until_complete(
+        dilution, atm, matching = asyncio.run(
             prefetcher.check_dilution("0000320193", filings, reference_date=monday)
         )
         assert dilution is True, "Friday 424B5 must be caught on Monday with 3-day lookback"
@@ -958,7 +958,7 @@ class TestWeekendHolidayLookback:
         filings = [make_filing("424B5", four_days_ago)]
 
         import asyncio
-        dilution, _, _ = asyncio.get_event_loop().run_until_complete(
+        dilution, _, _ = asyncio.run(
             prefetcher.check_dilution("0000320193", filings, reference_date=ref)
         )
         assert dilution is False

@@ -56,7 +56,7 @@ def _run_tech_agent(gap_pct: float, rvol: float, current_price: float = 10.0,
         mock_dt.now.return_value = mock_time
         mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             agent.analyze(
                 ticker="TEST",
                 current_price=current_price,

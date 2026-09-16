@@ -160,7 +160,7 @@ class TestExecutionBridge:
         """NO_TRADE verdicts should not reach executor."""
         bridge = self._make_bridge()
         verdict = _make_verdict(action="NO_TRADE", position_size_pct=0.0)
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             bridge.execute_verdict(verdict)
         )
         assert result is None
@@ -170,7 +170,7 @@ class TestExecutionBridge:
         """Zero position_size_pct should be skipped."""
         bridge = self._make_bridge()
         verdict = _make_verdict(action="BUY", position_size_pct=0.0)
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             bridge.execute_verdict(verdict)
         )
         assert result is None
@@ -181,7 +181,7 @@ class TestExecutionBridge:
         verdict = _make_verdict()
         scored = _make_scored()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             bridge.execute_verdict(verdict, scored=scored)
         )
 
@@ -205,7 +205,7 @@ class TestExecutionBridge:
         verdict = _make_verdict()
         scored = _make_scored()
 
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             bridge.execute_verdict(verdict, scored=scored)
         )
 
@@ -220,7 +220,7 @@ class TestExecutionBridge:
         bridge.position_manager.record_realized_pnl(-11000)
 
         verdict = _make_verdict()
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             bridge.execute_verdict(verdict)
         )
         assert result is None
@@ -247,7 +247,7 @@ class TestExecutionBridge:
         verdict = _make_verdict()
         scored = _make_scored()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             bridge.execute_verdict(verdict, scored=scored)
         )
 
@@ -261,12 +261,12 @@ class TestExecutionBridge:
         scored = _make_scored()
 
         # Open position
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             bridge.execute_verdict(verdict, scored=scored)
         )
 
         # Close with attribution
-        enriched = asyncio.get_event_loop().run_until_complete(
+        enriched = asyncio.run(
             bridge.close_with_attribution(
                 ticker="TEST",
                 exit_price=11.5,
@@ -284,7 +284,7 @@ class TestExecutionBridge:
     def test_close_without_cache_returns_none(self):
         """Closing a position without cached ScoredCandidate returns None."""
         bridge = self._make_bridge()
-        enriched = asyncio.get_event_loop().run_until_complete(
+        enriched = asyncio.run(
             bridge.close_with_attribution(ticker="UNKNOWN", exit_price=10.0)
         )
         assert enriched is None
@@ -314,7 +314,7 @@ class TestCachedAgentWrapper:
 
         wrapper = CachedAgentWrapper(agent=mock_agent, mode="record")
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             wrapper.analyze("TEST")
         )
 
@@ -349,7 +349,7 @@ class TestCachedAgentWrapper:
 
         wrapper = CachedAgentWrapper(mode="replay", cache=cache)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             wrapper.analyze("TEST")
         )
 
@@ -363,7 +363,7 @@ class TestCachedAgentWrapper:
 
         wrapper = CachedAgentWrapper(mode="replay", cache={})
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             wrapper.analyze("UNKNOWN_TICKER")
         )
 
@@ -382,7 +382,7 @@ class TestCachedAgentWrapper:
 
         wrapper = CachedAgentWrapper(agent=mock_agent, mode="record")
 
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             wrapper.analyze("AAPL")
         )
 
