@@ -1520,7 +1520,10 @@ class ExecutionBridge:
             bridge_metrics.orders_submitted.inc()
             order_result = await self._executor.execute(verdict)
         except Exception as e:
-            logger.error("%s: Executor failed: %s", ticker, e)
+            # exc_info: without a traceback this line is undiagnosable. A
+            # "'>' not supported between instances of 'MagicMock' and 'int'" from
+            # here sat unexplained in data/ops/verdict_trace_*.jsonl for weeks.
+            logger.error("%s: Executor failed: %s", ticker, e, exc_info=True)
             # doc 272 VLL: executor-exception terminal
             try:
                 from src.ops.verdict_ledger import vll_emit

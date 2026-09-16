@@ -129,10 +129,27 @@ class TestExecutionBridge:
             }
         )
 
+        # D216/D217 added a broker order-visibility poll after these tests were
+        # written: the bridge calls alpaca_client.get_orders() and refuses to create
+        # a position if the order is never seen. Without a client that poll hit None,
+        # so every execution returned None. Supply the order the executor just placed.
+        mock_client.get_orders = AsyncMock(
+            return_value=[{
+                "id": "order-001",
+                "status": "filled",
+                "filled_qty": "100",
+                "filled_avg_price": "10.0",
+                "symbol": "TEST",
+            }]
+        )
+        mock_client.cancel_order = AsyncMock(return_value={"status": "canceled"})
+
         executor = AlpacaExecutor(config=config, client=mock_client)
         pm = PositionManager(config=config, starting_equity=equity)
 
-        return ExecutionBridge(executor=executor, position_manager=pm)
+        return ExecutionBridge(
+            executor=executor, position_manager=pm, alpaca_client=mock_client
+        )
 
     def test_bridge_imports(self):
         """ExecutionBridge should be importable."""
@@ -174,7 +191,13 @@ class TestExecutionBridge:
         assert len(bridge.position_manager.open_positions) == 1
         pos = bridge.position_manager.open_positions[0]
         assert pos.ticker == "TEST"
-        assert pos.stop_loss == 9.3
+        # Bug R (2026-04-23): the position carries the stop the BROKER actually
+        # received, not verdict.stop_loss. The executor tightens it (D139 Phase-1),
+        # so asserting the raw verdict stop of 9.3 encodes the pre-Bug-R behaviour.
+        # Assert the invariant instead: broker truth sits between the verdict stop
+        # and the entry, and is strictly protective.
+        assert pos.stop_loss < pos.entry_price
+        assert pos.stop_loss >= 9.3
 
     def test_scored_candidate_cached_on_entry(self):
         """ScoredCandidate should be cached for Shapley."""

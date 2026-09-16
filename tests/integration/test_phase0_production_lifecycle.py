@@ -184,6 +184,13 @@ def executor(mock_client, phase0_writer, kelly_governor) -> AlpacaExecutor:
     cfg.tier2_gap_min = 0.20
     cfg.tier2_rvol_min = 3.0
     cfg.tier2_position_pct = 0.30
+    # doc 189/190 marketable-limit path. These are read with
+    # getattr(config, name, default), but getattr on a MagicMock returns a Mock
+    # rather than the default, so the comparison in compute_marketable_offset
+    # ('mfcs_full_at > 0') raises TypeError and the whole execute() fails.
+    cfg.marketable_base_offset_pct = 0.004
+    cfg.marketable_max_offset_pct = 0.015
+    cfg.marketable_mfcs_full_at = 0.55
     return AlpacaExecutor(
         config=cfg, client=mock_client,
         instrumentation=phase0_writer,
@@ -378,7 +385,15 @@ class TestPhase0ProductionLifecycle:
         # Flush + check health
         phase0_writer.flush_all_sync(reason="test")
         snap = phase0_writer.health_snapshot()
-        assert snap["d261_failures"] == {
-            "trade_context": 0, "bar_context": 0,
-            "child_fill_ticks": 0, "cohort_registry": 0,
-        }
+        # Assert the intent - ZERO validation failures - rather than an exact key
+        # set. The writer gained a 'decision_row' schema after this test was written,
+        # and hardcoding the schema list makes every future schema a false failure.
+        failures = snap["d261_failures"]
+        assert failures, "expected the writer to report per-schema failure counts"
+        assert all(v == 0 for v in failures.values()), (
+            f"D261 schema-validation failures on a clean lifecycle: "
+            f"{ {k: v for k, v in failures.items() if v} }"
+        )
+        # the schemas this lifecycle must actually exercise
+        for _schema in ("trade_context", "bar_context", "child_fill_ticks", "cohort_registry"):
+            assert _schema in failures, f"writer no longer reports {_schema}"
