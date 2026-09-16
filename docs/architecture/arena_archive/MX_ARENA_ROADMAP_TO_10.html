@@ -1,0 +1,97 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.track{margin:0 0 20px}
+.track-hdr{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.track-title{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.track-score{font-size:12px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
+.ts-green{background:var(--color-background-success);color:var(--color-text-success)}
+.ts-amber{background:var(--color-background-warning);color:var(--color-text-warning)}
+.ts-blue{background:var(--color-background-info);color:var(--color-text-info)}
+.bar-track{height:8px;background:var(--color-border-tertiary);border-radius:4px;overflow:hidden;margin:0 0 6px}
+.bar-done{height:100%;border-radius:4px;transition:width 0.3s}
+.items{display:flex;flex-direction:column;gap:4px}
+.item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-primary)}
+.item:hover{background:var(--color-background-secondary)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-p0{background:var(--color-text-danger)}
+.dot-p1{background:var(--color-text-warning)}
+.dot-p2{background:var(--color-text-info)}
+.dot-done{background:var(--color-text-success)}
+.effort{font-size:11px;color:var(--color-text-secondary);margin-left:auto;white-space:nowrap}
+.legend{display:flex;gap:16px;margin:0 0 16px;font-size:12px;color:var(--color-text-secondary)}
+.legend span{display:flex;align-items:center;gap:4px}
+.fidelity{font-size:12px;color:var(--color-text-secondary);margin:2px 0 0}
+</style>
+<div class="legend">
+<span><span class="dot dot-p0"></span> P0 showstopper</span>
+<span><span class="dot dot-p1"></span> P1 high impact</span>
+<span><span class="dot dot-p2"></span> P2 meaningful</span>
+</div>
+
+<div class="track">
+<div class="track-hdr"><span class="track-title">Sprint 1: truth in fills</span><span class="track-score ts-amber">7.5 → 8.0</span></div>
+<div class="bar-track"><div class="bar-done" style="width:0%;background:var(--color-text-warning)"></div></div>
+<div class="fidelity">Execution fidelity: 60% → 80%. Eliminates systematic optimism in every fill price.</div>
+<div class="items">
+<div class="item"><span class="dot dot-p0"></span>Spread model: .astimezone(ET) before hour extraction<span class="effort">1 line</span></div>
+<div class="item"><span class="dot dot-p1"></span>Limit fills: remove min/max, fill at NBBO ask/bid<span class="effort">2 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>Entry detection: fill when ask <= limit, not bar.low check<span class="effort">10 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>Stop fill: at bid when triggered, at open when gap-below<span class="effort">8 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Bar validation: assert chronological order on load<span class="effort">10 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Spread filter: reject entries where spread > threshold<span class="effort">15 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Re-validate Mar 26 and compare P&L delta to prior run<span class="effort">30 min</span></div>
+</div>
+</div>
+
+<div class="track">
+<div class="track-hdr"><span class="track-title">Sprint 2: tranche exits + stop ratcheting</span><span class="track-score ts-amber">8.0 → 8.5</span></div>
+<div class="bar-track"><div class="bar-done" style="width:0%;background:var(--color-text-warning)"></div></div>
+<div class="fidelity">Winning trade P&L accuracy: ~40% → ~85%. Captures the most important production behavior.</div>
+<div class="items">
+<div class="item"><span class="dot dot-p1"></span>Parse target_prices from journal BUY entries<span class="effort">20 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>T1/T2/T3 partial exit simulation (bar.high crosses target)<span class="effort">60 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>Stop ratchet: breakeven after T1, T1 price after T2<span class="effort">30 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Per-tranche P&L tracking and exit reason attribution<span class="effort">40 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Re-run Mar 26 sweep: compare tranche vs no-tranche P&L<span class="effort">30 min</span></div>
+</div>
+</div>
+
+<div class="track">
+<div class="track-hdr"><span class="track-title">Sprint 3: exit intelligence + portfolio sim</span><span class="track-score ts-blue">8.5 → 9.0</span></div>
+<div class="bar-track"><div class="bar-done" style="width:0%;background:var(--color-text-info)"></div></div>
+<div class="fidelity">Signal fidelity: 20% → 55%. Exit timing matches production. Portfolio constraints modeled.</div>
+<div class="items">
+<div class="item"><span class="dot dot-p1"></span>Port 4 exit strategies (velocity, volume, gratitude, oracle)<span class="effort">200 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>Sequential evaluation delay model (30s per LLM candidate)<span class="effort">40 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Portfolio state: position limits, concentration, buying power<span class="effort">80 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Multi-stock ordering: highest momentum score enters first<span class="effort">30 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Empirical null curve from --null-time backtest data<span class="effort">30 lines</span></div>
+</div>
+</div>
+
+<div class="track">
+<div class="track-hdr"><span class="track-title">Sprint 4: decision replay + full bot wiring</span><span class="track-score ts-blue">9.0 → 9.5</span></div>
+<div class="bar-track"><div class="bar-done" style="width:0%;background:var(--color-text-info)"></div></div>
+<div class="fidelity">Signal fidelity: 55% → 85%. Can optimize any parameter, not just execution.</div>
+<div class="items">
+<div class="item"><span class="dot dot-p1"></span>Full deterministic agent replay (all signal types)<span class="effort">150 lines</span></div>
+<div class="item"><span class="dot dot-p1"></span>LLM response cache: replay journal agent signals per ticker<span class="effort">80 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Pre-market data engine (04:00-09:30 bars + snapshots)<span class="effort">60 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>News API replay from journal-cached responses<span class="effort">50 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Phase-aware clock (trigger phase transitions at ET times)<span class="effort">40 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Walk-forward CPCV enforced in sweep output<span class="effort">60 lines</span></div>
+</div>
+</div>
+
+<div class="track">
+<div class="track-hdr"><span class="track-title">Sprint 5: statistical validation (ongoing)</span><span class="track-score ts-green">9.5 → 10.0</span></div>
+<div class="bar-track"><div class="bar-done" style="width:0%;background:var(--color-text-success)"></div></div>
+<div class="fidelity">Trust: validated against 20+ days of production results. Arena predicts reality.</div>
+<div class="items">
+<div class="item"><span class="dot dot-p1"></span>Shadow trading: arena + production same-day comparison<span class="effort">ongoing</span></div>
+<div class="item"><span class="dot dot-p1"></span>20-day P&L reconciliation (arena vs production delta)<span class="effort">ongoing</span></div>
+<div class="item"><span class="dot dot-p2"></span>Golden-file regression (Mar 25, 26, 27 expected outputs)<span class="effort">2 hours</span></div>
+<div class="item"><span class="dot dot-p2"></span>Bootstrap CI enforced on all sweep rankings<span class="effort">20 lines</span></div>
+<div class="item"><span class="dot dot-p2"></span>Optuna TPE with MedianPruner for parameter search<span class="effort">80 lines</span></div>
+</div>
+</div>

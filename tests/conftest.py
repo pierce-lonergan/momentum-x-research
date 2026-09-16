@@ -1,0 +1,30 @@
+"""doc 272 A2 — global test isolation for the incident bus.
+
+WHY THIS EXISTS: detectors now emit_incident() at fire time (recon daemon QTY_GHOST /
+RECON_LETHAL, D313 HEDGE_VIOLATION, circuit-breaker trips, plus the pre-existing bridge
+NAKED_POSITION_RISK). Unit tests deliberately exercise those exact code paths, so without
+isolation every `pytest` run appends realistic-looking CRITICAL rows (AGPU, PENNY, ...)
+to the REAL data/ops/incidents_<today>.jsonl — which the doc-272 incident pager would
+then PAGE and pipeline_health_check would count as a red CRIT. Observed live while
+building doc 272: one unit-suite run wrote 16 fake incidents.
+
+The fixture redirects the bus's module-level paths to pytest's tmp_path for EVERY test.
+Tests that patch incident_bus._OPS_DIR themselves (test_ops_foundation) still work —
+their later monkeypatch simply wins. Tests that want the bus disabled set
+OPS_INCIDENT_BUS_ENABLED=false as before.
+"""
+from __future__ import annotations
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _isolate_incident_bus(tmp_path, monkeypatch):
+    from src.ops import incident_bus
+
+    bus_dir = tmp_path / "_isolated_ops_bus"
+    monkeypatch.setattr(incident_bus, "_OPS_DIR", bus_dir)
+    monkeypatch.setattr(incident_bus, "_WAKE", bus_dir / "WAKE")
+    # fresh in-process dedup per test so cross-test order can't suppress emits
+    incident_bus._recent.clear()
+    yield

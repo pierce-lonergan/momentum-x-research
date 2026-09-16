@@ -1,0 +1,190 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║              MOMENTUM-X CI Pipeline                         ║
+# ║  Runs on every push to main and all PRs                     ║
+# ║  No API keys required — tests use mocks only                ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src/ config/ tests/ main.py
+
+      - name: Format check (ruff)
+        run: ruff format --check src/ config/ tests/ main.py
+
+      - name: Test suite (with coverage)
+        run: python -m pytest tests/ -v --tb=short -x --cov=src --cov=config --cov-report=term-missing --cov-report=xml:coverage.xml
+        env:
+          PYTHONPATH: .
+
+  # Separate job for type checking (can be slower)
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: MyPy (enforced — 92 errors baselined at S027)
+        run: |
+          ERROR_COUNT=$(mypy src/ config/ --ignore-missing-imports 2>&1 | grep -c "error:" || true)
+          echo "MyPy errors: $ERROR_COUNT (baseline: 92)"
+          if [ "$ERROR_COUNT" -gt 92 ]; then
+            echo "::error::MyPy error count increased from 92 to $ERROR_COUNT. Fix new type errors before merging."
+            mypy src/ config/ --ignore-missing-imports
+            exit 1
+          fi
+          echo "MyPy errors at or below baseline. Reduce toward 0."
+
+  # ╔══════════════════════════════════════════════════════════════╗
+  # ║      Discovery Infrastructure Gate                          ║
+  # ║  Per docs/research-log/40_discovery_infrastructure_summary.md     ║
+  # ║  Runs the six layers' fast-feedback variants on every PR.   ║
+  # ║  Blocks merge if any orphan D-codes, broken invariants, or  ║
+  # ║  Phase 0 wire-in regressions surface (Bug AF would have     ║
+  # ║  been caught by this gate before reaching production).      ║
+  # ╚══════════════════════════════════════════════════════════════╝
+  discovery_infrastructure:
+    name: Discovery Infrastructure Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.12-${{ hashFiles('pyproject.toml', 'requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.12-
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      # Pyright install — needed for the Bug AF/AG defense layer.
+      # First invocation downloads the JS bundle (~30 MB) once; subsequent
+      # runs are ~3 s. The pip cache step above keeps it warm across CI runs.
+      - name: Install pyright (Bug AF/AG defense)
+        run: pip install pyright
+
+      # Layer 1: Static analysis (24+ tests, ~3s + ~15s pyright on cold cache)
+      # Catches frozen-mutate, async-leak, silent-handler, relative-path,
+      # ps-datetime-utc, ps-pipe-deadlock, D-code orphans, whitelist conventions,
+      # AND reportPossiblyUnboundVariable (Bug AF + AG class — see
+      # docs/research-log/44_bug_ag_track_b_unbound.md).
+      - name: Static analysis (6 bug-class detectors + pyright unbound + D-code audit)
+        run: python -m pytest tests/static_analysis/ -q --no-header
+
+      # Layer 2: PBT state machine fast variant (HYP_MAX_EXAMPLES=200, ~3s)
+      # Catches the 17 invariant classes within a small budget.
+      - name: PBT state machine (HYP_MAX_EXAMPLES=200)
+        run: |
+          HYP_MAX_EXAMPLES=200 python -m pytest \
+            tests/property/test_bridge_state_machine.py \
+            tests/property/test_invariant_injection.py \
+            tests/property/test_mutation_canaries.py \
+            tests/property/test_simple_broker.py \
+            -q --hypothesis-seed=0 --no-header
+
+      # Layer 3: Phase 0 schemas + writer + migration round-trip (~1s)
+      - name: Phase 0 instrumentation (schemas + writer + migration)
+        run: |
+          python -m pytest \
+            tests/unit/test_phase0_instrumentation.py \
+            tests/unit/test_phase0_migration.py \
+            -q --no-header
+
+      # Layer 4: Differential testing harness (~1s)
+      - name: Differential testing harness
+        run: |
+          python -m pytest \
+            tests/unit/test_differential_harness.py \
+            tests/unit/test_git_replay.py \
+            -q --no-header
+
+      # Layer 5: BOCPD + Kelly governor (~1s)
+      - name: BOCPD + Kelly governor
+        run: |
+          python -m pytest \
+            tests/unit/test_bocpd.py \
+            tests/unit/test_kelly_governor.py \
+            -q --no-header
+
+      # Layer 6: Bayesian estimator fast gates (~3s; slow NUTS skipped here,
+      # runs nightly via the slow-marker gate)
+      - name: Bayesian estimator (fast gates only — slow NUTS deferred to nightly)
+        run: |
+          python -m pytest \
+            tests/unit/test_slippage_calibration.py \
+            -q -m "not slow" --no-header
+
+      # Phase 0 production-shape integration test (caught Bug AF, 42c5024)
+      - name: Phase 0 production-shape integration test
+        run: |
+          python -m pytest \
+            tests/integration/test_phase0_production_lifecycle.py \
+            -q --no-header
+
+      # EOD pipeline integration test
+      - name: EOD pipeline + report consolidator
+        run: |
+          python -m pytest \
+            tests/unit/test_eod_pipeline.py \
+            tests/unit/test_eod_report.py \
+            tests/unit/test_qmp_signing.py \
+            tests/unit/test_cohort_matcher.py \
+            -q --no-header
+
+      # D-code audit standalone — catches reserved-but-unwired silent debt
+      - name: D-code registry audit (--strict)
+        run: python scripts/audit_d_codes.py --strict

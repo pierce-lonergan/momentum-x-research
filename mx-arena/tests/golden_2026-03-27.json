@@ -1,0 +1,12 @@
+{
+  "date": "2026-03-27",
+  "params": {
+    "mfcs_buy_threshold": 0.15
+  },
+  "n_candidates": 16,
+  "n_buys": 0,
+  "n_trades": 0,
+  "total_pnl": 0,
+  "tickers_traded": [],
+  "trades": []
+}

@@ -1,0 +1,156 @@
+{
+  "version": "v0",
+  "train_date": "2026-04-16T23:15:42Z",
+  "n_train_rows": 407,
+  "class_balance_pos_rate": 0.44226044226044225,
+  "class_balance_ok": true,
+  "stratified": {
+    "arena_buy": {
+      "n": 171,
+      "win_rate": 0.2222222222222222
+    },
+    "arena_no_trade": {
+      "n": 236,
+      "win_rate": 0.6016949152542372
+    }
+  },
+  "models": {
+    "full": {
+      "feature_names": [
+        "gap_pct",
+        "log1p_premarket_volume",
+        "log1p_dollar_volume",
+        "log_price",
+        "price_to_pre_market_high_ratio",
+        "orb_range_pct",
+        "day_to_premarket_volume_ratio",
+        "arena_buy_verdict"
+      ],
+      "train_auc": 0.7820117474302497,
+      "cv_auc_mean": 0.7564009661835749,
+      "cv_auc_std": 0.06194297897054611,
+      "cv_brier_mean": 0.20263875970144002,
+      "cv_fold_aucs": [
+        0.8007246376811594,
+        0.731280193236715,
+        0.7882716049382715,
+        0.8030864197530864,
+        0.658641975308642
+      ],
+      "overfit_gap": 0.02561078124667482,
+      "overfit_flagged": false,
+      "feature_importance": {
+        "gap_pct": -0.16631668545036787,
+        "log1p_premarket_volume": -0.35813712766569517,
+        "log1p_dollar_volume": 0.6714330113434822,
+        "log_price": -0.1632143559019469,
+        "price_to_pre_market_high_ratio": 0.10403231379492685,
+        "orb_range_pct": -0.2590216666163069,
+        "day_to_premarket_volume_ratio": 0.2518414034002207,
+        "arena_buy_verdict": -0.8586378377095958
+      },
+      "calibration_table": [
+        {
+          "bin": "[0.00, 0.20)",
+          "n": 95,
+          "predicted": 0.146995073736996,
+          "actual": 0.12631578947368421
+        },
+        {
+          "bin": "[0.20, 0.40)",
+          "n": 91,
+          "predicted": 0.29237655175691746,
+          "actual": 0.3076923076923077
+        },
+        {
+          "bin": "[0.40, 0.60)",
+          "n": 99,
+          "predicted": 0.5076027103188617,
+          "actual": 0.45454545454545453
+        },
+        {
+          "bin": "[0.60, 0.80)",
+          "n": 94,
+          "predicted": 0.6897062323082018,
+          "actual": 0.7446808510638298
+        },
+        {
+          "bin": "[0.80, 1.00)",
+          "n": 28,
+          "predicted": 0.8690202987025291,
+          "actual": 0.8928571428571429
+        }
+      ]
+    },
+    "prescore": {
+      "feature_names": [
+        "gap_pct",
+        "log1p_premarket_volume",
+        "log1p_dollar_volume",
+        "log_price",
+        "price_to_pre_market_high_ratio",
+        "orb_range_pct",
+        "day_to_premarket_volume_ratio"
+      ],
+      "train_auc": 0.6894273127753303,
+      "cv_auc_mean": 0.6612345679012346,
+      "cv_auc_std": 0.09529174642429657,
+      "cv_brier_mean": 0.23063980709133358,
+      "cv_fold_aucs": [
+        0.7759661835748791,
+        0.6962560386473431,
+        0.5419753086419753,
+        0.7061728395061729,
+        0.5858024691358025
+      ],
+      "overfit_gap": 0.028192744874095732,
+      "overfit_flagged": false,
+      "feature_importance": {
+        "gap_pct": -0.24711646564646614,
+        "log1p_premarket_volume": -0.32355684922903927,
+        "log1p_dollar_volume": 0.6230370117129324,
+        "log_price": -0.18466657272918346,
+        "price_to_pre_market_high_ratio": 0.06301952591903014,
+        "orb_range_pct": -0.10025093834932114,
+        "day_to_premarket_volume_ratio": 0.31253857919245126
+      },
+      "calibration_table": [
+        {
+          "bin": "[0.00, 0.20)",
+          "n": 15,
+          "predicted": 0.15974143842477886,
+          "actual": 0.26666666666666666
+        },
+        {
+          "bin": "[0.20, 0.40)",
+          "n": 170,
+          "predicted": 0.322814111532614,
+          "actual": 0.3
+        },
+        {
+          "bin": "[0.40, 0.60)",
+          "n": 160,
+          "predicted": 0.4890208484553467,
+          "actual": 0.50625
+        },
+        {
+          "bin": "[0.60, 0.80)",
+          "n": 53,
+          "predicted": 0.6940339485150229,
+          "actual": 0.6981132075471698
+        },
+        {
+          "bin": "[0.80, 1.00)",
+          "n": 9,
+          "predicted": 0.855336976906913,
+          "actual": 0.7777777777777778
+        }
+      ]
+    }
+  },
+  "notes": [
+    "AUC is ARENA-VALIDATED \u2014 synthesized agent signals make this optimistic vs live.",
+    "Real-LLM validation awaits Phase 5 shadow data.",
+    "arena_buy_verdict is expected to have NEGATIVE coefficient: cascade anti-selects."
+  ]
+}

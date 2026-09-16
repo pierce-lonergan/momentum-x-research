@@ -1,0 +1,71 @@
+// _dependency_graph.dot (derived -- do not edit by hand)
+// Generated at: 2026-05-25T01:05:25.772306+00:00
+// Render: dot -Tsvg _dependency_graph.dot > _dependency_graph.svg
+digraph d_codes {
+  rankdir=LR;
+  node [shape=box, style=rounded, fontname="monospace"];
+
+  "DXXX_EXAMPLE" [label="DXXX_EXAMPLE\nSHORT_LABEL / human-readable n", fillcolor=lightblue, style="filled,rounded"];
+  "D91" [label="D91\nLLM_FALLBACK_CHAIN", fillcolor=lightcoral, style="filled,rounded"];
+  "D92" [label="D92\nEMERGENCY_MODEL_TIER", fillcolor=lightcoral, style="filled,rounded"];
+  "D101" [label="D101\nBIPOLAR_MFCS", fillcolor=lightblue, style="filled,rounded"];
+  "D116" [label="D116\nCONFIDENCE_FLOOR_020", fillcolor=lightblue, style="filled,rounded"];
+  "D142" [label="D142\nPHASE1_STOP_TIGHTENING", fillcolor=lightcoral, style="filled,rounded"];
+  "D146" [label="D146\nNON_SHORTABLE_FILTERING", fillcolor=lightcoral, style="filled,rounded"];
+  "D147" [label="D147\nSHORTABILITY_CHECK", fillcolor=lightcoral, style="filled,rounded"];
+  "D163" [label="D163\nTRAILING_STOP_SOFTWARE", fillcolor=lightblue, style="filled,rounded"];
+  "D165" [label="D165\nTRANCHE_PROFIT_TAKING", fillcolor=lightblue, style="filled,rounded"];
+  "D278" [label="D278\nT1_NEXT_OPEN_EXIT_POLICY", fillcolor=lightblue, style="filled,rounded"];
+  "D281" [label="D281\nKELLY_BASELINE_N25", fillcolor=lightblue, style="filled,rounded"];
+  "D290" [label="D290\nADAPTIVE_KELLY_BY_AUM", fillcolor=lightblue, style="filled,rounded"];
+  "D291_5" [label="D291_5\nHIGH_TIER_KELLY_RAISE_50", fillcolor=lightblue, style="filled,rounded"];
+  "D277" [label="D277\nHALT_NEW_ENTRIES", fillcolor=lightcoral, style="filled,rounded"];
+  "D293" [label="D293\nTABPFN_ENSEMBLE", fillcolor=lightgray, style="filled,rounded,dashed"];
+  "D294" [label="D294\nALPACA_STOP_FLOOR_CLAMP", fillcolor=lightcoral, style="filled,rounded"];
+  "D295" [label="D295\nD91_NEXT_OPEN_JOURNAL_CLOSE", fillcolor=lightcoral, style="filled,rounded"];
+  "D297" [label="D297\nOTO_STOP_FILL_JOURNAL", fillcolor=lightcoral, style="filled,rounded"];
+  "D304" [label="D304\nALERT_KWARG_COMPLETENESS", fillcolor=lightyellow, style="filled,rounded"];
+  "D308" [label="D308\nSTOP_DECISION_LOG", fillcolor=lightyellow, style="filled,rounded"];
+  "D310" [label="D310\nSTOP_WIDENING_T2_ARM_ASSIGN", fillcolor=lightblue, style="filled,rounded"];
+  "D311" [label="D311\nPNL_RECON_AFTER_FILTER", fillcolor=lightyellow, style="filled,rounded"];
+  "D312" [label="D312\nGATE_SUMMARY_TO_EOD", fillcolor=lightyellow, style="filled,rounded"];
+  "D313" [label="D313\nHEDGE_INTEGRITY_WATCHER", fillcolor=lightcoral, style="filled,rounded"];
+  "D314" [label="D314\nDURABLE_ALERT_SPOOL", fillcolor=lightyellow, style="filled,rounded"];
+  "D315" [label="D315\nBOOT_SELF_TEST", fillcolor=lightyellow, style="filled,rounded"];
+  "D26" [label="D26\nWEIGHT_REDISTRIBUTION_LEGACY", fillcolor=lightgray, style="filled,rounded,dashed"];
+  "D164" [label="D164\nEARLY_PROFIT_TAKE_DEPRECATED", fillcolor=lightgray, style="filled,rounded,dashed"];
+  "D293a" [label="D293a\nTABPFN_SINGLE_SEED_REVERT", fillcolor=lightblue, style="filled,rounded"];
+  "D293_8" [label="D293_8\nTABPFN_ENSEMBLE_RETEST", fillcolor=white, style="filled,rounded,dotted"];
+  "D316" [label="D316\nEXTERNAL_PROCESS_WATCHDOG", fillcolor=white, style="filled,rounded,dotted"];
+  "D317" [label="D317\nEVENT_SOURCED_TRADE_JOURNAL", fillcolor=white, style="filled,rounded,dotted"];
+
+  "DXXX_EXAMPLE" -> "D142";
+  "DXXX_EXAMPLE" -> "D294";
+  "D91" -> "D92";
+  "D92" -> "D91";
+  "D116" -> "D101";
+  "D146" -> "D147";
+  "D147" -> "D146";
+  "D147" -> "D165";
+  "D165" -> "D142";
+  "D165" -> "D147";
+  "D278" -> "D91";
+  "D278" -> "D295";
+  "D290" -> "D281";
+  "D291_5" -> "D290";
+  "D291_5" -> "D281";
+  "D295" -> "D91";
+  "D295" -> "D278";
+  "D297" -> "D295";
+  "D308" -> "D142";
+  "D308" -> "D310";
+  "D310" -> "D142";
+  "D310" -> "D294";
+  "D310" -> "D308";
+  "D310" -> "D313";
+  "D312" -> "D304";
+  "D313" -> "D310";
+  "D315" -> "D313";
+  "D315" -> "D314";
+  "D293_8" -> "D293";
+}

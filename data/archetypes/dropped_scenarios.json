@@ -1,0 +1,8 @@
+[
+  {
+    "ticker": "CLSK",
+    "date": "2024-11-11",
+    "reason": "insufficient_bars",
+    "bar_count": 0
+  }
+]

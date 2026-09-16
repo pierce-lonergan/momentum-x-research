@@ -1,0 +1,132 @@
+# Momentum-X Experiment Definitions
+# Phase 1: Parameter replay (zero additional LLM calls)
+#
+# Each evaluation replays the same agent signals through these parameter
+# variants. Total overhead: ~1ms per candidate (sub-millisecond per variant).
+#
+# Ref: D102 (Experimentation Framework Phase 1)
+
+experiments:
+  # ─── ATR Stop Multiplier Sweep ─────────────────────────────────────
+  # The #2 critique item. Default is 2.0x — sweep 1.5x to 3.0x to find
+  # the optimal stop distance for small-cap momentum gappers.
+  - experiment_id: atr_sweep
+    experiment_type: parameter
+    description: "ATR stop multiplier sweep (1.5x to 3.0x)"
+    enabled: true
+    variants:
+      - variant_id: atr_1.5
+        overrides:
+          execution.initial_stop_atr_multiplier: 1.5
+      - variant_id: atr_2.0
+        overrides:
+          execution.initial_stop_atr_multiplier: 2.0
+      - variant_id: atr_2.5
+        overrides:
+          execution.initial_stop_atr_multiplier: 2.5
+      - variant_id: atr_3.0
+        overrides:
+          execution.initial_stop_atr_multiplier: 3.0
+
+  # ─── MFCS Buy Threshold Sweep ──────────────────────────────────────
+  # With bipolar scoring, 0.25 may not be optimal. Test 0.15-0.35 range.
+  - experiment_id: threshold_sweep
+    experiment_type: threshold
+    description: "MFCS buy threshold sweep (0.15 to 0.35)"
+    enabled: true
+    variants:
+      - variant_id: thresh_0.15
+        overrides:
+          scoring.mfcs_buy_threshold: 0.15
+      - variant_id: thresh_0.20
+        overrides:
+          scoring.mfcs_buy_threshold: 0.20
+      - variant_id: thresh_0.25
+        overrides:
+          scoring.mfcs_buy_threshold: 0.25
+      - variant_id: thresh_0.30
+        overrides:
+          scoring.mfcs_buy_threshold: 0.30
+      - variant_id: thresh_0.35
+        overrides:
+          scoring.mfcs_buy_threshold: 0.35
+
+  # ─── Agent Weight Variants ─────────────────────────────────────────
+  # Default: news=0.35, tech=0.30, rvol=0.20, float=0.15, inst=0, deep=0.
+  # Test alternative allocations (all sum to 1.0).
+  - experiment_id: weight_variants
+    experiment_type: weight
+    description: "Agent weight allocation variants"
+    enabled: true
+    variants:
+      - variant_id: news_heavy
+        overrides:
+          scoring.catalyst_news: 0.45
+          scoring.technical: 0.25
+          scoring.volume_rvol: 0.15
+          scoring.float_structure: 0.15
+      - variant_id: tech_heavy
+        overrides:
+          scoring.catalyst_news: 0.25
+          scoring.technical: 0.40
+          scoring.volume_rvol: 0.20
+          scoring.float_structure: 0.15
+      - variant_id: balanced
+        overrides:
+          scoring.catalyst_news: 0.30
+          scoring.technical: 0.30
+          scoring.volume_rvol: 0.20
+          scoring.float_structure: 0.20
+
+  # ─── Risk Aversion Lambda Sweep ────────────────────────────────────
+  # How aggressively to penalize risk score. Default 0.15 (backtesting).
+  # Production target is 0.30. Sweep the full range.
+  - experiment_id: lambda_sweep
+    experiment_type: lambda
+    description: "Risk aversion lambda sweep (0.05 to 0.30)"
+    enabled: true
+    variants:
+      - variant_id: lambda_0.05
+        overrides:
+          scoring.risk_aversion_lambda: 0.05
+      - variant_id: lambda_0.10
+        overrides:
+          scoring.risk_aversion_lambda: 0.10
+      - variant_id: lambda_0.15
+        overrides:
+          scoring.risk_aversion_lambda: 0.15
+      - variant_id: lambda_0.20
+        overrides:
+          scoring.risk_aversion_lambda: 0.20
+      - variant_id: lambda_0.30
+        overrides:
+          scoring.risk_aversion_lambda: 0.30
+
+  # ─── Confidence Deflation Factor Sweep ─────────────────────────────
+  # D106: Production default raised to 0.70. KalshiBench says 0.5-0.6x
+  # optimal but 0.6x compressed LLM scoring range too aggressively
+  # (0.80 conf → 0.48). Key variants: 0.60 (baseline), 0.70 (current),
+  # 0.75 (candidate if 0.70 still compresses too much).
+  - experiment_id: deflation_sweep
+    experiment_type: parameter
+    description: "D106 LLM confidence deflation factor sweep (0.4 to 0.8)"
+    enabled: true
+    variants:
+      - variant_id: deflate_0.4
+        overrides:
+          scoring.confidence_deflation_factor: 0.4
+      - variant_id: deflate_0.5
+        overrides:
+          scoring.confidence_deflation_factor: 0.5
+      - variant_id: deflate_0.6
+        overrides:
+          scoring.confidence_deflation_factor: 0.6
+      - variant_id: deflate_0.7
+        overrides:
+          scoring.confidence_deflation_factor: 0.7
+      - variant_id: deflate_0.75
+        overrides:
+          scoring.confidence_deflation_factor: 0.75
+      - variant_id: deflate_0.8
+        overrides:
+          scoring.confidence_deflation_factor: 0.8

@@ -1,0 +1,182 @@
+# Cross-model evaluation catalog for D220 Phase 7.
+#
+# Each entry: provider, api_model_id (litellm format), input_price_per_mtok USD,
+# output_price_per_mtok USD, context_window, notes.
+#
+# IMPORTANT: model IDs marked `verified: true` were confirmed against
+# src/llm_arena/harness.py MODEL_REGISTRY and are known to resolve through litellm.
+# Entries marked `verified: false` are best-effort guesses based on the user's
+# Phase 7 prompt and Together's published model IDs as of Apr 2026 — they may
+# fail to resolve at API call time, in which case the harness logs and skips.
+#
+# To add a model: append an entry. To disable: set `enabled: false`.
+
+models:
+
+  # ── Anthropic (production-grade) ───────────────────────────────────────
+  - key: claude-haiku-4-5
+    enabled: true
+    verified: true                              # in llm_arena MODEL_REGISTRY
+    provider: anthropic
+    api_model_id: anthropic/claude-haiku-4-5-20251001
+    input_price_per_mtok: 0.25
+    output_price_per_mtok: 1.25
+    context_window: 200000
+    notes: "Cheapest Anthropic; production candidate for fast agents."
+
+  - key: claude-sonnet-4-6
+    enabled: true
+    verified: false                             # NOT in llm_arena registry; user-requested
+    provider: anthropic
+    api_model_id: anthropic/claude-sonnet-4-6
+    input_price_per_mtok: 3.0
+    output_price_per_mtok: 15.0
+    context_window: 200000
+    notes: "Mid-tier Anthropic. ID may need verification at API call time."
+
+  - key: claude-opus-4-7
+    enabled: true
+    verified: false                             # NOT in llm_arena registry; user-requested
+    provider: anthropic
+    api_model_id: anthropic/claude-opus-4-7
+    input_price_per_mtok: 15.0
+    output_price_per_mtok: 75.0
+    context_window: 200000
+    notes: "Top-tier Anthropic. Highest expected accuracy, highest cost."
+
+  # ── Together AI — Qwen ─────────────────────────────────────────────────
+  - key: qwen-3-5-397b
+    enabled: true
+    verified: true                              # in llm_arena MODEL_REGISTRY
+    provider: together
+    api_model_id: together_ai/Qwen/Qwen3.5-397B-A17B
+    input_price_per_mtok: 1.20
+    output_price_per_mtok: 1.60
+    context_window: 32000
+    notes: "Production Tier 1 model (D95). Known reference."
+
+  - key: qwen-3-235b
+    enabled: true
+    verified: true                              # in llm_arena MODEL_REGISTRY
+    provider: together
+    api_model_id: together_ai/Qwen/Qwen3-235B-A22B-Instruct-2507-tput
+    input_price_per_mtok: 0.20
+    output_price_per_mtok: 0.60
+    context_window: 32000
+    notes: "Production Tier 2 model (D95). Cheap but capable."
+
+  - key: qwen-3-5-9b-fp8
+    enabled: true
+    verified: false                             # user-requested; format may differ
+    provider: together
+    api_model_id: together_ai/Qwen/Qwen3.5-9B-FP8
+    input_price_per_mtok: 0.10
+    output_price_per_mtok: 0.30
+    context_window: 32000
+    notes: "Small + fast Qwen. Cost benchmark."
+
+  # ── Together AI — DeepSeek ─────────────────────────────────────────────
+  - key: deepseek-v3-1
+    enabled: true
+    verified: true                              # in llm_arena MODEL_REGISTRY
+    provider: together
+    api_model_id: together_ai/deepseek-ai/DeepSeek-V3.1
+    input_price_per_mtok: 0.55
+    output_price_per_mtok: 1.65
+    context_window: 65000
+    notes: "Strong reasoning at low price."
+
+  - key: deepseek-r1-0528
+    enabled: true
+    verified: true                              # in llm_arena MODEL_REGISTRY
+    provider: together
+    api_model_id: together_ai/deepseek-ai/DeepSeek-R1-0528
+    input_price_per_mtok: 3.0
+    output_price_per_mtok: 7.0
+    context_window: 65000
+    notes: "Thinking-block model. Slower; higher accuracy on hard tasks."
+
+  # ── Together AI — OpenAI gpt-oss ───────────────────────────────────────
+  - key: gpt-oss-120b
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/openai/gpt-oss-120b
+    input_price_per_mtok: 1.50
+    output_price_per_mtok: 6.00
+    context_window: 128000
+    notes: "OpenAI open-weights via Together. ID format unverified."
+
+  - key: gpt-oss-20b
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/openai/gpt-oss-20b
+    input_price_per_mtok: 0.40
+    output_price_per_mtok: 1.20
+    context_window: 128000
+    notes: "OpenAI 20B open-weights. Cost benchmark."
+
+  # ── Together AI — GLM (Zai Org) ────────────────────────────────────────
+  - key: glm-5-fp4
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/zai-org/GLM-5-FP4
+    input_price_per_mtok: 0.20
+    output_price_per_mtok: 0.60
+    context_window: 32000
+    notes: "GLM 5 FP4 quantized. ID format unverified."
+
+  - key: glm-5-1-fp4
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/zai-org/GLM-5.1-FP4
+    input_price_per_mtok: 0.20
+    output_price_per_mtok: 0.60
+    context_window: 32000
+    notes: "GLM 5.1 FP4 newer release."
+
+  # ── Together AI — MiniMax ──────────────────────────────────────────────
+  - key: minimax-m-2-5-fp4
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/MiniMaxAI/MiniMax-M-2.5-FP4
+    input_price_per_mtok: 0.30
+    output_price_per_mtok: 0.90
+    context_window: 32000
+    notes: "MiniMax 2.5. ID format unverified."
+
+  - key: minimax-m-2-7-fp4
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/MiniMaxAI/MiniMax-M-2.7-FP4
+    input_price_per_mtok: 0.30
+    output_price_per_mtok: 0.90
+    context_window: 32000
+    notes: "MiniMax 2.7 newer. ID format unverified."
+
+  # ── Together AI — Moonshot Kimi ────────────────────────────────────────
+  - key: kimi-k2-5
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/moonshotai/Kimi-K2.5
+    input_price_per_mtok: 0.50
+    output_price_per_mtok: 1.50
+    context_window: 200000
+    notes: "Kimi K2.5 long-context. ID format unverified."
+
+  # ── Together AI — Google Gemma ─────────────────────────────────────────
+  - key: gemma-4-31b-it-fp8
+    enabled: true
+    verified: false                             # user-requested
+    provider: together
+    api_model_id: together_ai/google/gemma-4-31b-it-FP8
+    input_price_per_mtok: 0.30
+    output_price_per_mtok: 0.90
+    context_window: 32000
+    notes: "Gemma 4 instruction-tuned. ID format unverified."

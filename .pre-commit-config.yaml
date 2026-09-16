@@ -1,0 +1,98 @@
+# Pre-commit hooks for Momentum-X
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # ── Code Quality ──
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # ── Security & Safety ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+
+  # ── .env Leak Prevention ──
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '.env.example'
+
+  # ── Track A item 27: AST dark-zone audit on critical execution files ──
+  # Re-runs the audit per `25_bug_hunting_playbook.md` §5 every commit.
+  # Score-3 findings (broker-call + state-mutation + critical-file) BLOCK
+  # commit. Score-2 findings produce a warning but do not block.
+  # Catches the "Bug-N-class regression introduced by a patch" pattern.
+  - repo: local
+    hooks:
+      - id: ast-dark-zone-audit
+        name: AST dark-zone audit (block on score-3)
+        entry: python scripts/audit_log_coverage.py
+        language: system
+        files: ^(src/execution/(bridge|alpaca_executor)\.py|src/analysis/trade_journal\.py|src/data/premarket_research\.py|main\.py)$
+        pass_filenames: false
+
+  # ── Track C Phase 2: Hypothesis state-machine fast-feedback variant ──
+  # Runs the bridge-broker state machine at max_examples=200 on every commit
+  # touching the production execution stack. Catches counterexamples within
+  # ~3 seconds of `git commit`. Full max_examples=2000 runs in CI nightly;
+  # max_examples=10000 runs weekly for deep search.
+  # The HYPOTHESIS_PROFILE=precommit env var picks up the smaller search.
+  - repo: local
+    hooks:
+      - id: track-c-pbt-fast
+        name: Track C PBT (state machine, HYP_MAX_EXAMPLES=200)
+        entry: env HYP_MAX_EXAMPLES=200 python -m pytest tests/property/test_bridge_state_machine.py tests/property/test_invariant_injection.py -q --hypothesis-seed=0
+        language: system
+        files: ^(src/execution/(bridge|alpaca_executor)\.py|main\.py|tests/property/.*\.py)$
+        pass_filenames: false
+
+  # ── Bug AF/AG defense: pyright reportPossiblyUnboundVariable ──
+  # Per docs/research-log/44_bug_ag_track_b_unbound.md §7. Catches the
+  # Python `UnboundLocalError` class statically — variables that are
+  # assigned only inside a conditional branch but referenced
+  # unconditionally afterward. mypy's default config does not catch
+  # this; pyright does. Bug AF (`_cand` in bridge.execute_verdict)
+  # and Bug AG (`_d217_hb_repo` in main.py startup) were both this
+  # class. The test runs pyright + a baseline-diff check (catch-new-only
+  # semantics, mirroring tests/static_analysis/_baselines.json). On
+  # any commit touching gated production paths it fires in <20 seconds.
+  - repo: local
+    hooks:
+      - id: pyright-unbound-gate
+        name: Bug AF/AG defense (pyright reportPossiblyUnboundVariable)
+        entry: python -m pytest tests/static_analysis/test_pyright_unbound.py -q
+        language: system
+        files: ^(src/.*\.py|main\.py|scripts/.*\.py|pyrightconfig\.json|tests/static_analysis/_pyright_baseline\.json)$
+        pass_filenames: false
+
+  # ── Track D: Differential testing harness gate ──
+  # Per docs/research-log/35_differential_harness_foundation.md.
+  # Runs scripts/check_differential_diff.py — exits 0 unless a gated
+  # file (bridge.py, alpaca_executor.py, trade_journal.py, main.py)
+  # was modified, in which case it requires the harness suite to pass
+  # before the patch can land. Per-PR replay comparison is the next step
+  # (requires Phase 0 to capture a recorded session worth using as input).
+  - repo: local
+    hooks:
+      - id: differential-harness-gate
+        name: Track D differential harness gate (gated file edit)
+        entry: python scripts/check_differential_diff.py
+        language: system
+        files: ^(src/execution/(bridge|alpaca_executor)\.py|src/analysis/trade_journal\.py|main\.py|src/testing/.*\.py|tests/unit/test_differential_harness\.py)$
+        pass_filenames: false

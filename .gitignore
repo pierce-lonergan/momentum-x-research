@@ -1,0 +1,73 @@
+# ── Environment & Secrets (CRITICAL — never commit) ──
+.env
+*-secrets.env
+*.pem
+*.key
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Testing ──
+.pytest_cache/
+.hypothesis/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Tools ──
+.ruff_cache/
+.mypy_cache/
+.vscode/
+.idea/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Project ──
+logs/
+/data/
+*.tar.gz
+docs/worktree_logs_archive/
+momentum_*.log
+.claude/
+models/diagnostics/
+
+# Silent-fallback audit raw + triaged dumps (regenerable from scripts/)
+scripts/_silent_fallback_findings.json
+scripts/_silent_fallback_triaged.json
+
+# cProfile artifacts (regenerable via scripts/profile_pbt.py)
+*.prof
+pbt_profile.prof
+
+# Arena-derived bar parquets (regenerable via
+# scripts/convert_bars_to_arena_parquet.py from data/bar_recordings/).
+# Source-of-truth is the recordings; these are caches.
+mx-arena/data/historical/
+mx-arena/data/daily/
+/.duckdb_tmp/
+
+# Never publish: rendered performance artifacts, trade-level P&L, machine-identifying task XML,
+# and the personal-finance planning document. These are excluded from this repository entirely.
+data/reports/tearsheet.html
+data/backfill/trade_features_backfill.json
+scripts/paper_task_current_xml.txt
+docs/**/Project Gaps*
+
+# Small committed fixtures the code and tests need, kept despite the blanket /data/ rule above
+!data/archetypes/
+!data/archetypes/**
+!data/experiments/
+!data/experiments/**
+!data/scenarios/
+!data/scenarios/**
+!data/selection_arena/
+!data/selection_arena/**

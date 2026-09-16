@@ -1,0 +1,35 @@
+{
+  "date": "2026-03-25",
+  "params": {
+    "mfcs_buy_threshold": 0.15
+  },
+  "n_candidates": 18,
+  "n_buys": 6,
+  "n_trades": 3,
+  "total_pnl": 0.3032,
+  "tickers_traded": [
+    "MKDW",
+    "FEED",
+    "CVV"
+  ],
+  "trades": [
+    {
+      "ticker": "MKDW",
+      "fill_price": 3.1044,
+      "pnl": 0.1656,
+      "exit_reason": "stop"
+    },
+    {
+      "ticker": "FEED",
+      "fill_price": 2.2078,
+      "pnl": -0.0078,
+      "exit_reason": "stop"
+    },
+    {
+      "ticker": "CVV",
+      "fill_price": 5.0572,
+      "pnl": 0.1454,
+      "exit_reason": "exit_intelligence"
+    }
+  ]
+}

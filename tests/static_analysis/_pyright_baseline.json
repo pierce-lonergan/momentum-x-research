@@ -1,0 +1,58 @@
+{
+  "_comment": "Pyright reportPossiblyUnboundVariable baseline. Generated 2026-04-27 after Bug AG fix. Per-file count of pre-existing latent Bug AF/AG-class issues. Test fails iff the count for any file INCREASES (catch-new-only semantics, same as the AST static_analysis suite). Track each entry to its own finding doc as it is fixed; remove from this file when count drops to zero. See docs/research-log/44_bug_ag_track_b_unbound.md.",
+  "_priority_legend": "critical = production trading path (positions/orders/sizing); high = production support (data ingest, broker comms); research = analytics/experiments not in trading path. Critical-path issues take next-available focused fix slots; research-path issues fix when convenient.",
+  "_total_at_baseline": 24,
+  "_baseline_date": "2026-04-27",
+  "reportPossiblyUnboundVariable": {
+    "src/execution/bridge.py": 4,
+    "src/core/orchestrator.py": 4,
+    "src/execution/exit_intelligence.py": 3,
+    "src/execution/position_manager.py": 1,
+    "src/agents/deterministic_technical.py": 2,
+    "src/data/alpaca_client.py": 2,
+    "src/data/short_interest.py": 1,
+    "scripts/run_meta_simulation.py": 7
+  },
+  "_priority": {
+    "src/execution/bridge.py": {
+      "priority": "critical",
+      "rationale": "Same module as Bug AF. Lines 1022/1030 (_now), 1221 (_close_aio), 1226 (_hold_min) are all on the post-trade-close enriched path — silently dropping a fill in production-shape input would lose attribution data and could orphan a position. Fix order: bridge first, since this is where the AF/AG pattern lives.",
+      "next_fix_slot": "Bug AH (tonight post-close)"
+    },
+    "src/core/orchestrator.py": {
+      "priority": "critical",
+      "rationale": "Lines 880/897 (_cached_signals in D106 cache bypass), 1544 (_catalyst_type), 2696 (_dynamic_cap). All in entry-decision path. _cached_signals failure would crash the cache-bypass branch silently inside try/except, dropping the entry verdict. _dynamic_cap drives sizing.",
+      "next_fix_slot": "Bug AI"
+    },
+    "src/execution/exit_intelligence.py": {
+      "priority": "critical",
+      "rationale": "Lines 1353 (_chan_mult), 1367 (_parallel_results) on the exit-decision path. A silent fail here means we hold past the configured exit signal.",
+      "next_fix_slot": "Bug AJ"
+    },
+    "src/execution/position_manager.py": {
+      "priority": "high",
+      "rationale": "Line 917: pnl referenced in a warning log message — would raise UnboundLocalError instead of logging '0.0' when position has no remaining_qty branch. Caught only as a logging failure but masks a real branch we should harden.",
+      "next_fix_slot": "Bug AK"
+    },
+    "src/agents/deterministic_technical.py": {
+      "priority": "high",
+      "rationale": "Line 532: bullish_factors / bearish_factors. Affects the technical agent's signal generation. Failure mode: technical agent returns degenerate signal silently.",
+      "next_fix_slot": "Bug AL"
+    },
+    "src/data/alpaca_client.py": {
+      "priority": "high",
+      "rationale": "Lines 1105/1106: resp possibly unbound in a network-call retry path. Would cause UnboundLocalError under certain transient API failures (the path designed to handle them).",
+      "next_fix_slot": "Bug AM"
+    },
+    "src/data/short_interest.py": {
+      "priority": "high",
+      "rationale": "Line 680: raw_text. Short-interest fetcher; failure mode is missing-data, not a crash, but worth tightening.",
+      "next_fix_slot": "Bug AN"
+    },
+    "scripts/run_meta_simulation.py": {
+      "priority": "research",
+      "rationale": "Lines 613-620: numpy `np` reference inside an optional-import try/except. Script is a one-shot meta-simulation runner, not in trading path. 7 references chained from one optional import.",
+      "next_fix_slot": "convenient"
+    }
+  }
+}

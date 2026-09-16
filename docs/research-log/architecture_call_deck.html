@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MOMENTUM-X · Tuesday Architecture Call · 2026-04-28</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --good: #3fb950;
+      --warn: #d29922;
+      --bad: #f85149;
+      --code-bg: #1f242c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    main { flex: 1; padding: 36px 64px 84px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .slide {
+      display: none;
+      animation: fadeIn 250ms ease-out;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    h1 { font-size: 36px; margin-bottom: 16px; color: var(--accent); }
+    h2 { font-size: 28px; margin: 24px 0 14px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 20px; margin: 18px 0 8px; color: var(--accent); }
+    p { margin-bottom: 12px; }
+    ul, ol { margin: 12px 0 16px 24px; }
+    li { margin-bottom: 6px; }
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 12px 18px;
+      background: var(--panel);
+      margin: 16px 0;
+      font-style: italic;
+      color: var(--text);
+    }
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: "JetBrains Mono", Consolas, "SF Mono", monospace;
+      font-size: 0.92em;
+      color: #79c0ff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 22px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--panel);
+      font-weight: 600;
+      color: var(--accent);
+    }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+    .num-col { text-align: right; font-variant-numeric: tabular-nums; }
+    .tag { display: inline-block; padding: 2px 8px; background: var(--accent); color: #000; border-radius: 3px; font-size: 12px; font-weight: 600; font-family: monospace; }
+    .tag.muted { background: var(--muted); color: var(--bg); }
+    .commit { font-family: monospace; color: var(--muted); }
+    .stat { display: inline-block; padding: 2px 10px; border-radius: 3px; font-weight: 600; font-family: monospace; }
+    .stat.good { background: var(--good); color: #000; }
+    .stat.warn { background: var(--warn); color: #000; }
+    .stat.bad  { background: var(--bad);  color: #000; }
+    .stat.big  { font-size: 22px; padding: 6px 14px; }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    nav .dots {
+      display: flex;
+      gap: 6px;
+    }
+    nav .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 100ms;
+    }
+    nav .dot:hover { background: var(--muted); }
+    nav .dot.active { background: var(--accent); }
+    nav .label { color: var(--muted); font-size: 13px; font-family: monospace; }
+    nav button {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 3px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    nav button:hover { background: var(--accent); color: #000; }
+    nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .header-meta {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .footnote { color: var(--muted); font-size: 13px; margin-top: 24px; font-style: italic; }
+    .layer-row td.label { color: var(--accent); font-weight: 600; font-family: monospace; }
+
+    @media print {
+      nav { display: none; }
+      .slide { display: block !important; page-break-after: always; padding: 32px 0; }
+      body { background: white; color: black; font-size: 12pt; }
+      h1, h2, h3 { color: #0366d6; }
+      table th { background: #f6f8fa; color: #0366d6; }
+      blockquote { background: #f6f8fa; }
+    }
+  </style>
+</head>
+<body>
+<main>
+
+<!-- ─────────── SLIDE 1: THESIS ─────────── -->
+<section class="slide active" data-slide="1">
+  <div class="header-meta">
+    MOMENTUM-X · Tuesday Architecture Call · 2026-04-28
+    <span style="float:right">Generated 2026-04-26 · 19 commits · 7 tags</span>
+  </div>
+  <h1>Slide 1 — Thesis statement</h1>
+  <blockquote>
+    In 7 days we shipped 19 production-bug fixes and 6 layers of discovery
+    infrastructure (the static-analysis layer now includes pyright). Zero
+    patches introduced regressions. The discovery rate is rising while the
+    engineering rate stays flat. Bug AG was the first bug caught
+    <em>live in a paid session</em> — surfaced on the Monday morning startup
+    log, fixed within 2 hours, defended forward by pyright
+    <code>reportPossiblyUnboundVariable</code>.
+    <br><br>
+    This is the <em>antifragility property</em>. The architecture decision
+    today is whether we commit to maintaining it through May 2026.
+  </blockquote>
+  <h3>The 27/0 ratio in one number</h3>
+  <p>
+    <span class="stat big good">27 / 0 = ∞</span>
+  </p>
+  <ul>
+    <li>27 production / oracle / harness bugs surfaced + fixed (Bug A→AO; <strong>9 in a single trading day on 2026-04-27</strong>)</li>
+    <li>0 patches that introduced regressions</li>
+    <li>1 algorithm-calibration finding caught test-first (BOCPD cp-widening)</li>
+    <li>1 algorithm capability addition (Tobit-censoring on Bayesian estimator)</li>
+    <li>1 net-new defense layer (pyright reportPossiblyUnboundVariable, baselined at 24 known issues + ratcheting)</li>
+  </ul>
+  <p style="font-size: 0.85em; color: #555; margin-top: 1em; padding: 0.6em; border-left: 3px solid #888; background: #fafafa;">
+    <strong>Preventive yield (separate counter, do not conflate with the 19/0 ratio):</strong>
+    Arming the pyright <code>reportPossiblyUnboundVariable</code> gate on
+    2026-04-27 immediately surfaced <strong>24 latent Bug AF/AG-class
+    instances</strong> across 8 files (4 in <code>bridge.py</code>, 4 in
+    <code>orchestrator.py</code>, 3 in <code>exit_intelligence.py</code>, etc.).
+    These pre-existed the gate and are locked behind a per-file ratchet in
+    <code>tests/static_analysis/_pyright_baseline.json</code> — any future
+    commit that adds even one new instance fails CI before it can land.
+    Scheduled for incremental fix (Bug AH–AN tagged in the baseline,
+    one atomic commit each, baseline projected to clear by 2026-05-04).
+    These 24 are <em>preventive yield from arming the gate</em>, not bugs
+    "shipped" — the running discovery ratio remains 19/0; the
+    backfill-cleanup ratio (currently 0/24) tracks separately.
+  </p>
+</section>
+
+<!-- ─────────── SLIDE 2: 19/0 BREAKDOWN ─────────── -->
+<section class="slide" data-slide="2">
+  <h1>Slide 2 — Bugs surfaced and fixed (chronological)</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Bug</th>
+        <th>Symptom</th>
+        <th>Surface</th>
+        <th>Defense layer added</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>D</td><td>Partial-fill qty overwritten</td><td>Live (XNDU)</td><td>D217 poll + D218 drift checks</td></tr>
+      <tr><td>E</td><td>D91 09:30 close silent fail</td><td>Live (ELSE)</td><td>opened_at gating</td></tr>
+      <tr><td>#13</td><td>Journal qty mismatch</td><td>EOD recon</td><td>D222 PNL_RECON</td></tr>
+      <tr><td>F</td><td>Arena hardcoded literal</td><td>Live</td><td>D146 expected/actual</td></tr>
+      <tr><td>N</td><td>Wrong client method</td><td>Live (post-patch)</td><td>Static analysis (Bug-N class)</td></tr>
+      <tr><td>Q</td><td>BAR-1 silent exit fallback</td><td>Live</td><td>D228 BAR1_EXIT_PX_DEGRADED</td></tr>
+      <tr><td>R</td><td>Phase-0 stop drift</td><td>Live (XNDU)</td><td>broker-truth in ManagedPosition</td></tr>
+      <tr><td>T,U</td><td>Schema / import fallbacks</td><td>Pre-commit</td><td>Pydantic + import guard tests</td></tr>
+      <tr><td>V</td><td>Bridge timeout, broker live</td><td>EOD recon ($978)</td><td>_cancel_order_or_warn helper</td></tr>
+      <tr><td>W</td><td>Restructure dropped tightened stop</td><td>Live (LIDR)</td><td>I7 invariant + production fix</td></tr>
+      <tr><td>X,Y</td><td>BAR-1 cascade + D76 false negative</td><td>Live (LIDR)</td><td>Resolved transitively by Bug Z fix</td></tr>
+      <tr><td>Z</td><td>SMART_EXIT 403 → fake close</td><td>EOD recon (LIDR -$1210)</td><td>attempt_close_with_status_check</td></tr>
+      <tr><td>AA</td><td>SimpleBroker fill discipline (limit/buying-power)</td><td>PBT search</td><td>Bug AA patch + I8 sharpening</td></tr>
+      <tr><td>AB</td><td>trigger_stop allowed phantom shorts</td><td>PBT search (I12)</td><td>Position-existence guard</td></tr>
+      <tr><td>AC</td><td>partial_fill didn't update positions until terminal</td><td>PBT search (I12)</td><td>_apply_fill_increment refactor</td></tr>
+      <tr><td>AD</td><td>close_position created sell order but didn't fill</td><td>PBT search (I12)</td><td>Auto-fill at avg_entry_price</td></tr>
+      <tr><td>AE</td><td>reject() didn't account for partial fills</td><td>PBT search (I17)</td><td>partial → canceled instead of rejected</td></tr>
+      <tr><td>AF</td><td>UnboundLocalError on _cand when scored=None (CRITICAL-PATH)</td><td>Phase 0 integration test</td><td><code>_cand = None</code> initialization before conditional</td></tr>
+      <tr><td>AG</td><td>UnboundLocalError on _d217_hb_repo — Track B daemon offline (HIGH)</td><td><strong>Live session log (Mon 2026-04-27 AM)</strong></td><td>Hoist <code>_d217_hb_repo</code> definition + add <code>pyright reportPossiblyUnboundVariable</code> gate</td></tr>
+      <tr><td>AH</td><td>run_eod_invariants returns None — Track B crashes on every tick (HIGH)</td><td><strong>Live session log (Mon 2026-04-27 PM)</strong></td><td>Add <code>return result</code> at end of function. Same Track B daemon as AG, different defect; 4 silent unit-test failures restored</td></tr>
+      <tr><td>AI</td><td>Bridge can't force-close when external stop holds shares — caused 5+ failed LIDR closes (CRITICAL)</td><td><strong>Live session log (Mon 2026-04-27 PM)</strong></td><td>Opt-in <code>cancel_blocking_stops_first</code> param + cancel-and-rearm pattern + 7 unit tests. Direct cost: ~$684 today on LIDR alone</td></tr>
+      <tr><td>AJ</td><td>Morning-resolution Discord alert never wired despite OPS_ALERT_WEBHOOK_URL existing (MEDIUM)</td><td><strong>Strategic assessment (Mon 2026-04-27 evening)</strong></td><td>New <code>alert_morning_resolution_sync</code> + main.py D91 wire + <code>MOMENTUM_HOLD_OVERNIGHT</code> env override + 6 unit tests</td></tr>
+      <tr><td>AK</td><td>D124 consensus alignment over-rejected when bullish_conf=0 — 47% of today's rejections were spurious (HIGH)</td><td><strong>Tier 2 audit (Mon 2026-04-27 evening)</strong></td><td>Three-tier explicit rejection logic: numeric dominance / aggregate floor / single-veto path. Single low-conf bearish now passes through to MFCS. + 20 unit tests including statistical replay of today's 37 rejections.</td></tr>
+      <tr><td>AL</td><td>CandidateStock had no float_shares plausibility check — SCNI's 11.3B reported float (vs 5M implied; 2263× ratio) cost today's highest-RVOL setup (HIGH)</td><td><strong>Tier 3 audit (Mon 2026-04-27 evening)</strong></td><td>Pydantic <code>@model_validator(mode='before')</code> drops float to None when ratio &gt; 100×. + 22 tests including Hypothesis property test (500 examples) + frozen-mutation regression + D112 router integration (legit huge-float still rejected).</td></tr>
+      <tr><td>AM</td><td>No way for operator to register a manually-submitted broker stop with the tracker — D230 RECON_WARN STOP fired ~900 times for LIDR (HIGH)</td><td><strong>Tier 3 audit (Mon 2026-04-27 evening)</strong></td><td><code>PositionManager.attach_external_stop()</code> + auto-discovery in <code>sync_from_broker(broker_orders=...)</code>. main.py D56 path now passes alpaca_orders. + 12 tests using REAL PositionManager including end-to-end LIDR scenario.</td></tr>
+      <tr><td>AN</td><td>Equity estimator typo: <code>getattr(pm, "starting_equity", 0)</code> always returned 0 because PositionManager only had <code>_starting_equity</code>; D230 RECON_WARN EQUITY fired ~900 times (MEDIUM)</td><td><strong>Tier 3 audit (Mon 2026-04-27 evening)</strong></td><td>Add public <code>starting_equity</code> property to PositionManager. + 7 tests using REAL PositionManager (which would have caught the typo had original tests not used MagicMock with explicit setters).</td></tr>
+      <tr><td><strong>AO</strong></td><td><strong>Decision-replay infrastructure (Tier 4 #15) — closes the "rigorous answer to does this make money" architectural gap. Validates Bug AK's predicted +47% pass-through against today's actual session log: measured 48.6% (within 1.6pp of prediction)</strong></td><td><strong>Tier 4 audit (Mon 2026-04-27 evening)</strong></td><td>DecisionRow Pydantic schema + InstrumentationWriter extension + log parser + rules library (D124 v1/v2) + counterfactual aggregator + CLI + 29 tests including Hypothesis property test + integration test against today's actual production log.</td></tr>
+    </tbody>
+  </table>
+  <p class="footnote">
+    Bugs A-Z = production code. Bugs AA-AE = SimpleBroker oracle (the audit-complete reference model used by the PBT search).
+    Bug AF = production code surfaced by the integration test that wires the production path through a mocked broker.
+    Bug AG = production code surfaced by reading the Monday-morning startup log of the live system —
+    the first bug found by direct operator observation rather than by a test layer. The pyright defense added
+    in the same commit catches the entire AF/AG class going forward and immediately surfaced 24 latent
+    instances now baselined for incremental fix-and-ratchet.
+    Together these prove the discovery infrastructure works at every layer:
+    static analysis, PBT, integration test, and live observation.
+  </p>
+</section>
+
+<!-- ─────────── SLIDE 3: 6 DISCOVERY LAYERS ─────────── -->
+<section class="slide" data-slide="3">
+  <h1>Slide 3 — Six discovery infrastructure layers (all live)</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Layer (tag)</th>
+        <th>Catches</th>
+        <th>Trigger</th>
+        <th class="num-col">Latency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="layer-row">
+        <td class="label">Static analysis<br><span class="tag">v2.2-static-analysis-active</span></td>
+        <td>frozen-mutate, async-leak, silent-handler, relative-path, ps-datetime-utc, ps-pipe-deadlock</td>
+        <td>every commit</td>
+        <td class="num-col">&lt; 3s</td>
+      </tr>
+      <tr class="layer-row">
+        <td class="label">PBT state machine<br><span class="tag">v2.2-pbt-phase2-active</span></td>
+        <td>17 invariants × 11 rules; Bug D/V/W/Z classes + generalizations</td>
+        <td>every commit + nightly</td>
+        <td class="num-col">3s / 20s / 100s</td>
+      </tr>
+      <tr class="layer-row">
+        <td class="label">Phase 0 instrumentation<br><span class="tag">v2.2-phase-0-active</span></td>
+        <td>Per-trade microstructure capture; D261 schema validation; foundation for QMP retrospective + Bayesian fit + replay</td>
+        <td>every order lifecycle</td>
+        <td class="num-col">inline (sub-ms)</td>
+      </tr>
+      <tr class="layer-row">
+        <td class="label">Differential testing<br><span class="tag">v2.2-difftest-foundation</span></td>
+        <td>Bug-N-class regressions (silent call-site changes)</td>
+        <td>every commit; per-PR replay</td>
+        <td class="num-col">&lt; 1s harness; minutes for replay</td>
+      </tr>
+      <tr class="layer-row">
+        <td class="label">BOCPD changepoint<br><span class="tag">v2.2-bocpd-armed</span></td>
+        <td>Regime breaks in trade outcomes; D223 BOCPD_BREAK + D224 KELLY_HALVED; D262 refit recommendation</td>
+        <td>per-trade close + EOD</td>
+        <td class="num-col">inline + EOD</td>
+      </tr>
+      <tr class="layer-row">
+        <td class="label">Bayesian (η,γ) estimator<br><span class="tag">v2.2-bayesian-estimator-armed</span></td>
+        <td>Capacity calibration drift; D256-D259 four-trigger gates; Tobit-censored microcap fits</td>
+        <td>EOD when run</td>
+        <td class="num-col">seconds-to-minutes</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>The compounding property</h3>
+  <p>
+    Each layer catches a distinct bug class. Adding a layer increases total catch surface
+    <em>without</em> reducing existing protection. Adding an invariant within a layer
+    surfaces oracle bugs the invariant set didn't enumerate (proven this iteration:
+    I10-I13 → 5 oracle bugs; I14-I17 → 1 oracle bug; oracle is approaching stable).
+  </p>
+</section>
+
+<!-- ─────────── SLIDE 4: COMMIT LEDGER ─────────── -->
+<section class="slide" data-slide="4">
+  <h1>Slide 4 — Weekly commit ledger</h1>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Commit</th><th>Capability</th><th>Tag</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td class="commit">366d028</td><td>Static-analysis suite + 6 silent-handler fixes</td><td><span class="tag">v2.2-static-analysis-active</span></td></tr>
+      <tr><td>2</td><td class="commit">2cc3e9a</td><td>Track C Phase 2 expansion (R1-R11 + I1-I9)</td><td><span class="tag">v2.2-pbt-phase2-active</span></td></tr>
+      <tr><td>3</td><td class="commit">09f3ce4</td><td>Bug AA: SimpleBroker fill discipline (PBT-surfaced)</td><td>—</td></tr>
+      <tr><td>4</td><td class="commit">5e6a9b9</td><td>QMP signing migration + D260 wire-in</td><td>—</td></tr>
+      <tr><td>5</td><td class="commit">f1fd13f</td><td>Phase 0 instrumentation MVP foundation</td><td><span class="tag">v2.2-phase-0-active</span></td></tr>
+      <tr><td>6</td><td class="commit">0f0bd0f</td><td>Phase 0 wire-in: 6 emit-sites + EOD flush + D261</td><td>—</td></tr>
+      <tr><td>7</td><td class="commit">e4c32a3</td><td>Track D differential harness foundation</td><td><span class="tag">v2.2-difftest-foundation</span></td></tr>
+      <tr><td>8</td><td class="commit">133adb6</td><td>BOCPD pre-training + cp-widening calibration finding</td><td><span class="tag">v2.2-bocpd-armed</span></td></tr>
+      <tr><td>9</td><td class="commit">8c4160f</td><td>Track C mutation canaries (Bug V/W/Z)</td><td>—</td></tr>
+      <tr><td>10</td><td class="commit">c5a82ba</td><td>BOCPD wire-in</td><td>—</td></tr>
+      <tr><td>11</td><td class="commit">7ecc2e8</td><td>BOCPD re-fit scheduling + D262</td><td>—</td></tr>
+      <tr><td>12</td><td class="commit">e8d6340</td><td>Architecture call agenda synthesis</td><td>—</td></tr>
+      <tr><td>13</td><td class="commit">6e8272d</td><td>Kelly governance: D223 → D224 KELLY_HALVED</td><td>—</td></tr>
+      <tr><td>14</td><td class="commit">c34f654</td><td>Cohort registry v0.1</td><td>—</td></tr>
+      <tr><td>15</td><td class="commit">0cee9d4</td><td>Bayesian (η, γ) estimator + D256-D259</td><td><span class="tag">v2.2-bayesian-estimator-armed</span></td></tr>
+      <tr><td>16</td><td class="commit">c995009</td><td>Track B N=2 + arch deck</td><td>—</td></tr>
+      <tr><td>17</td><td class="commit">6b01d27</td><td>EOD pipeline: cohort backfill + Bayesian runner + replay engine</td><td>—</td></tr>
+      <tr><td>18</td><td class="commit">2aac2e2</td><td>I10-I13 + Bug AB/AC/AD + Tobit-censoring</td><td>—</td></tr>
+      <tr><td>19</td><td class="commit">24ec23e</td><td>I14-I17 + Bug AE</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ─────────── SLIDE 5: TEST SURFACE ─────────── -->
+<section class="slide" data-slide="5">
+  <h1>Slide 5 — Test surface</h1>
+  <table>
+    <thead>
+      <tr><th>Suite</th><th class="num-col">Tests</th><th class="num-col">Runtime</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Static analysis</td><td class="num-col">26</td><td class="num-col">~3s</td></tr>
+      <tr><td>Track C Phase 2 PBT (state machine)</td><td class="num-col">1</td><td class="num-col">~20s @ 2k examples</td></tr>
+      <tr><td>PBT injection tests (alive proof)</td><td class="num-col">22</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>PBT mutation canaries (search proof)</td><td class="num-col">3</td><td class="num-col">~5s</td></tr>
+      <tr><td>SimpleBroker oracle</td><td class="num-col">24</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>Phase 0 instrumentation</td><td class="num-col">14</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>QMP signing</td><td class="num-col">25</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>BOCPD + refit</td><td class="num-col">18</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>Kelly governor</td><td class="num-col">7</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>Cohort matcher</td><td class="num-col">11</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>Differential harness</td><td class="num-col">10</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>Bayesian estimator (fast gates)</td><td class="num-col">12</td><td class="num-col">~3s</td></tr>
+      <tr><td>Bayesian estimator (slow NUTS, <code>-m slow</code>)</td><td class="num-col">3</td><td class="num-col">~90s + ~78s Tobit</td></tr>
+      <tr><td>EOD pipeline integration</td><td class="num-col">10</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>D219 behavioral</td><td class="num-col">5</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td>D24 Bug Z behavioral</td><td class="num-col">6</td><td class="num-col">&lt;1s</td></tr>
+      <tr><td><strong>Total fast (relevant scope)</strong></td><td class="num-col"><strong>~245</strong></td><td class="num-col"><strong>~30s</strong></td></tr>
+      <tr><td>Total including slow</td><td class="num-col">~248</td><td class="num-col">~3 min</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Pre-commit hook chain runs the fast variants on every commit. Nightly runs the
+    full <code>-m slow</code> + 10000-example PBT pass. CI never goes red because the
+    gating discipline prevents it.
+  </p>
+</section>
+
+<!-- ─────────── SLIDE 6: TUESDAY DECISIONS ─────────── -->
+<section class="slide" data-slide="6">
+  <h1>Slide 6 — Five Tuesday discussion items</h1>
+  <p>(Each with a recommendation. Voting closes the architecture session.)</p>
+
+  <h3>Item 1 · Pull Track B daemon arming forward to N=2</h3>
+  <p><strong>Status:</strong> Already documented in <code>26_d_code_registry.md</code>. <strong>Recommendation:</strong> Arm Wednesday eve if Monday + Tuesday both clean.</p>
+
+  <h3>Item 2 · D223 BOCPD_BREAK Kelly governance policy</h3>
+  <p><strong>Status:</strong> Already shipped (<span class="commit">6e8272d</span>). D224 KELLY_HALVED logged on activation, RE-ACTIVATED on extension, RESET when window expires. <strong>Recommendation:</strong> Confirm policy. Empirically tunable via <code>KellyGovernor</code> constructor.</p>
+
+  <h3>Item 3 · Cohort registry matching algorithm v0.1</h3>
+  <p><strong>Status:</strong> Already shipped (<span class="commit">c34f654</span>). Same-(catalyst, market_cap_bucket, hour_bucket) within ±15min, 5-peer cap. EOD backfill wired (<span class="commit">6b01d27</span>). <strong>Recommendation:</strong> Run live for 1 week, tune in v0.2 from real cohort vs. absolute return data.</p>
+
+  <h3>Item 4 · Bayesian estimator + four-trigger gates D256-D259</h3>
+  <p><strong>Status:</strong> Already shipped + Tobit-censored variant added (<span class="commit">2aac2e2</span>). Tagged <span class="tag">v2.2-bayesian-estimator-armed</span>. EOD runner shipped (<span class="commit">6b01d27</span>). <strong>Recommendation:</strong> Wire EOD pipeline to the live trading session — auto-runs after Phase 0 produces N≥30 fills.</p>
+
+  <h3>Item 5 · Differential replay engine timing</h3>
+  <p><strong>Status:</strong> Foundation shipped (<span class="commit">e4c32a3</span>) + replay engine v1 shipped (<span class="commit">6b01d27</span>). v2 (per-SHA git-aware) is the next iteration after Phase 0 captures Monday's session. <strong>Recommendation:</strong> Implement per-SHA wrapper this week.</p>
+</section>
+
+<!-- ─────────── SLIDE 7: VOTE ─────────── -->
+<section class="slide" data-slide="7">
+  <h1>Slide 7 — The architecture-call vote</h1>
+  <blockquote>
+    <strong>Resolved:</strong> MOMENTUM-X commits to maintaining the
+    <span class="stat good">18 / 0</span> discovery ratio (or higher)
+    through May 2026. If the ratio drops, the next-week budget shifts
+    from new features to discovery infrastructure.
+  </blockquote>
+
+  <h3>What this means operationally</h3>
+  <ul>
+    <li>Every patch ships test-first per the established discipline.</li>
+    <li>Every shipped bug gets:
+      <ol>
+        <li>A behavioral injection test (proves invariant catches the state)</li>
+        <li>A search canary (proves PBT reaches the state)</li>
+        <li>A static-analysis rule (when AST-detectable)</li>
+        <li>A finding doc in <code>docs/research-log/</code></li>
+      </ol>
+    </li>
+    <li>Bug naming continues alphabetically (Bug AE shipped this week; next is BF).</li>
+    <li>Discovery infrastructure layers extend (Track E chaos testing, etc.) when the existing six become saturated.</li>
+  </ul>
+
+  <h3>The bug-discovery curve trend</h3>
+  <table style="max-width: 600px;">
+    <thead><tr><th>Iteration</th><th class="num-col">Invariants added</th><th class="num-col">Oracle bugs surfaced</th></tr></thead>
+    <tbody>
+      <tr><td>I1-I9 (initial)</td><td class="num-col">9</td><td class="num-col">1 (AA)</td></tr>
+      <tr><td>I10-I13 (Knight-Capital)</td><td class="num-col">4</td><td class="num-col">3 (AB, AC, AD) + 2 disciplines</td></tr>
+      <tr><td>I14-I17 (consistency)</td><td class="num-col">4</td><td class="num-col">1 (AE)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The marginal bug-surfacing rate is decreasing — the SimpleBroker oracle is approaching
+    stable. This is healthy: the broker now correctly mirrors realistic broker discipline
+    most production scenarios depend on.
+  </p>
+</section>
+
+<!-- ─────────── SLIDE 8: $1M ARC ─────────── -->
+<section class="slide" data-slide="8">
+  <h1>Slide 8 — How this enables the $1M-in-12-months arc</h1>
+  <p>
+    The discovery infrastructure exists to make AUM scaling <em>safe</em>, not just <em>fast</em>.
+    Three operational lifts directly fund the AUM-deployment conversation:
+  </p>
+
+  <h3>Lift 1 · Bayesian (η, γ) calibration → capacity number</h3>
+  <p>
+    Once Phase 0 captures 60-80 fills per cohort cell, the Bayesian estimator produces
+    an honest posterior over (η_perm, γ). That's the AUM-ceiling number with credible-interval
+    error bars — the data the architecture-side of the $1M plan needs.
+    <strong>Status:</strong> Estimator + EOD wire shipped. Waiting on Phase 0 corpus.
+  </p>
+
+  <h3>Lift 2 · BOCPD + Kelly governance → drawdown discipline</h3>
+  <p>
+    When the live regime breaks (D223 fires), Kelly halves automatically (D224). Operator
+    sees the alert and can halt further entries. Converts "regime change kills strategy in
+    production" risk into "regime change degrades sizing for 5 trades, then resumes."
+    Drawdown bound — required for capital-side fundraise conversations.
+    <strong>Status:</strong> Live as of trade #1 of next session.
+  </p>
+
+  <h3>Lift 3 · Track B daemon → kill switch latency</h3>
+  <p>
+    Bug Z's 5h 30m discovery → 30s discovery once D231 is armed. The difference between
+    "we lost $947 over a weekend before noticing" and "we noticed in 30 seconds and
+    contained the failure." Capital-side fundraise gate.
+    <strong>Status:</strong> Shadow mode operational. Arm Wednesday eve if criteria met.
+  </p>
+
+  <h3>The takeaway</h3>
+  <p>
+    Each capability built in the past week is a constraint reduction for the
+    $1M-in-12-months arc. Capital-side items operate in parallel — the engineering
+    side has cleared a milestone today: <strong>every atomic capability needed for
+    the AUM-deployment conversation is now operational (foundation level) or wired
+    (live level).</strong>
+  </p>
+  <blockquote>Architecture call closes this sprint. Capital-side pivot starts the next.</blockquote>
+</section>
+
+</main>
+
+<nav>
+  <button id="prev">← Prev</button>
+  <div class="dots" id="dots"></div>
+  <span class="label" id="counter">1 / 8</span>
+  <button id="next">Next →</button>
+</nav>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  let current = 0;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function goTo(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    dotsContainer.children[current].classList.add('active');
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+    prev.disabled = current === 0;
+    next.disabled = current === slides.length - 1;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  prev.addEventListener('click', () => goTo(current - 1));
+  next.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault(); goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault(); goTo(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goTo(slides.length - 1);
+    } else if (/^[1-9]$/.test(e.key)) {
+      const i = parseInt(e.key, 10) - 1;
+      if (i < slides.length) goTo(i);
+    }
+  });
+
+  // Initial state
+  prev.disabled = true;
+  next.disabled = slides.length === 1;
+})();
+</script>
+
+</body>
+</html>

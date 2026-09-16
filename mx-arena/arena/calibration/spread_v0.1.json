@@ -1,0 +1,16 @@
+{
+  "version": "v0.1-reverted",
+  "fit_window": {
+    "since": "2026-04-22",
+    "until": "2026-04-28"
+  },
+  "method": "IDENTITY (all multipliers 1.0)",
+  "data_sparsity_caveat": "First fit attempt overshot on exit-side for sub_3 tier; ATER was median-skewing outlier. Reverted per Block 2 stop condition. See docs/research-log/59_spread_calibration.md.",
+  "tiers": {
+    "sub_1": 1.0,
+    "sub_3": 1.0,
+    "sub_10": 1.0,
+    "sub_50": 1.0,
+    "above_50": 1.0
+  }
+}

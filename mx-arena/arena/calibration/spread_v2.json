@@ -1,0 +1,45 @@
+{
+  "version": "v2",
+  "method": "side-only winsorized median, structural outliers excluded; sanity-capped to identity if naive multiplier > 5x",
+  "structural_outlier_threshold_bps": 500.0,
+  "n_total_residuals": 18,
+  "n_structural_outliers_excluded": 4,
+  "n_used_for_fit": 14,
+  "per_side_diagnostic": {
+    "buy": {
+      "n_total": 7,
+      "n_dropped_winsorize": 0,
+      "n_kept": 7,
+      "median_abs_bps": 129.32,
+      "multiplier": 17.243
+    },
+    "sell": {
+      "n_total": 7,
+      "n_dropped_winsorize": 0,
+      "n_kept": 7,
+      "median_abs_bps": 141.99,
+      "multiplier": 18.932
+    }
+  },
+  "naive_fit_tiers_uncapped": {
+    "sub_1": 18.087,
+    "sub_3": 18.087,
+    "sub_10": 18.087,
+    "sub_50": 18.087,
+    "above_50": 18.087
+  },
+  "tiers": {
+    "sub_1": 1.0,
+    "sub_3": 1.0,
+    "sub_10": 1.0,
+    "sub_50": 1.0,
+    "above_50": 1.0
+  },
+  "ship_status": "IDENTITY (sanity cap exceeded)",
+  "warnings": [
+    "Calibration applies ONLY to non-prod-mirror trades. Prod-mirror still wins for trades in the truth corpus.",
+    "4/18 residuals were structural limit-vs-bar-open mismatches, NOT slippage. See doc 64 \u00a73.",
+    "Exit-side residuals approximated using bar.open at ENTRY minute, not exit minute. Acceptable for side-averaged MVP; doc 64 \u00a74 plans the proper exit-bar lookup.",
+    "Cleaned-residual MEDIAN of 130-142 bps still contains intra-bar drift. Without intra-bar tick data we cannot separate intra-minute price movement from slippage. Identity multipliers shipped to avoid over-correcting."
+  ]
+}

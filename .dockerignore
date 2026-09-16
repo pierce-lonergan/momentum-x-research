@@ -1,0 +1,39 @@
+# Build context exclusions. Dockerfile uses `COPY . .`, so anything not listed
+# here is baked into the image — including secrets and full git history.
+.git
+.gitignore
+.env
+.env.*
+*.env
+secrets/
+**/momentum-x-secrets*
+
+# Research data, logs, local state — large and often sensitive
+data/
+logs/
+*.log
+*.parquet
+*.jsonl
+*.db
+*.sqlite3
+
+# Python / tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Agent + session state
+.claude/
+.claude-worktrees/

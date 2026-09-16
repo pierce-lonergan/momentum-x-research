@@ -1,0 +1,42 @@
+{
+  "_comment_purpose": "Pyright static-analysis defense for the Bug AF/AG class (Python UnboundLocalError on conditionally-assigned-then-unconditionally-referenced names). reportPossiblyUnboundVariable is the rule that catches it. See docs/research-log/44_bug_ag_track_b_unbound.md.",
+
+  "_comment_baseline_scripts": "Excluded analytics/experiment scripts have pre-existing reportPossiblyUnboundVariable findings caused by pyright's cross-block tracking limitation (multiple sequential `if trades:` blocks where the second uses names from the first; runtime is correct but pyright can't prove the conditions are correlated). They are NOT in the critical trading path and are run manually. New scripts and changes to src/ + main.py remain gated. Tracked for cleanup; remove from `exclude` as each is refactored.",
+
+  "include": ["src", "main.py", "scripts"],
+  "exclude": [
+    "**/__pycache__",
+    ".venv",
+    "venv",
+    "tests",
+    "mx-arena",
+    "data",
+    "logs",
+    ".claude",
+    "node_modules",
+    "scripts/backfill_analytics.py",
+    "scripts/experiment_kelly.py"
+  ],
+
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Windows",
+
+  "_comment_strictness": "Bug-AF/AG class is reportPossiblyUnboundVariable. Other rules left at warning/none to keep the gate focused on the specific class we have a finding doc for. Tighten in follow-up commits as more bug classes ship.",
+
+  "reportPossiblyUnboundVariable": "error",
+
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": "none",
+  "reportGeneralTypeIssues": "warning",
+  "reportOptionalMemberAccess": "none",
+  "reportArgumentType": "none",
+  "reportAssignmentType": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportCallIssue": "none",
+  "reportIndexIssue": "none",
+  "reportOperatorIssue": "none",
+  "reportReturnType": "none",
+  "reportRedeclaration": "none",
+  "reportUnusedExpression": "none",
+  "reportUnusedVariable": "none"
+}

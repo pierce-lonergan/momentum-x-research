@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit -- SYSTEM_MAP atomicity enforcement (doc 175 keystone)
+#
+# Rule: any commit that ADDS a new file matching docs/research-log/[0-9]+*.md
+# MUST also stage a change to docs/SYSTEM_MAP/changelog.md in the SAME commit.
+#
+# Why: ship docs become stale source-of-truth in 2 weeks without binding
+# discipline. The changelog is the atomic unit of "what changed in the
+# system map." This hook converts "I should update SYSTEM_MAP" from
+# discipline-by-memory to discipline-by-mechanism.
+#
+# Bypass for genuine emergency: `git commit --no-verify` (logged in
+# reflog; defeats the discipline -- use only for hotfix incidents).
+#
+# Install: git config core.hooksPath .githooks && chmod +x .githooks/pre-commit
+
+set -euo pipefail
+
+# Find newly-added ship docs in this commit (Added, not Modified or Renamed)
+# 2026-05-28: research-log added as successor dir to research-log. Same discipline.
+new_ship_docs=$(git diff --cached --name-only --diff-filter=A \
+    | grep -E '^docs/research-log/[0-9]+.*\.md$' || true)
+
+if [ -n "$new_ship_docs" ]; then
+    # Check whether changelog.md is in the staged set (any diff filter)
+    if ! git diff --cached --name-only | grep -q '^docs/SYSTEM_MAP/changelog\.md$'; then
+        echo ""
+        echo "================================================================"
+        echo "  SYSTEM_MAP DISCIPLINE: changelog update required"
+        echo "================================================================"
+        echo ""
+        echo "  This commit adds new ship doc(s):"
+        echo "$new_ship_docs" | sed 's/^/    /'
+        echo ""
+        echo "  But docs/SYSTEM_MAP/changelog.md is NOT in the staged set."
+        echo ""
+        echo "  Required: append a changelog entry describing what changed in:"
+        echo "    - d_codes.md       (new/superseded codes, dependency links)"
+        echo "    - experiments.md   (new experiments, decision_date updates)"
+        echo "    - backlog.md       (items added/completed/deferred)"
+        echo "    - models.md        (model lifecycle: shipped/shadow/deprecated)"
+        echo "    - architecture.md  (layer changes)"
+        echo ""
+        echo "  Format (top of changelog.md):"
+        echo ""
+        echo "    ## doc 175 -- 2026-05-25 -- T3 cutover shipped"
+        echo "    - d_codes.md: D310 status ACTIVE -> DEPRECATED"
+        echo "    - d_codes.md: D316 added (label, depends_on D295, D297)"
+        echo "    - backlog.md: D310_L3 status pending -> completed"
+        echo ""
+        echo "  Then: git add docs/SYSTEM_MAP/changelog.md && git commit"
+        echo ""
+        echo "  Emergency bypass: git commit --no-verify (defeats discipline)"
+        echo "================================================================"
+        exit 1
+    fi
+fi
+
+exit 0

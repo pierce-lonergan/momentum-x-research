@@ -1,0 +1,47 @@
+{
+  "date": "2026-03-31",
+  "source": "manual",
+  "notes": "Session 2026-03-31 universe. Long trades from scanner that were stopped out. No short candidates -- all faller scores well below 0.65 threshold. gap/rvol/dolvol updated with confirmed values from session notes.",
+  "stocks": [
+    {
+      "ticker": "BFRG",
+      "date": "2026-03-31",
+      "open_price": 1.18,
+      "previous_close": 0.51,
+      "gap_pct": 1.32,
+      "rvol_at_open": 1874.0,
+      "premarket_volume": 229661,
+      "prev_volume": 123,
+      "dollar_volume": 271000,
+      "high": 1.24,
+      "low": 0.77,
+      "close": 0.80,
+      "max_gain_from_open": null,
+      "scanner_found": true,
+      "journal_action": "BUY",
+      "has_news": true,
+      "data_confidence": "confirmed_partial",
+      "notes": "Long entry $1.18, stopped at $0.77 (-35%). faller_score=0.255 -- long candidate, NOT a short. gap=132%, rvol=1874x, dolvol=$271K confirmed from session notes. previous_close estimated (1.18/2.32). high/close estimated."
+    },
+    {
+      "ticker": "ASTC",
+      "date": "2026-03-31",
+      "open_price": 4.16,
+      "previous_close": 2.38,
+      "gap_pct": 0.75,
+      "rvol_at_open": 588.0,
+      "premarket_volume": 191827,
+      "prev_volume": 326,
+      "dollar_volume": 798000,
+      "high": 4.37,
+      "low": 2.70,
+      "close": 2.75,
+      "max_gain_from_open": null,
+      "scanner_found": true,
+      "journal_action": "BUY",
+      "has_news": true,
+      "data_confidence": "confirmed_partial",
+      "notes": "Long entry $4.16, stopped at $2.70 (-35%). faller_score=0.035 -- long candidate, NOT a short. gap=75%, rvol=588x, dolvol=$798K confirmed from session notes. previous_close estimated (4.16/1.75). close estimated near low."
+    }
+  ]
+}

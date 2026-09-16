@@ -1,0 +1,35 @@
+{
+  "date": "2026-03-26",
+  "params": {
+    "mfcs_buy_threshold": 0.15
+  },
+  "n_candidates": 13,
+  "n_buys": 9,
+  "n_trades": 3,
+  "total_pnl": 0.9005,
+  "tickers_traded": [
+    "EEIQ",
+    "OLPX",
+    "SRPU"
+  ],
+  "trades": [
+    {
+      "ticker": "EEIQ",
+      "fill_price": 4.907,
+      "pnl": 1.313,
+      "exit_reason": "stop"
+    },
+    {
+      "ticker": "OLPX",
+      "fill_price": 1.9971,
+      "pnl": -0.0242,
+      "exit_reason": "exit_intelligence"
+    },
+    {
+      "ticker": "SRPU",
+      "fill_price": 14.0083,
+      "pnl": -0.3883,
+      "exit_reason": "stop"
+    }
+  ]
+}
