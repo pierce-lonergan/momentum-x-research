@@ -101,6 +101,7 @@ def main() -> int:
     section("STEP 3 -- HIGH-tier mean ret_t5 (the Bouchaud-optimal Kelly question)")
     high_60 = last_60_tagged[last_60_tagged["is_HIGH_equiv"]]
     high_120 = last_120_tagged[last_120_tagged["is_HIGH_equiv"]]
+    mean_60 = mean_120 = None  # pre-bound: assigned conditionally below
     if len(high_60) > 0:
         mean_60 = float(high_60["y_true"].mean())
         median_60 = float(high_60["y_true"].median())

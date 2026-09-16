@@ -109,6 +109,7 @@ def main() -> int:
 
     # Autocorrelation: does this month's Sharpe predict next month's?
     sh = monthly["sharpe_ann"].values
+    ac1 = slope = r_val = None  # pre-bound: assigned conditionally below
     if len(sh) >= 3:
         ac1 = float(np.corrcoef(sh[:-1], sh[1:])[0, 1]) if len(sh) >= 2 else float("nan")
         print(f"\n  Lag-1 autocorrelation of monthly Sharpe: {ac1:+.3f}")

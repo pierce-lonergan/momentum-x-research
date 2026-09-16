@@ -206,6 +206,7 @@ def main() -> int:
         m = float(sub["y_reg"].mean()) * 100
         sens.append((thr, len(sub), len(d), s, m))
         print(f"  {thr:>9.2f} {len(sub):>8,} {len(d):>5} {s:>+10.3f} {m:>+9.2f}%")
+    max_dev = None  # pre-bound: assigned conditionally below
     if sens:
         sharpes_sens = [x[3] for x in sens if not math.isnan(x[3])]
         baseline_at_050 = next((x[3] for x in sens if abs(x[0] - 0.50) < 1e-6), float("nan"))

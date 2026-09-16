@@ -290,6 +290,7 @@ def main() -> int:
               f"{sm['sharpe_ann']:>+10.2f} {sm['n_picks']:>7}")
 
     print()
+    baseline_sharpe = overlay_sharpe = None  # pre-bound: assigned conditionally below
     if len(variants_metrics) >= 2:
         baseline_sharpe = next((v["sharpe_ann"] for v in variants_metrics
                                   if v["label"] == "v3 trades alone"), None)

@@ -61,6 +61,8 @@ try:
     from arena.fill_model import AlpacaFillModel, Bar  # noqa: E402
     _HAVE_ARENA = True
 except Exception:  # pragma: no cover
+    # Bind the names so they are never "possibly unbound"; _HAVE_ARENA still gates use.
+    SpreadModel = AlpacaFillModel = Bar = None  # type: ignore[assignment]
     _HAVE_ARENA = False
 
 try:  # doc 196: reuse the live-parity D122 exit machinery
@@ -69,6 +71,8 @@ try:  # doc 196: reuse the live-parity D122 exit machinery
     )
     _HAVE_REPLAY = True
 except Exception:  # pragma: no cover
+    # Bind the names so they are never "possibly unbound"; _HAVE_REPLAY still gates use.
+    SimPosition = SimBar = D122ExitEvaluator = replay_position = None  # type: ignore[assignment]
     _HAVE_REPLAY = False
 
 _WINDOWS = [1, 2, 5, 15, 60]

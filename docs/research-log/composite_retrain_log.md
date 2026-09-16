@@ -725,3 +725,45 @@ is done.
 - last_train_age_days: 136
 - latest_meta: models/composite_v0_metadata.json
 - decision: **RETRAIN** (row count grew >50% (last: 407, current: 5812))
+
+## 2026-09-16T00:14:06Z
+- current_rows: 1 (base=0 + shards=1)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 1/407*1.5 rows)
+
+## 2026-09-16T00:14:06Z
+- current_rows: 1 (base=0 + shards=1)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 1/407*1.5 rows)
+
+## 2026-09-16T00:14:07Z
+- current_rows: 1 (base=0 + shards=1)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 1/407*1.5 rows)
+
+## 2026-09-16T00:19:07Z
+- current_rows: 2 (base=0 + shards=2)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 2/407*1.5 rows)
+
+## 2026-09-16T00:19:07Z
+- current_rows: 2 (base=0 + shards=2)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 2/407*1.5 rows)
+
+## 2026-09-16T00:19:08Z
+- current_rows: 2 (base=0 + shards=2)
+- last_train_rows: 407
+- last_train_age_days: 0
+- latest_meta: models/composite_v0_metadata.json
+- decision: skip (no triggers met; 0d old, 2/407*1.5 rows)

@@ -214,6 +214,7 @@ def main() -> int:
 
     section("STEP 6 — the inverse: 'v3 trades, TabPFN below-q4' (defensive overlay)")
     v3_only = merged[(merged["v3_trades"]) & (~merged["tabpfn_top_q"])]
+    v3_with_pfn_mean = delta = None  # pre-bound: assigned conditionally below
     if len(v3_only) > 0:
         v3_only_mean = v3_only["y_reg"].mean()
         v3_with_pfn = merged[(merged["v3_trades"]) & (merged["tabpfn_top_q"])]

@@ -299,6 +299,10 @@ class TestFallerDetectionIntegration:
         candidate.avg_daily_volume = 1_000_000
         candidate.float_shares = float_shares
         candidate.has_news_catalyst = True
+        # D212-B reads this via getattr; a bare MagicMock returns a Mock that is
+        # "not None" and then fails the numeric comparison. None is the contract's
+        # absent value (src/core/models.py: prior_gap_count: int | None).
+        candidate.prior_gap_count = None
         return candidate
 
     def test_squeeze_blocks_shorting(self):

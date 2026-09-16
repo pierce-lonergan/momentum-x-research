@@ -574,6 +574,10 @@ class TestFallerIntegration:
         candidate.float_shares = 10_000_000
         candidate.avg_daily_volume = 2_000_000
         candidate.gap_pct = 0.3
+        # D212-B reads this via getattr; a bare MagicMock returns a Mock that is
+        # "not None" and then fails the numeric comparison. None is the contract's
+        # absent value (src/core/models.py: prior_gap_count: int | None).
+        candidate.prior_gap_count = None
 
         scored = MagicMock()
         scored.agent_signals = []  # No agent signals — isolates SEC impact

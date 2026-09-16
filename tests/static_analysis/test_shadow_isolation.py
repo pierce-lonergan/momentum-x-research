@@ -73,6 +73,11 @@ _ALLOWED_SHADOW_IMPORTS = frozenset({
     "ShadowLogger",
     "INVERTED_ENTRY_BASIS",
     "InvertedShadowEntry",  # may be needed for type hints in write paths
+    # Write-only: records one gate-rejection for post-close grading and returns a
+    # success bool. No shadow state flows back into a production decision, which is
+    # what this allowlist exists to prevent. Added after the function post-dated the
+    # original list (imported by src/execution/entry_delay.py and main.py).
+    "log_rejection_for_grading",
 })
 
 

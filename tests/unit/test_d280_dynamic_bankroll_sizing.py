@@ -45,6 +45,10 @@ def _reload_runner(monkeypatch, **env):
         monkeypatch.delenv(k, raising=False)
     for k, v in env.items():
         monkeypatch.setenv(k, v)
+    # D262 added a $5k SHARED-account cap that clamps the bankroll before these
+    # assertions ever see it. These tests exercise D280 bankroll RESOLUTION, so
+    # isolate the account the documented way to lift that cap.
+    monkeypatch.setenv("LOTTERY_ALPACA_API_KEY", "test-lottery-key-26char-aaaa")
     monkeypatch.setenv("ALPACA_API_KEY", "test-key-26char-aaaaaaaaaaaa")
     monkeypatch.setenv("ALPACA_SECRET_KEY", "test-secret-44char-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
     import lottery_runner

@@ -46,15 +46,20 @@ class TestPhase2TrancheWiring:
         assert "tranche_monitor = TrancheExitMonitor" in source
 
     def test_phase2_computes_exit_tranches(self):
-        """After fill, Phase 2 should compute exit tranches."""
-        import main
-        source = inspect.getsource(main.cmd_paper)
+        """After fill, the post-fill handler computes exit tranches.
+
+        The tranche pipeline was refactored out of the cmd_paper body into
+        src/execution/post_fill_handler.py; asserting on cmd_paper's inline source
+        tested the old shape, not the behaviour.
+        """
+        from src.execution import post_fill_handler
+        source = inspect.getsource(post_fill_handler)
         assert "compute_exit_tranches" in source
 
     def test_phase2_submits_limit_orders(self):
-        """Phase 2 should submit limit orders for each tranche."""
-        import main
-        source = inspect.getsource(main.cmd_paper)
+        """The exit ladder submits a sell limit order per tranche."""
+        from src.execution import exit_ladder
+        source = inspect.getsource(exit_ladder)
         assert "submit_limit_order" in source
         assert 'side="sell"' in source
 
@@ -65,16 +70,18 @@ class TestPhase2TrancheWiring:
         assert "tranche_monitor.register_tranche_order" in source
 
     def test_phase2_handles_tranche_errors(self):
-        """Tranche submission errors should be caught."""
-        import main
-        source = inspect.getsource(main.cmd_paper)
-        assert "Tranche order submission error" in source
+        """Tranche submission errors are caught around the exit-ladder call."""
+        from src.execution import post_fill_handler
+        source = inspect.getsource(post_fill_handler)
+        # the ladder call is wrapped, and an unprotected position escalates loudly
+        assert "except Exception as _el_e:" in source
+        assert "is_position_unprotected" in source
 
     def test_phase2_logs_tranche_submissions(self):
-        """Each tranche submission should be logged."""
-        import main
-        source = inspect.getsource(main.cmd_paper)
-        assert "TRANCHE T%d submitted" in source
+        """Each tranche submission is logged by the module that submits it."""
+        from src.execution import alpaca_executor, tranche_monitor
+        combined = inspect.getsource(alpaca_executor) + inspect.getsource(tranche_monitor)
+        assert "TRANCHE T" in combined
 
 
 # ═══════════════════════════════════════════════════════════════════

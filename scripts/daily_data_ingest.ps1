@@ -403,7 +403,7 @@ asyncio.run(alert_data_ingest_result(
     webhook_url='$_ops_webhook',
 ))
 print('Discord ingest-success alert sent')
-" 2>&1 | ForEach-Object { Log "  [discord] $_" }
+" 2>> $LogFile | ForEach-Object { Log "  [discord] $_" }
     Pop-Location
 }
 
