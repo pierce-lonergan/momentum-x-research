@@ -4,7 +4,7 @@
 **Status:** BUILT. One retro-validation hit, one procurement item, one finding that
 strengthens the no-edge thesis rather than weakening it.
 **Code:** `src/epistemics/` (closure, archive, eig, retro), `scripts/epistemics.py`,
-`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (60 tests)
+`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (62 tests)
 **Data:** `data/research/stepping_stones.jsonl` (25 records),
 `data/research/design_queue.json` (9 designs, priors declared)
 
@@ -62,11 +62,15 @@ this work says a discard pile contains a thin seam of suppressed signal, and I w
 expecting to find that "35 families closed, zero certified edges" was really "we never
 managed to ask most of these properly."
 
-It is not. The ledger tracks **35 families**: 22 CLOSED, 4 FILTERED, 5 OPEN, 4 QUEUED.
-The archive holds the 22 closures plus 3 of the 4 filtered — the fourth is the LETF
-family's earlier BLOCKED-AT-$0 state, superseded by its own CLOSED entry, and counting it
-twice would double-count one family. Hence **25**. The 9 open and queued families have no
-closure to type yet. Transcribing all 25:
+It is not. The ledger has **35 rows** — 22 CLOSED, 4 FILTERED, 5 OPEN, 4 QUEUED — but
+only **33 distinct families**, because the LETF close-window family appears three times as
+its state changed. The archive holds the 22 closures plus 3 of the 4 filtered, the fourth
+being LETF's superseded BLOCKED-AT-$0 state. Hence **25**. The open and queued families
+have no closure to type yet. Transcribing all 25:
+
+> **CORRECTION (doc 300).** This originally said "35 families". The ledger tracks 35
+> *rows*; 33 distinct families. The same 33 also happens to be the registered-trial count,
+> which is what made 33 and 35 look interchangeable across the repository. They are not.
 
 | closure class | n | evidence about |
 |---|---|---|
@@ -87,11 +91,21 @@ of poor instruments. They are mostly measurements, and they mostly point the wro
 
 ### The honest caveat, which is also a finding
 
-Only **14 of 25** records are strictly admissible. Eleven claim `REFUTED_BY_NATURE`
+Only **13 of 25** records are strictly admissible. Twelve claim `REFUTED_BY_NATURE`
 without a recorded effect size or interval. That does not mean those families were not
 measured — the measurements are in the documents. It means **the ledger does not carry
-them**, so none of those eleven can be retro-scored quantitatively without re-reading
-prose. Every future closure should be written with its measurement attached; the cost of
+them**, so none of those twelve can be retro-scored quantitatively without re-reading
+prose.
+
+> **CORRECTION (doc 300).** This originally read 14 and eleven. The audit found that two
+> records had been made admissible with numbers that exist in no artifact anywhere in the
+> repository: the overnight-ETF sleeve carried an interval of (−1.0, 3.1) where the
+> ledger says only "CI spanning zero", and attention-coupling carried
+> `effect=0.0, ci=(0.0, 0.0), n_obs=32` where the ledger says "0/32 after correction" — a
+> tally of pre-declared regime cells, not an effect size, and 32 counts *cells* rather
+> than observations. Both were invented to clear the very admissibility rule this section
+> is about. They are removed; the count is now 13/12. **All 25 `closed_on` dates were
+> also invented** — the ledger carries no dates — and are now blank. Every future closure should be written with its measurement attached; the cost of
 doing so at burial time is a minute, and the cost of recovering it later is an afternoon
 per family.
 
@@ -142,14 +156,14 @@ and the new one is not arithmetic.
 
 The operative multiplicity bar at 34 registered trials depends only on the trial count
 and the sample length. A 15-minute close window can only be measured on minute bars, and
-**`minute_aggs` covers 2024–2026 only — about 650 sessions** — where the daily warehouse
-was extended to 2016–2026 this cycle.
+**`minute_aggs` covers 2024-01-16 → 2026-09-17 — 666 sessions, counted from the
+warehouse itself** — where the daily warehouse was extended to 2016–2026 this cycle.
 
 | intraday sample | sessions | operative bar @34 trials | ceiling 1.91 clears? |
 |---|---|---|---|
-| `minute_aggs` 2024–2026 (**what is on disk**) | 650 | **2.347** | **no** |
+| `minute_aggs`, **measured on disk** | **666** | **2.319** | **no** |
 | extended to 2020 | 1,510 | 1.540 | yes, at the optimistic ceiling |
-| extended to 2016 (matching daily) | 2,772 | 1.137 | yes, at both ends |
+| extended to 2016 (**measured: 2,690**) | 2,690 | 1.154 | yes, at both ends |
 
 So the answer is not "LETF is revived". It is:
 
@@ -163,7 +177,25 @@ that the build filter therefore flipped, that the daily warehouse was extended b
 minute warehouse was not, and that this family needs minute bars. Four facts, three
 documents, two repositories. That is what the archive is for.
 
-Three caveats, stated rather than buried. The 6.0–8.6% figure is a **ceiling**, not a
+> **CORRECTION (doc 300).** The session counts above were originally 650 and 2,772 —
+> a round estimate and a nominal 11×252. Counted from the warehouse with DuckDB, the
+> figures are 666 (2024-01-16 → 2026-09-17, so there is also an unnoticed two-week hole at
+> the start of 2024) and ~2,690 after a 2016 backfill. The bars move from 2.347/1.137 to
+> 2.319/1.154. **No sign changes: the ceiling sits below the bar now and above it after.**
+
+**A load-bearing assumption that the audit would not let stand.** The table above halves
+the requirement on the premise that the LETF closure was evaluated against a 0.1%/day
+target, inferred from 21.07 ≈ 2 × 10 bps. That inference is **under-determined**: 21.07 is
+equally consistent with other deployment assumptions, and `TARGET.md` records a target
+that moved twice during the period the closure was made. If the closure was in fact made
+against the 0.5%/day target of docs 292–293, the ratio is 10× rather than 2× and every
+figure in the build-filter row changes. **The conclusion "extend `minute_aggs`" survives
+either way** — it is driven by the bar, not the requirement — but the "clears the ≥10%
+filter" claim does not, and should be treated as conditional until someone confirms which
+target era that closure belongs to. The archive's `closed_on` field would have settled it,
+which is precisely why inventing those dates was harmful.
+
+Three further caveats, stated rather than buried. The 6.0–8.6% figure is a **ceiling**, not a
 measured mean with an interval, so 1.91 is an upper bound on the deliverable Sharpe. The
 15.06 bps window sd was measured on the 2024–2026 sample and LETF rebalance mechanics
 were not stationary over 2016–2026. And the family also needs point-in-time shares
@@ -208,23 +240,55 @@ is the optimistic bound and the gap between the two is the honest uncertainty ba
 **A ceremonial test cannot be detected with an absolute threshold, and I tried.** My
 first implementation flagged a design as worthless if its certification probability was
 below 1% and its information gain negligible. Writing the test for it showed the flag
-never fires: under a tempered likelihood, `p_cert` for a null-prior design is very nearly
-**invariant in sample size**, because the bar and the estimator's spread both scale with
-the same standard error. Formally `bar/σₑ ≈ √ω·(E[max]/se + 1.645)`, in which `n_obs`
-cancels. At `ω=0.25` and 34 trials that pins `p_cert ≈ 2.9%` whether the sample is one
-year or twenty-five.
+never fires, and the reason is a real invariance — but I attached it to the wrong
+quantity, and published it that way.
 
-That is the deflated-Sharpe point restated, and it is worth stating plainly because it
-contradicts the intuition the program has been running on: **more data does not buy
-protection from multiplicity. Fewer looks do.** More data lowers the bar, which is a
-different and real benefit — it is why the LETF calculation above turns on sample length
-— but it does not reduce the rate at which a null design certifies.
+> **CORRECTION (doc 300, 2026-09-20).** This section originally asserted that `p_cert`
+> is "very nearly invariant in sample size", pinned at ≈2.9% "whether the sample is one
+> year or twenty-five", and drew from that the general lesson "more data does not buy
+> protection from multiplicity." **That is false**, and the same claim propagated into
+> `eig.py`, `ATTEMPTS_LEDGER.md` and a commit message. The paragraphs below are the
+> corrected version.
 
-The fix was to replace the absolute floor with a ratio: `informativeness = p_cert /
-p_false_positive`. A design whose pass is as likely under the null as under the prior
-proves nothing whichever way it lands. This is doc 290's standing rule — always
-rank-calibrate against the strong baseline, because a weak baseline manufactures lift —
-applied to the design rather than to a model. The baseline here is the null.
+The invariance is real and it belongs to **`p_false_positive`** — the rate at which a
+design certifies *nothing*. Because the bar and the estimator's spread carry the same
+standard error, `bar/σₑ = √ω·(E[max]/se + 1.6449)` exactly, with `n` cancelling, so:
+
+| | 1 yr | 4 yr | 11 yr | 25 yr | 100 yr |
+|---|---|---|---|---|---|
+| `p_false_positive`, any prior | 0.029342 | 0.029342 | 0.029342 | 0.029342 | 0.029342 |
+| `p_cert` at `prior_sd`=0.001 | 0.0293 | 0.0293 | 0.0293 | 0.0293 | 0.0293 |
+| `p_cert` at `prior_sd`=0.5 **(the default)** | **0.0333** | **0.0454** | **0.0728** | **0.1188** | **0.2413** |
+
+`p_cert` is invariant only as `prior_sd → 0`, because it also carries the prior through
+`√(σ₀² + σₑ²)`, which does not cancel. At this module's own default prior it spans a
+factor of **7.2**. The published 2.9342% figure is real — it is just the false-positive
+rate, not the certification probability.
+
+**How the error survived, which is the part worth recording.** The single test certifying
+the claim used `prior_sd = 0.001` — 500× below the module's default of 0.5, and a value
+appearing nowhere in the live queue. It passed, and a green test is what licensed
+publishing the sentence. That is precisely doc 290's rule — *a weak baseline manufactures
+lift* — committed against the program's own machinery by the person who wrote the rule
+down two sections earlier. The corrected test now asserts both halves: invariance at a
+point-mass prior, and a spread of ≥0.05 at the default one.
+
+The corrected lesson is narrower and still worth having: **more data does not reduce the
+rate at which a null design certifies.** It does lower the bar — which is exactly why the
+LETF calculation above turns on sample length — and those two facts are consistent, not
+contradictory: the bar and the noise fall together, so their ratio, and with it the
+false-positive rate, is fixed.
+
+The fix to the flag stands: replace the absolute floor with a ratio, `informativeness =
+p_cert / p_false_positive`. A design whose pass is as likely under the null as under the
+prior proves nothing whichever way it lands. This is doc 290's rule applied to the design
+rather than to a model, with the null as the baseline.
+
+One caveat that the original section overstated away. For an *unclustered* design
+`p_false_positive` depends only on `(n_trials, ω)`, so within a single planning run
+`informativeness < 1.5` reduces to an absolute floor on `p_cert` at `1.5 × p_fp` ≈ 4.4%.
+It is not a floor across runs, and not one for clustered designs — but the difference
+from the threshold it replaced is smaller than "replace the floor with a ratio" implies.
 
 ### Running it on the actual queue
 
@@ -235,14 +299,21 @@ priors declared and committed — including, for each, why that prior and not an
 | design | EIG (nats) | lift | bar | verdict |
 |---|---|---|---|---|
 | `letf_..._if_minute_extended` | **0.344** | **14.67** | 1.14 | **INFEASIBLE** — needs `intraday_tape_pre_2020` |
-| `anomaly_vol_scale_monetisation` | 0.135 | 1.53 | 1.14 | ADMISSIBLE |
-| `sevp_event_vol_carry` | 0.144 | 3.29 | 1.73 | ADMISSIBLE |
+| `anomaly_vol_scale_monetisation` | 0.135 | 2.31 | 2.03 | ADMISSIBLE |
+| `sevp_event_vol_carry` | 0.144 | 4.85 | 2.29 | ADMISSIBLE |
 | `letf_close_window_retest` | 0.104 | 5.55 | 2.35 | ADMISSIBLE |
 | `overnight_etf_excess_of_cash` | 0.079 | 1.89 | 1.14 | ADMISSIBLE |
 | `kalshi_zero_capital_shadow` | 0.024 | 1.47 | 4.23 | CEREMONIAL |
-| `vol_score_risk_shaping` | 0.037 | 1.06 | 1.14 | CEREMONIAL |
+| `vol_score_risk_shaping` | 0.037 | 1.17 | 2.03 | CEREMONIAL |
 | `rv_forward_shadow_ledger` | 0.007 | 1.15 | 7.72 | CEREMONIAL |
 | `rocket_gate_forward_ledger` | 0.002 | 1.01 | 10.92 | CEREMONIAL |
+
+> **CORRECTION (doc 300).** Three rows moved. `appraise()` computed the multiplicity bar
+> on the *nominal* sample while computing the estimator's spread on the *effective*
+> (cluster-corrected) one, so every clustered design's bar was understated — 1.14 where it
+> should be 2.03. Fixed; the three affected rows are the three with `icc > 0`. **No verdict
+> flipped.** The bug also broke the `p_false_positive` invariance for clustered designs,
+> which is how it was found.
 
 Two things fall out, and the second is unwelcome.
 

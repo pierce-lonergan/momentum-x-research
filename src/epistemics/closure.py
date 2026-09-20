@@ -2,8 +2,8 @@
 
 Motivation
 ----------
-The program's `ATTEMPTS_LEDGER.md` records 33 closed hypothesis families under a
-single column called "verdict". Read closely, that column conflates two kinds of
+The program's `ATTEMPTS_LEDGER.md` records 22 closed hypothesis families under a
+single column called "verdict" (33 distinct families in all, across 35 rows). Read closely, that column conflates two kinds of
 statement that have nothing to do with each other:
 
     "Short door — net negative after borrow"

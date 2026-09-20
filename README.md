@@ -1,7 +1,7 @@
 # Momentum-X
 
 **A falsification-driven research program in systematic equity trading.**
-It ran for 299 documented experiments and did not find a tradeable edge — and the interesting part
+It ran for 300 documented experiments and did not find a tradeable edge — and the interesting part
 is how thoroughly it established that.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -20,7 +20,7 @@ including several the author believed in.
 
 The headline result, stated the way the repository's own evidence supports it:
 
-> Across 35 hypothesis families and 33 registered trials, **zero** produced a positive, cost-net,
+> Across 33 hypothesis families and 33 registered trials, **zero** produced a positive, cost-net,
 > denominator-honest effect whose confidence interval excludes zero. Over the same 2016–2026 window,
 > **buy-and-hold SPY returned +14.91%/yr** — more than the program's own target. The active strategy
 > underperformed a passive index position.
@@ -60,7 +60,7 @@ This is why nothing here is certified — and why reporting a "Sharpe 1.4 strate
 
 ## What was tested, and what it cost to find out
 
-A selection from [`docs/ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (35 families):
+A selection from [`docs/ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (33 families, 35 rows):
 
 | Family | Verdict |
 |---|---|
@@ -100,13 +100,23 @@ those turn on the account-level target rather than on any data the program could
 exercise was an attempt to weaken the headline claim; it strengthened it.
 
 The check also cuts the other way, which is the point of building it rather than asserting it.
-Eleven of the twenty-five records claim `REFUTED_BY_NATURE` with **no effect size or interval
+Twelve of the twenty-five records claim `REFUTED_BY_NATURE` with **no effect size or interval
 recorded in the ledger** — the measurements are in the documents but not where a machine can reach
 them, so those families cannot be re-scored without re-reading prose. And one family (the LETF
 close-window harvest) turned out to have been killed by a requirement that has since halved: it now
 clears the build filter it failed, and is blocked instead on a specific, bounded gap — minute bars
 exist only for 2024–2026 where the daily warehouse reaches back to 2016. That is a procurement item
 found by query, not by memory, which is the whole reason the archive exists.
+
+Then the machinery was audited by ten independent adversarial lenses, and
+[doc 300](docs/research-log/300_auditing_the_auditor.md) records what broke: two archive
+records had been made admissible with **numbers that exist in no artifact in the repository**
+— invented to satisfy the very validator that section is about — a published invariance was
+attached to the wrong quantity and certified by a test using a prior 500× below the module's
+default, and the planner computed its bar on the nominal sample while computing the
+estimator's spread on the effective one. All corrected. The audit's own coverage was 20.4%
+before it hit a session limit, so doc 300 is explicitly not a clean bill of health, and says
+so.
 
 ## The self-correction record
 
@@ -140,7 +150,7 @@ That last one fired nine genuine breaches on the day it was first enabled.
 
 | | count |
 |---|---|
-| passed | 4,569 |
+| passed | 4,571 |
 | skipped | 26 |
 | xfailed | 3 |
 | **failed** | **0** |
@@ -173,6 +183,13 @@ Working through them surfaced seven real defects, which is the argument for doin
 Three of those were found only because a test failed for the *wrong reason* and the reason
 was worth chasing.
 
+A green suite is not the same as correct code, and this repository has a worked example of the
+difference: [doc 300](docs/research-log/300_auditing_the_auditor.md) found a real defect in
+`src/epistemics/` — the multiplicity bar computed on the nominal sample while the estimator's
+spread used the effective one — that changed three published figures while all 60 tests stayed
+green. The tests that would have caught it exist now, and they were written after the fact,
+which is the honest order to admit it in.
+
 The static-analysis ratchets (`tests/static_analysis/`) are green and worth a look: they are
 "no new violations" gates with a committed baseline, covering silent exception handlers, relative
 paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound rule.
@@ -182,7 +199,7 @@ paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound ru
 ```
 docs/ATTEMPTS_LEDGER.md    every hypothesis family, its verdict, and the doc that closed it
 docs/TARGET.md             the requirements ledger - what a result must clear, and why
-docs/research-log/         299 research documents, in chronological order (no 298)
+docs/research-log/         300 research documents, in chronological order (no 298)
 docs/research-log/README.md  a curated reading path through them
 scripts/trial_registry.py  the multiplicity counter
 scripts/epistemics.py      CLI: discriminate, keystones, anomalies, revive, bar, plan

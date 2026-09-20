@@ -106,12 +106,23 @@ the power gate may be consulted, and any pass is PROVISIONAL until the mandatory
   severity (would this test have failed if the hypothesis were false?), and the **multiplicity toll** —
   the bar increment this trial levies on every other hypothesis in the queue. A `CEREMONIAL` or
   `UNDISCRIMINATING` design must not be registered: it cannot teach and it raises the bar.
-- **More data does not buy protection from multiplicity; fewer looks do.** Under a tempered likelihood
-  `bar/σₑ ≈ √ω·(E[max]/se + 1.645)`, in which `n_obs` cancels — so a null design's certification
-  probability is near-invariant in sample length (≈2.9% at ω=0.25, 34 trials, at *any* n). More data
-  lowers the bar, which is a separate and real benefit; it does not lower the false-positive rate.
+- **More data does not lower the FALSE-POSITIVE rate; fewer looks do.** Under a tempered likelihood
+  `bar/σₑ = √ω·(E[max]/se + 1.6449)` exactly, with `n` cancelling — so `p_false_positive` is identical
+  at every sample length (0.029342 at ω=0.25, 34 trials, at *any* n and *any* prior). More data lowers
+  the bar, which is a separate and real benefit.
+  ⚠ **CORRECTED doc 300.** This entry originally attributed the invariance to `p_cert`. It does not
+  hold there: `p_cert` also carries the prior through `√(σ₀²+σₑ²)`, and at the module's default
+  `prior_sd=0.5` it runs 0.0333 → 0.2413 from one year to a hundred, a factor of 7.2. The invariance
+  belongs to `p_false_positive`; the 2.9% figure was real but misattributed. The single test certifying
+  it used `prior_sd=0.001`, 500× below the default — doc 290's weak-baseline failure, committed against
+  the program's own machinery.
 - **Revived (conditionally): LETF close-window rebalance-flow harvest.** At the 5 bps/day target its
   ceiling is 12.0–17.2% of requirement and clears the ≥10% filter it was killed by (6.0–8.6% at
   0.1%/day). Ceiling-implied Sharpe 1.33–1.91. **Still blocked**: the operative bar on the intraday
-  sample that exists (`minute_aggs` 2024–2026, ~650 sessions) is 2.347. Extending `minute_aggs` to 2016
-  drops it to 1.137. That extension is now the program's top keystone.
+  sample that exists is 2.319 (`minute_aggs` = **666 sessions, measured**, 2024-01-16→2026-09-17).
+  Extending `minute_aggs` to 2016 gives ~2,690 sessions and drops the bar to 1.154. That extension is
+  the program's top keystone, and it is **entitled and cheap**: flat files reach back to 2016-01-05 and
+  the gap is ~38 GB at the probed 18.7 MB/day (the puller's docstring says 65 MB/day — 3.5× too high).
+  ⚠ **doc 300**: the 2× requirement rescale this revival rests on is under-determined — it assumes the
+  closure was evaluated at 0.1%/day. The procurement conclusion is bar-driven and survives either way;
+  the "clears the ≥10% filter" claim is conditional until the target era is settled.

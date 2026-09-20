@@ -210,13 +210,28 @@ class Appraisal:
     def is_ceremonial(self) -> bool:
         """A test that can neither teach nor discriminate.
 
-        Note what this deliberately does *not* use: an absolute floor on
-        `p_cert`. Under a tempered likelihood the certification probability of a
-        null-prior design is very nearly invariant in sample size — both the bar
-        and the estimator's spread scale with the same standard error — so an
-        absolute threshold would flag long samples and short ones alike. What
-        distinguishes a worthless design is that a pass tells you nothing you
-        did not already know, which is the lift over the null.
+        The invariance that motivates this belongs to `p_false_positive`, not to
+        `p_cert`. Because the bar and the estimator's spread carry the same
+        standard error, bar/sigma_e = sqrt(omega) * (E[max]/se + 1.6449) with n
+        cancelling exactly, so p_false_positive is identical at every sample
+        length: 2.9342% at omega=0.25 and 34 trials, from one year to a hundred.
+
+        `p_cert` is NOT invariant. It also carries the prior, through
+        sqrt(sigma_0^2 + sigma_e^2), and at this module's own default
+        prior_sd=0.5 it runs from 3.3% at one year to 24.1% at a hundred. An
+        earlier version of this docstring, and doc 299, asserted the invariance
+        of p_cert. That was wrong; corrected by the doc-300 audit.
+
+        The consequence for this flag is unchanged, and it is still why a ratio
+        beats an absolute floor: a design whose pass is no more likely under the
+        prior than under the null has proved nothing, whatever its sample size.
+
+        One honest caveat. For an UNCLUSTERED design p_false_positive depends
+        only on (n_trials, omega), so within a single planning run
+        `informativeness < 1.5` reduces to an absolute floor on p_cert at
+        1.5 * p_fp. It is not a floor across runs, and not one for clustered
+        designs, but the difference from an absolute threshold is smaller than
+        doc 299 originally implied.
         """
         return self.eig_nats < 0.05 and self.informativeness < 1.5
 
@@ -307,10 +322,15 @@ def appraise(
     posterior_sd = math.sqrt(1.0 / (1.0 / sigma_0**2 + 1.0 / sigma_e**2))
 
     # ── The bar, before and after this trial is registered ───────────────
-    bar_before = operative_bar(n_trials_registered, design.n_obs, design.periods_per_year)
-    bar_after = operative_bar(
-        n_trials_registered + 1, design.n_obs, design.periods_per_year
-    )
+    # On the EFFECTIVE sample, not the nominal one. The bar answers "what is the
+    # best Sharpe the null would produce given this much sampling noise", so it
+    # must see the same noise the estimator does. Computing it on nominal n while
+    # computing sigma_e on n_eff made every clustered design's severity, p_cert
+    # and mde wrong, and broke the n-cancellation that makes p_false_positive
+    # invariant. Caught by the doc-300 audit.
+    n_bar = int(design.n_eff)
+    bar_before = operative_bar(n_trials_registered, n_bar, design.periods_per_year)
+    bar_after = operative_bar(n_trials_registered + 1, n_bar, design.periods_per_year)
     toll_sharpe = bar_after - bar_before
 
     # ── Severity (Popper via Mayo): would this test have failed if the
@@ -337,12 +357,9 @@ def appraise(
             continue
         s_o = other.obs_sd(omega)
         s_pred_o = math.sqrt(max(other.prior_sd, 1e-9) ** 2 + s_o**2)
-        b_before = operative_bar(
-            n_trials_registered, other.n_obs, other.periods_per_year
-        )
-        b_after = operative_bar(
-            n_trials_registered + 1, other.n_obs, other.periods_per_year
-        )
+        n_bar_o = int(other.n_eff)
+        b_before = operative_bar(n_trials_registered, n_bar_o, other.periods_per_year)
+        b_after = operative_bar(n_trials_registered + 1, n_bar_o, other.periods_per_year)
         before = 1.0 - _phi((b_before - other.prior_mean) / s_pred_o)
         after = 1.0 - _phi((b_after - other.prior_mean) / s_pred_o)
         toll_p_cert += max(before - after, 0.0)

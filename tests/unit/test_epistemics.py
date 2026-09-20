@@ -456,21 +456,99 @@ class TestAppraisal:
         assert a.is_ceremonial
         assert "CEREMONIAL" in a.verdict
 
-    def test_p_cert_under_a_null_prior_is_near_invariant_in_sample_size(self):
-        """Both the bar and the estimator's spread scale with the same standard
-        error, so lengthening the sample does not reduce the rate at which a
-        null design certifies. This is why `is_ceremonial` cannot use an
-        absolute floor on p_cert, and it restates the deflated-Sharpe point:
-        more data does not buy protection from multiplicity, fewer looks do.
+    def test_p_cert_is_invariant_ONLY_under_a_point_mass_prior(self):
+        """The corrected form of a claim this file previously got wrong.
+
+        The original test asserted p_cert was invariant in sample size, and
+        passed — but only because it used prior_sd=0.001, which is 500x below
+        this module's own default of 0.5 and appears nowhere in the live queue.
+        That is exactly the weak-baseline failure doc 290 forbids, committed
+        against the program's own machinery, and the green test is what licensed
+        publishing the unqualified claim in doc 299. Corrected by the doc-300
+        audit; see test_p_false_positive_is_the_invariant_quantity for where the
+        invariance actually lives.
         """
+        NS = (252, 1008, 2772, 6300)
+
+        def spread(prior_sd):
+            ps = [
+                appraise(
+                    Design(name="d", family="f", n_obs=n,
+                           prior_mean=0.0, prior_sd=prior_sd),
+                    n_trials_registered=34,
+                ).p_cert
+                for n in NS
+            ]
+            return max(ps) - min(ps)
+
+        # A point-mass prior: invariant, as originally claimed.
+        assert spread(0.001) < 1e-4
+
+        # The module's OWN default prior: emphatically not invariant. 0.0855 on
+        # this grid, which is 8.5x the 0.01 tolerance the original test used to
+        # certify "invariance". Widening the grid to 25,200 takes it to 0.208.
+        assert spread(0.5) > 0.05, (
+            "p_cert must be shown to vary at the default prior, or the "
+            "corrected claim is not actually pinned"
+        )
+        # And monotone increasing in n, which is the substantive point: a
+        # longer sample lowers the bar faster than it sharpens the estimate.
         ps = [
-            appraise(
-                Design(name="d", family="f", n_obs=n, prior_mean=0.0, prior_sd=0.001),
-                n_trials_registered=34,
-            ).p_cert
-            for n in (252, 1008, 2772, 6300)
+            appraise(Design(name="d", family="f", n_obs=n, prior_mean=0.0, prior_sd=0.5),
+                     n_trials_registered=34).p_cert
+            for n in NS
         ]
-        assert max(ps) - min(ps) < 0.01
+        assert ps == sorted(ps), ps
+
+    def test_p_false_positive_is_the_invariant_quantity(self):
+        """This is the claim worth locking, and the one doc 299 should have made.
+
+        bar/sigma_e = sqrt(omega) * (E[max]/se + 1.6449), in which n cancels
+        exactly, so the rate at which a design certifies NOTHING is identical at
+        every sample length — and independent of the prior, which never enters
+        it. 2.9342% at omega=0.25 and 34 trials.
+        """
+        vals = set()
+        for n in (252, 1008, 2772, 6300, 25200):
+            for prior_sd in (0.001, 0.3, 0.5, 0.9):
+                for prior_mean in (0.0, 1.0, 2.0):
+                    vals.add(round(appraise(
+                        Design(name="d", family="f", n_obs=n,
+                               prior_mean=prior_mean, prior_sd=prior_sd),
+                        n_trials_registered=34, omega=0.25,
+                    ).p_false_positive, 9))
+        assert len(vals) == 1, f"p_false_positive should be invariant, got {sorted(vals)}"
+        assert abs(vals.pop() - 0.029342) < 1e-5
+
+    def test_the_bar_is_computed_on_the_effective_sample(self):
+        """The bar must see the same sampling noise the estimator does.
+
+        Computing it on nominal n while computing sigma_e on n_eff understated
+        the bar for every clustered design — three of the nine in the live queue
+        — and broke the cancellation that makes p_false_positive invariant.
+        Caught by the doc-300 audit; nothing in the suite failed when it was
+        wrong, which is why this test exists.
+        """
+        clustered = Design(name="c", family="f", n_obs=2772, cluster_size=12, icc=0.2)
+        a = appraise(clustered, n_trials_registered=34)
+
+        # n_eff is far below n_obs, so the bar must be far ABOVE the naive one.
+        assert clustered.n_eff < clustered.n_obs / 3
+        assert a.bar_after > operative_bar(35, clustered.n_obs) + 0.5
+        assert a.bar_after == pytest.approx(
+            operative_bar(35, int(clustered.n_eff)), abs=1e-9
+        )
+
+        # And with the bar on the same footing, the invariance is restored even
+        # under clustering — which is the independent check that the fix is right.
+        fps = {
+            round(appraise(
+                Design(name="c", family="f", n_obs=n, cluster_size=12, icc=0.2),
+                n_trials_registered=34,
+            ).p_false_positive, 9)
+            for n in (1008, 2772, 6300)
+        }
+        assert len(fps) == 1, f"clustered p_fp should also be invariant, got {sorted(fps)}"
 
     def test_a_well_powered_design_discriminates(self):
         """The contrast case: a prior mean well above the bar makes a pass far
