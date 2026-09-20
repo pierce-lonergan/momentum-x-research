@@ -11,7 +11,7 @@ All LLM calls are mocked to test pipeline wiring, not LLM quality.
 from __future__ import annotations
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from src.core.models import (
@@ -176,23 +176,48 @@ class TestFullPipeline:
             '"dilution_risk": 0.2, "key_reasoning": "Low float", "red_flags": []}'
         )
 
+        # The shipped default for risk_veto_mode is ADVISORY (ADR-026 D25: the
+        # Phase-3 backtesting default, where the risk agent hallucinated vetoes
+        # from sparse data). In ADVISORY mode a risk VETO is logged and the MFCS
+        # score still decides, so this test — whose whole subject is the veto
+        # *blocking* a trade — must ask for HARD explicitly. Production does the
+        # same via SCORE_RISK_VETO_MODE=HARD in .env; relying on the library
+        # default here would test the backtesting configuration by accident.
+        settings.scoring.risk_veto_mode = "HARD"
+
         # D101: Provide SEC filings with S-3 to trigger deterministic risk VETO
         sec_filings = {
             "filings": [
                 {
                     "form": "S-3",
                     "description": "Shelf registration for up to $50M in securities",
-                    "date": "2026-03-09",
+                    # Anchored to the run date, not hardcoded: the agent's
+                    # contract is about a *recent* filing, and a fixed date
+                    # silently ages out of every window that depends on it.
+                    "date": (datetime.now(timezone.utc) - timedelta(days=1))
+                            .strftime("%Y-%m-%d"),
                 }
             ]
         }
 
         # D101: Only 2 LLM agents active (news, fundamental).
         # Technical + Risk are deterministic.
-        with patch("litellm.acompletion") as mock_llm:
-            mock_llm.side_effect = [
-                mock_news, mock_fundamental,
-            ]
+        # AsyncMock, not MagicMock: `litellm.acompletion` is awaited. With a plain
+        # MagicMock both LLM agents raise on await, the orchestrator sees zero
+        # directional agents, and D101 vetoes on *consensus* — so the S-3 dilution
+        # veto this test exists to exercise never runs, and the assertion below
+        # passes or fails for the wrong reason.
+        # A two-element side_effect list is not enough: the base agent retries a
+        # primary failure against a fallback and then an emergency model, so the
+        # list is exhausted, the remaining calls raise StopAsyncIteration, and
+        # after five the llm_provider breaker trips. Dispatch on the prompt
+        # instead, so every call — original or retry — gets a valid response.
+        def _dispatch(*args, **kwargs):
+            blob = str(kwargs.get("messages", args))
+            return mock_fundamental if "dilution" in blob.lower() else mock_news
+
+        with patch("litellm.acompletion", new_callable=AsyncMock) as mock_llm:
+            mock_llm.side_effect = _dispatch
 
             orchestrator = Orchestrator(settings)
             verdict = await orchestrator.evaluate_candidate(
@@ -201,4 +226,8 @@ class TestFullPipeline:
             )
 
         assert verdict.action == "NO_TRADE"
-        assert "VETO" in verdict.reasoning_summary or "Dilution" in verdict.reasoning_summary
+        assert (
+            "VETO" in verdict.reasoning_summary
+            or "Dilution" in verdict.reasoning_summary
+            or "dilution" in verdict.reasoning_summary
+        ), verdict.reasoning_summary
