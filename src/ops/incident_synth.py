@@ -71,7 +71,8 @@ def _from_eod_report(date: str) -> int:
                          "disagreements": btr.get("ticker_disagreements")},
                 suggested=["a close path booked P&L without a confirmed broker fill (phantom)",
                            "trust broker_total_pnl; the journal P&L is contaminated"],
-                dedup_key=f"pnl_divergence_{date}")
+                dedup_key=f"pnl_divergence_{date}",
+                session_date=date)
             emitted += 1
         # ghost / position drift between internal tracker and broker
         qd = recon.get("qty_drift_count")
@@ -83,7 +84,8 @@ def _from_eod_report(date: str) -> int:
                          "broker_equity": recon.get("broker_equity")},
                 suggested=["broker holds a position the tracker doesn't (or vice-versa)",
                            "D86/D242 ghost cleanup; verify no naked/unmanaged position"],
-                dedup_key=f"qty_drift_{date}")
+                dedup_key=f"qty_drift_{date}",
+                session_date=date)
             emitted += 1
         elif recon.get("equity_within_tolerance") is False:
             emit_incident(
@@ -91,7 +93,8 @@ def _from_eod_report(date: str) -> int:
                 context={"broker_equity": recon.get("broker_equity"),
                          "equity_within_tolerance": False},
                 suggested=["internal equity estimate diverged from broker"],
-                dedup_key=f"equity_tol_{date}")
+                dedup_key=f"equity_tol_{date}",
+                session_date=date)
             emitted += 1
         return emitted
     except Exception as e:  # noqa: BLE001

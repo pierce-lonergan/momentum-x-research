@@ -29,7 +29,9 @@ cd "$REPO_ROOT"
 LABELS_FILE="data/backfill/features_labeled.jsonl"
 SHARDS_DIR="data/backfill/labels_shards"
 MODELS_DIR="models"
-LOG_FILE="docs/research-log/composite_retrain_log.md"
+# Overridable so tests (and dry runs) do not append to the committed research
+# log. Without this, the fast suite mutates a tracked document every run.
+LOG_FILE="${COMPOSITE_RETRAIN_LOG:-docs/research-log/composite_retrain_log.md}"
 
 CHECK_ONLY=0
 FORCE=0

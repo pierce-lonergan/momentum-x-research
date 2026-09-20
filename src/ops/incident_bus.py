@@ -54,6 +54,7 @@ def emit_incident(
     context: dict | None = None,
     suggested: list[str] | None = None,
     dedup_key: str | None = None,
+    session_date: str | None = None,
 ) -> bool:
     """Record one incident. Returns True if written. NEVER raises into the caller.
 
@@ -81,7 +82,11 @@ def emit_incident(
             if last is not None and (now_s - last) < _DEDUP_WINDOW_SEC:
                 return False
             _recent[dedup_key] = now_s
-        session_date = ts.astimezone(_NY).strftime("%Y-%m-%d")
+        # An incident SYNTHESIZED for a past session must be filed under THAT
+        # session, not under "now": read_incidents(), the pager and
+        # pipeline_health_check all index by date, so a backfilled incident filed
+        # under today is both invisible where it belongs and noise where it lands.
+        session_date = session_date or ts.astimezone(_NY).strftime("%Y-%m-%d")
         _seq += 1
         inc_id = f"{ts.strftime('%Y%m%dT%H%M%S')}_{_seq}_{kind}"
         row = {

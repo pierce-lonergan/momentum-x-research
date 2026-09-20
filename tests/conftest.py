@@ -48,3 +48,39 @@ def _isolate_verdict_ledger(tmp_path, monkeypatch):
 
     monkeypatch.setattr(verdict_ledger, "_DIR", str(tmp_path / "_isolated_vll"))
     yield
+
+
+@pytest.fixture(autouse=True)
+def _reset_circuit_breakers():
+    """Reset the module-level circuit breakers between tests.
+
+    `src/utils/circuit_breaker.py` exposes three process-wide singletons
+    (`alpaca_breaker`, `llm_breaker`, `news_breaker`). A test that deliberately
+    trips one leaves it OPEN for every test that follows in the same process,
+    and the symptom is silent: the affected code takes its *degraded* path
+    rather than raising. That is how `test_mixed_headlines_filters_and_calls_llm`
+    came to fail only in a full-suite run — the LLM call was short-circuited by
+    an already-open breaker and the FinBERT backstop answered BULL where the
+    test expected the LLM's STRONG_BULL.
+
+    Restoring the constructor's state is enough; there is no public reset, and
+    adding one to production code for a test's benefit would be the wrong trade.
+    """
+    from src.utils import circuit_breaker as _cb
+
+    breakers = [
+        getattr(_cb, n)
+        for n in ("alpaca_breaker", "llm_breaker", "news_breaker")
+        if hasattr(_cb, n)
+    ]
+
+    def _close_all():
+        for b in breakers:
+            b._state = b.CLOSED
+            b._fail_count = 0
+            b._last_failure_time = 0.0
+            b._current_reset_timeout = b._base_reset_timeout
+
+    _close_all()
+    yield
+    _close_all()

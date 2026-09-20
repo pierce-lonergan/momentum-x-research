@@ -229,16 +229,28 @@ def script_path():
 class TestRetrainScriptIdempotency:
     """The script is bash; tests run via subprocess on git-bash / wsl."""
 
-    def _run_script(self, *args, cwd=None):
+    def _run_script(self, *args, cwd=None, log_file=None):
         bash = shutil.which("bash") or shutil.which("sh")
         if bash is None:
             pytest.skip("bash not available on this platform")
+        env = os.environ.copy()
+        # The script appends its decision to a log. Redirect it, or the fast
+        # suite silently mutates docs/research-log/composite_retrain_log.md —
+        # a tracked research document — on every run.
+        env["COMPOSITE_RETRAIN_LOG"] = str(
+            log_file or (self._tmp_log_dir / "composite_retrain_log.md")
+        )
         result = subprocess.run(
             [bash, str(script_path()), *args],
             cwd=cwd or Path(__file__).resolve().parents[2],
+            env=env,
             capture_output=True, text=True,
         )
         return result
+
+    @pytest.fixture(autouse=True)
+    def _tmp_log(self, tmp_path):
+        self._tmp_log_dir = tmp_path
 
     def test_script_exists_and_executable(self):
         p = Path(__file__).resolve().parents[2] / "scripts" / "maybe_retrain_composite.sh"

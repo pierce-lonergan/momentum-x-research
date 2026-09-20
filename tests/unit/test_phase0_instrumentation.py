@@ -363,12 +363,20 @@ class TestFullOrderLifecycleIntegration:
 
         # Flush everything
         counts = w.flush_all_sync(reason="lifecycle-test")
-        assert counts == {
+        # Assert on the four schemas this lifecycle exercises rather than
+        # freezing the writer's full schema set — later docs add schemas
+        # (e.g. decision_row) that this test deliberately emits nothing for.
+        expected = {
             "trade_context": 2,
             "bar_context": 1,
             "child_fill_ticks": 2,
             "cohort_registry": 1,
         }
+        for schema, n in expected.items():
+            assert counts[schema] == n, f"{schema}: expected {n}, got {counts[schema]}"
+        for schema, n in counts.items():
+            if schema not in expected:
+                assert n == 0, f"unexercised schema {schema} flushed {n} rows"
 
         # Round-trip every partition
         df_tc = pd.read_parquet(w._output_path("trade_context"))

@@ -277,6 +277,8 @@ def _parse_live_response(
 
     raw = _extract_json(raw_content) if raw_content else None
 
+    salvage_failed = False
+
     if raw is None:
         # Strategy 4: regex field extraction
         raw = {}
@@ -314,7 +316,13 @@ def _parse_live_response(
                 break
 
         if not raw:
-            # Strategy 5: return raw text as reasoning with NEUTRAL signal
+            # Strategy 5: nothing recoverable. Fall back to a safe NEUTRAL /
+            # confidence 0.0 so callers get a well-formed no-trade result, but
+            # flag it: this is the harness giving up, not the model answering.
+            # Counting it as a clean parse pins parse_success_rate at 1.0 for
+            # every model and makes scoring.py's parse_success_delta
+            # structurally zero — i.e. silently destroys the metric.
+            salvage_failed = True
             raw = {"reasoning": (raw_content or "")[:500], "signal": "NEUTRAL", "confidence": 0.0}
 
     # Extract fields from parsed dict
@@ -330,7 +338,7 @@ def _parse_live_response(
     catalyst_type = raw.get("catalyst_type")
     parse_success = signal_direction in (
         "BULL", "STRONG_BULL", "BEAR", "STRONG_BEAR", "NEUTRAL"
-    )
+    ) and not salvage_failed
 
     return AgentRunResult(
         scenario_id=scenario.scenario_id,
@@ -346,7 +354,12 @@ def _parse_live_response(
         cost_usd=cost_usd,
         timed_out=False,
         parse_success=parse_success,
-        error=None if parse_success else f"Unrecognised signal: {signal_direction!r}",
+        error=(
+            None if parse_success
+            else "No JSON object could be extracted from the response"
+            if salvage_failed
+            else f"Unrecognised signal: {signal_direction!r}"
+        ),
         timestamp=now,
     )
 

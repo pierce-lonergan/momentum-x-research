@@ -29,6 +29,14 @@ from src.core.models import CandidateStock
 
 
 def _make_candidate(**overrides) -> CandidateStock:
+    """Build a CandidateStock for router tests.
+
+    NOTE (D272): CandidateStock now nulls ``float_shares`` when it exceeds
+    100x the market-cap-implied share count. Any test that overrides
+    ``float_shares`` must override ``market_cap`` to match, or the float
+    never reaches the router and the assertion passes/fails for the wrong
+    reason.
+    """
     defaults = dict(
         ticker="TEST",
         company_name="Test Corp",
@@ -66,7 +74,10 @@ class TestD112FloatEscapeHatch:
         deterministic MFCS bypasses the structural float check.
         """
         router = _make_router()
-        candidate = _make_candidate(float_shares=3_000_000_000)
+        candidate = _make_candidate(
+            float_shares=3_000_000_000,
+            market_cap=15_000_000_000.0,  # 3B shares x $5 — keeps D272 plausibility happy
+        )
         decision = router.classify(candidate, deterministic_mfcs=0.45)
         assert decision.tier != EvalTier.INSTANT_REJECT, (
             f"Expected escape from INSTANT_REJECT but got {decision.tier} "
@@ -79,7 +90,10 @@ class TestD112FloatEscapeHatch:
         Confirms the escape hatch is gated on MFCS quality, not just float size.
         """
         router = _make_router()
-        candidate = _make_candidate(float_shares=3_000_000_000)
+        candidate = _make_candidate(
+            float_shares=3_000_000_000,
+            market_cap=15_000_000_000.0,  # 3B shares x $5 — keeps D272 plausibility happy
+        )
         decision = router.classify(candidate, deterministic_mfcs=0.20)
         assert decision.tier == EvalTier.INSTANT_REJECT
         assert "float" in decision.reason and "max" in decision.reason
@@ -91,7 +105,10 @@ class TestD112FloatEscapeHatch:
         informed bypass decision. Default to the conservative behavior (reject).
         """
         router = _make_router()
-        candidate = _make_candidate(float_shares=3_000_000_000)
+        candidate = _make_candidate(
+            float_shares=3_000_000_000,
+            market_cap=15_000_000_000.0,  # 3B shares x $5 — keeps D272 plausibility happy
+        )
         decision = router.classify(candidate, deterministic_mfcs=None)
         assert decision.tier == EvalTier.INSTANT_REJECT
         assert "float" in decision.reason

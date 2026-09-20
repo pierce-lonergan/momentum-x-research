@@ -194,8 +194,15 @@ class TestSyncFromStateAndOrders:
         assert position_manager._positions["BOOM"].tranches_filled == 0
         assert position_manager._positions["RITR"].tranches_filled == 2
 
-    def test_short_positions_skipped(self, position_manager: PositionManager):
-        """Short positions from Alpaca are ignored (we only trade long)."""
+    def test_short_positions_recovered_as_shorts(self, position_manager: PositionManager):
+        """D202: shorts are recovered, not skipped.
+
+        This test previously asserted `synced == 0` on the grounds that the
+        system only trades long. D202 changed that on purpose: a short that
+        exists at the broker is a live obligation, and dropping it on restart
+        leaves an unmonitored naked position. Recovery must therefore adopt it
+        *as a short*, with a protective stop above entry rather than below.
+        """
         state = _make_session_state()
         alpaca_positions = [
             {"symbol": "SHORT", "side": "short", "qty": "100", "avg_entry_price": "50.00"},
@@ -207,7 +214,13 @@ class TestSyncFromStateAndOrders:
             alpaca_orders=[],
         )
 
-        assert synced == 0
+        assert synced == 1
+        assert position_manager.has_position("SHORT")
+        recovered = position_manager._positions["SHORT"]
+        assert recovered.direction == "short"
+        assert recovered.stop_loss > recovered.entry_price, (
+            "a recovered short's stop must sit above entry, not below"
+        )
 
     def test_none_session_state_falls_back(self, position_manager: PositionManager):
         """None session_state → D56 estimation for all positions."""

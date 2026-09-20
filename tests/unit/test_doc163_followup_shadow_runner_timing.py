@@ -31,6 +31,16 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "scripts" / "tabpfn_shadow_runner.py"
 
+# The two end-to-end exit-code tests below shell out to the real runner, which
+# loads the derived warehouse before it can reach the exit-code logic. That
+# parquet is built locally from licensed market data and is not distributed
+# with the repository, so skip rather than fail when it is absent.
+_BASE_PARQUET = REPO / "data" / "polygon_warehouse" / "derived" / "aftermath_strat.parquet"
+requires_warehouse = pytest.mark.skipif(
+    not _BASE_PARQUET.exists(),
+    reason=f"requires derived warehouse ({_BASE_PARQUET.name}); not shipped with the repo",
+)
+
 
 def _run_runner(*args: str, env_extra: dict | None = None,
                 timeout: int = 120) -> tuple[int, str]:
@@ -67,6 +77,7 @@ def test_help_output_documents_live_mode_default():
 # ── Exit code semantics ─────────────────────────────────────────────
 
 
+@requires_warehouse
 def test_exit_code_zero_when_no_data_for_date_in_live_mode(tmp_path):
     """In live mode, scoring a d0 that has 0 rows in the catalog must
     exit 0 (not 1) so the launcher doesn't mark the step FAILED.
@@ -84,6 +95,7 @@ def test_exit_code_zero_when_no_data_for_date_in_live_mode(tmp_path):
     assert "0 rows in catalog" in out or "skip" in out.lower()
 
 
+@requires_warehouse
 def test_exit_code_zero_when_only_skip_is_already_exists(tmp_path):
     """An idempotent re-run (target file already on disk) is a no-op;
     must exit 0 so daily cron doesn't escalate the same WARN every day."""
