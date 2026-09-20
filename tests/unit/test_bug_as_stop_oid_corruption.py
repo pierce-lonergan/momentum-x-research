@@ -59,6 +59,9 @@ from src.execution.exit_ladder import ExitLadderResult
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MAIN_PY = REPO_ROOT / "main.py"
+# The exit-ladder call sites were consolidated out of main.py into a single
+# shared post-fill path. That is what these Bug AS guards must now inspect.
+POST_FILL = REPO_ROOT / "src" / "execution" / "post_fill_handler.py"
 
 
 # ── Behavior: ManagedPosition mirrors the new stop OID ───────────────
@@ -330,7 +333,11 @@ def test_every_exit_ladder_call_site_mirrors_new_stop_oid_to_in_memory_position(
     in-memory ManagedPosition. Asymmetric handling between FAST_PATH
     (always mirrored) and Phase2/VWAP/RESCAN (formerly never mirrored)
     was Bug AS root cause #1."""
-    text = MAIN_PY.read_text(encoding="utf-8")
+    # Bug AS was four DUPLICATED call sites where only one remembered to mirror
+    # the new stop OID. They are now a single shared path, which removes the bug
+    # class by construction — but the mirror must still be present, so the guard
+    # follows the code rather than the old file layout.
+    text = POST_FILL.read_text(encoding="utf-8")
     lines = text.splitlines()
 
     # Find every call site
@@ -338,14 +345,16 @@ def test_every_exit_ladder_call_site_mirrors_new_stop_oid_to_in_memory_position(
         i for i, line in enumerate(lines)
         if "await cancel_stop_and_submit_exit_ladder" in line
     ]
-    assert len(call_indices) >= 4, (
-        f"Expected ≥4 cancel_stop_and_submit_exit_ladder call sites in "
-        f"main.py, found {len(call_indices)}. Did the file shape change?"
+    assert len(call_indices) >= 1, (
+        f"Expected at least one cancel_stop_and_submit_exit_ladder call site, "
+        f"found {len(call_indices)}. Did the file shape change?"
     )
 
     # Pattern for the in-memory mirror write
+    # pos_obj is the consolidated path's variable; the rest are the legacy
+    # per-call-site names, kept so the guard still fires if those ever return.
     mirror_pattern = re.compile(
-        r"(?:fp_pos|_p2_pos|_vwap_pos|_rs_pos|_pos)\.stop_order_id\s*="
+        r"(?:pos_obj|fp_pos|_p2_pos|_vwap_pos|_rs_pos|_pos)\.stop_order_id\s*="
     )
 
     failures = []
@@ -370,12 +379,16 @@ def test_every_exit_ladder_call_site_mirrors_new_stop_oid_to_in_memory_position(
 
 
 def test_fast_path_mirror_line_is_present_as_parity_baseline():
-    """FAST_PATH at main.py ~2315 has always had the in-memory mirror:
-        fp_pos.stop_order_id = _fp_new_stop_oid
-    This test pins it as the parity baseline. If a refactor removes
-    it, ALL paths regress — including the one site that wasn't broken."""
-    text = MAIN_PY.read_text(encoding="utf-8")
-    assert "fp_pos.stop_order_id = _fp_new_stop_oid" in text, (
+    """Pin the in-memory stop-OID mirror on the shared post-fill path.
+
+    Originally this pinned `fp_pos.stop_order_id = _fp_new_stop_oid` in main.py's
+    FAST_PATH, as the template the other three call sites should have copied. The
+    four sites have since been consolidated into one, so the mirror it guards now
+    lives in post_fill_handler. If a refactor drops it, every path regresses —
+    which is exactly what this test exists to catch.
+    """
+    text = POST_FILL.read_text(encoding="utf-8")
+    assert "pos_obj.stop_order_id = new_stop_oid" in text, (
         "FAST_PATH parity baseline missing: `fp_pos.stop_order_id = "
         "_fp_new_stop_oid` not found in main.py. This was the line "
         "that Phase2/VWAP/RESCAN should have mirrored from. Without "

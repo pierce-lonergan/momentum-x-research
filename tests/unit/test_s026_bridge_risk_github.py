@@ -235,17 +235,31 @@ class TestGitHubReadiness:
         content = Path("README.md").read_text(encoding="utf-8")
         assert "Momentum-X" in content
 
-    def test_readme_has_current_test_count(self):
-        content = Path("README.md").read_text(encoding="utf-8")
-        assert "2021" in content
+    def test_readme_documents_how_to_run_the_suite(self):
+        """A reader must be able to find and run the tests.
 
-    def test_readme_has_new_features(self):
+        This asserted the literal "2021" - a test count frozen years ago, when the
+        suite now collects 4,500+. A hardcoded count in prose is guaranteed to rot,
+        and the assertion tested the number rather than the documentation.
+        """
         content = Path("README.md").read_text(encoding="utf-8")
-        assert "Tranche" in content or "tranche" in content
-        assert "Portfolio Risk" in content or "portfolio" in content.lower()
-        assert "Observability" in content or "Prometheus" in content
-        assert "Strategy Arena" in content
-        assert "Exit Intelligence" in content or "exit intelligence" in content.lower()
+        assert "pytest" in content
+        assert "tests/" in content or "test files" in content
+
+    def test_readme_orients_a_newcomer(self):
+        """The README must state what the project is and point at the evidence.
+
+        This asserted a list of marketing feature nouns (Tranche / Portfolio Risk /
+        Strategy Arena / Exit Intelligence). Those described a product pitch the
+        README no longer makes: the repository is a research record whose headline
+        finding is that it found no edge. Assert the orientation a reader needs
+        instead of vocabulary from a superseded framing.
+        """
+        content = Path("README.md").read_text(encoding="utf-8")
+        assert "DISCLAIMER.md" in content, "must link the disclaimer"
+        assert "LICENSE" in content, "must reference the licence"
+        assert "ATTEMPTS_LEDGER.md" in content, "must point at the results ledger"
+        assert "TARGET.md" in content, "must point at the requirements ledger"
 
     def test_gitignore_exists(self):
         assert Path(".gitignore").exists()

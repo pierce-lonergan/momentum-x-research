@@ -40,6 +40,8 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 MAIN_PY = REPO / "main.py"
+# exit-ladder calls were consolidated into the shared post-fill path
+POST_FILL = REPO / "src" / "execution" / "post_fill_handler.py"
 
 
 # ── T1 — exit-ladder call sites must use pos.stop_loss ─────────────
@@ -52,10 +54,10 @@ class TestBugW_ExitLadderCallSites:
         call site in main.py must use a position-tracked stop_loss
         value (pos.stop_loss or equivalent), NOT verdict.stop_loss
         (the un-tightened verdict-time stop)."""
-        text = MAIN_PY.read_text(encoding="utf-8")
+        text = POST_FILL.read_text(encoding="utf-8")
         # Find each exit-ladder call (multiline; scan a window for stop_price=)
         offsets = [m.start() for m in re.finditer(r"cancel_stop_and_submit_exit_ladder\(", text)]
-        assert offsets, "expected at least one exit-ladder call site in main.py"
+        assert offsets, "expected at least one exit-ladder call site in post_fill_handler.py"
 
         violations: list[str] = []
         for off in offsets:

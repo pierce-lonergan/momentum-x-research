@@ -101,8 +101,12 @@ class TestD37ExecutionConfigDefaults:
     """D37: Competition mode config defaults."""
 
     def test_max_positions_default(self):
+        """D162 reduced this 8 -> 3 after a Mar-26 backtest in which four
+        simultaneous stops fired for -$3,411 in one session. The D37 expectation
+        of 8 predates that risk decision; asserting it would fail the repo back
+        into the concentration it deliberately walked away from."""
         config = ExecutionConfig()
-        assert config.max_positions == 8  # Was 3
+        assert config.max_positions == 3
 
     def test_max_position_pct_default(self):
         config = ExecutionConfig()
@@ -195,34 +199,33 @@ class TestD43TrailingStop:
 class TestPositionManagerLimits:
     """D37: PositionManager respects competition mode limits."""
 
-    def test_can_enter_up_to_8_positions(self):
-        """Max 8 concurrent positions in competition mode."""
+    def test_blocks_entry_at_the_configured_position_limit(self):
+        """Entry is permitted up to max_positions and blocked at it.
+
+        Was hardcoded to 8. D162 reduced the default to 3, so the constant is now
+        read from config: the invariant under test is the LIMIT being enforced,
+        not the particular number, and this no longer breaks when risk policy moves.
+        """
         config = ExecutionConfig(paper_aggressive_mode=False)
+        limit = config.max_positions
         mgr = PositionManager(config=config, starting_equity=100_000)
 
-        # Add 7 positions
-        for i in range(7):
+        for i in range(limit - 1):
             mgr.add_position(ManagedPosition(
-                ticker=f"TICK{i}",
-                qty=100,
-                entry_price=10.0,
-                signal_price=10.0,
-                stop_loss=9.60,
+                ticker=f"TICK{i}", qty=100, entry_price=10.0,
+                signal_price=10.0, stop_loss=9.60,
             ))
+        assert mgr.can_enter_new_position() is True, (
+            f"should still accept entries below the limit of {limit}"
+        )
 
-        assert mgr.can_enter_new_position() is True
-
-        # Add 8th position
         mgr.add_position(ManagedPosition(
-            ticker="TICK7",
-            qty=100,
-            entry_price=10.0,
-            signal_price=10.0,
-            stop_loss=9.60,
+            ticker=f"TICK{limit - 1}", qty=100, entry_price=10.0,
+            signal_price=10.0, stop_loss=9.60,
         ))
-
-        # Should be blocked now
-        assert mgr.can_enter_new_position() is False
+        assert mgr.can_enter_new_position() is False, (
+            f"should block at the limit of {limit}"
+        )
 
     def test_circuit_breaker_at_10_percent(self):
         """Circuit breaker triggers at -10% daily P&L (was -5%)."""

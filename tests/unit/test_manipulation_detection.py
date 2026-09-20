@@ -495,6 +495,15 @@ class TestParameterModification:
         settings.models.default_temperature = 0.3
         settings.models.litellm_timeout_tier1 = 15
         settings.models.litellm_timeout_tier2 = 10
+        # D218 logs agent dispatch at startup and compares each scoring weight
+        # with > 0; on a bare MagicMock that raises TypeError and __init__ dies.
+        settings.scoring.catalyst_news = 0.30
+        settings.scoring.technical = 0.20
+        settings.scoring.volume_rvol = 0.15
+        settings.scoring.float_structure = 0.10
+        settings.scoring.institutional = 0.10
+        settings.scoring.deep_search = 0.05
+        settings.scoring.risk_aversion_lambda = 0.5   # formatted with :.2f at startup
         settings.experiments.enabled = False
         settings.experiments.yaml_path = "data/experiments/experiments.yaml"
         settings.experiments.journal_dir = "data/experiments/journal"
@@ -710,6 +719,15 @@ class TestAgentRegistration:
         settings.models.default_temperature = 0.3
         settings.models.litellm_timeout_tier1 = 15
         settings.models.litellm_timeout_tier2 = 10
+        # D218 logs agent dispatch at startup and compares each scoring weight
+        # with > 0; on a bare MagicMock that raises TypeError and __init__ dies.
+        settings.scoring.catalyst_news = 0.30
+        settings.scoring.technical = 0.20
+        settings.scoring.volume_rvol = 0.15
+        settings.scoring.float_structure = 0.10
+        settings.scoring.institutional = 0.10
+        settings.scoring.deep_search = 0.05
+        settings.scoring.risk_aversion_lambda = 0.5   # formatted with :.2f at startup
         settings.debate.divergence_low_threshold = 0.3
         settings.debate.divergence_high_threshold = 0.7
         settings.experiments.enabled = False
@@ -738,6 +756,15 @@ class TestAgentRegistration:
         settings.models.default_temperature = 0.3
         settings.models.litellm_timeout_tier1 = 15
         settings.models.litellm_timeout_tier2 = 10
+        # D218 logs agent dispatch at startup and compares each scoring weight
+        # with > 0; on a bare MagicMock that raises TypeError and __init__ dies.
+        settings.scoring.catalyst_news = 0.30
+        settings.scoring.technical = 0.20
+        settings.scoring.volume_rvol = 0.15
+        settings.scoring.float_structure = 0.10
+        settings.scoring.institutional = 0.10
+        settings.scoring.deep_search = 0.05
+        settings.scoring.risk_aversion_lambda = 0.5   # formatted with :.2f at startup
         settings.debate.divergence_low_threshold = 0.3
         settings.debate.divergence_high_threshold = 0.7
         settings.experiments.enabled = False

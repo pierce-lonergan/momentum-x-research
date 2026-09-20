@@ -402,9 +402,19 @@ class TestCmdPaperMetricsServerWiring:
         assert "reset_metrics()" in source
 
     def test_cmd_paper_logs_metrics_url(self):
+        """The metrics server is started on the CONFIGURED port.
+
+        This asserted the literal "9090" in cmd_paper. The port has since moved to
+        settings.server.metrics_port (default 9090), so the literal is correctly
+        absent and the old assertion penalised the better code. Assert the wiring
+        and the default instead.
+        """
         import main
+        from config.settings import Settings
         source = inspect.getsource(main.cmd_paper)
-        assert "9090" in source
+        assert "MetricsServer(port=settings.server.metrics_port)" in source
+        assert "metrics_server.start()" in source
+        assert Settings().server.metrics_port == 9090
 
 
 # ═══════════════════════════════════════════════════════════════════
