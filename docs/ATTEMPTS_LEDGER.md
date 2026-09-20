@@ -85,3 +85,33 @@ the power gate may be consulted, and any pass is PROVISIONAL until the mandatory
   report; `promote()` refuses by design.
 - **Certification cost scales as n ∝ (σ/Δ)² against a fixed absolute bar.** More names per day helps;
   more deployment does not. The two were conflated by four agents in doc 297.
+
+**Doc 299 additions (closures are now typed, and experiments are priced before they run):**
+- **Every closure names its CLASS, not just a verdict.** Three classes are evidence about the market
+  (`REFUTED_BY_NATURE`, `REFUTED_BY_COST`, `STRUCTURALLY_UNAVAILABLE`); five are evidence about us
+  (`REFUTED_BY_ARITHMETIC`, `UNDERPOWERED`, `INSTRUMENT_LIMITED`, `VOIDED_BY_DEFECT`, `ABANDONED`).
+  A closure in the second group **must name the keystone it was missing**, or it is filed as
+  `ABANDONED` — honestly, rather than dressed up as a refutation. `src/epistemics/closure.py`.
+- **`REFUTED_BY_NATURE` requires a recorded effect and interval.** Without them the honest class is
+  `UNDERPOWERED`. On transcription, **11 of 25 historical closures fail this** — the measurements exist
+  in the documents but not in the ledger, so those families cannot be retro-scored without re-reading
+  prose. Every future closure ships its measurement.
+- **Discrimination of the existing graveyard: 17/25 (68%) are measurements of the market.** Mean
+  evidential weight 0.736; only 6 are mechanically revivable. This *strengthens* the no-edge thesis —
+  the negative results are not an artifact of poor instruments.
+- **Retro-validate on every capability landing, by query and not from memory.**
+  `scripts/epistemics.py revive --have <keystone>`. Market-evidence closures do NOT revive on
+  capability; only on an argued market-structure change, which is Pierce's call.
+- **Price a trial before registering it.** `src/epistemics/eig.py` computes expected information gain,
+  severity (would this test have failed if the hypothesis were false?), and the **multiplicity toll** —
+  the bar increment this trial levies on every other hypothesis in the queue. A `CEREMONIAL` or
+  `UNDISCRIMINATING` design must not be registered: it cannot teach and it raises the bar.
+- **More data does not buy protection from multiplicity; fewer looks do.** Under a tempered likelihood
+  `bar/σₑ ≈ √ω·(E[max]/se + 1.645)`, in which `n_obs` cancels — so a null design's certification
+  probability is near-invariant in sample length (≈2.9% at ω=0.25, 34 trials, at *any* n). More data
+  lowers the bar, which is a separate and real benefit; it does not lower the false-positive rate.
+- **Revived (conditionally): LETF close-window rebalance-flow harvest.** At the 5 bps/day target its
+  ceiling is 12.0–17.2% of requirement and clears the ≥10% filter it was killed by (6.0–8.6% at
+  0.1%/day). Ceiling-implied Sharpe 1.33–1.91. **Still blocked**: the operative bar on the intraday
+  sample that exists (`minute_aggs` 2024–2026, ~650 sessions) is 2.347. Extending `minute_aggs` to 2016
+  drops it to 1.137. That extension is now the program's top keystone.

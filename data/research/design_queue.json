@@ -1,0 +1,173 @@
+{
+  "_comment": [
+    "Candidate experiments, priced by scripts/epistemics.py plan --spec this-file.",
+    "",
+    "EVERY prior_mean AND prior_sd BELOW IS A DECLARED JUDGEMENT, NOT A MEASUREMENT.",
+    "They are committed here so they can be argued with and so a later reader can see",
+    "what was believed before the data was touched — which is the whole point of",
+    "pre-registering a prior. Change them and re-run; the ranking is reported alongside",
+    "its inputs for exactly that reason.",
+    "",
+    "prior_mean is the believed TRUE annualised Sharpe of the effect. 0.0 is the",
+    "program's own measured base rate across 35 families and is the default that needs",
+    "no justification; anything above it does.",
+    "",
+    "n_obs is the sample that ACTUALLY EXISTS on disk, not the sample one would like.",
+    "cluster_size/icc encode the day-clustering correction (doc 278): nominal n is not",
+    "effective n, and a design that is powered on the former and not the latter should",
+    "never be run.",
+    "",
+    "omega = 0.25 is the epistemic learning rate. It temper the likelihood because the",
+    "model is misspecified (non-stationarity; docs 277 and 296 both saw results fail to",
+    "survive retest). Set omega = 1.0 to see the optimistic bound."
+  ],
+
+  "n_trials_registered": 33,
+  "omega": 0.25,
+  "lam": 0.5,
+
+  "available_keystones": [
+    "lower_requirement",
+    "executable_prereg_fixture",
+    "point_in_time_shares_outstanding",
+    "regime_coverage",
+    "third_party_ground_truth"
+  ],
+  "_keystone_notes": {
+    "lower_requirement": "target re-scoped to 5 bps/day (docs/TARGET.md)",
+    "executable_prereg_fixture": "the doc-296 rule is in force",
+    "point_in_time_shares_outstanding": "confirmed served (doc 298); DEPTH UNVERIFIED",
+    "regime_coverage": "daily warehouse spans 2016-2026, 11 years",
+    "third_party_ground_truth": "day_aggs tape-validated in the doc-278 rebuild",
+    "_excluded_historical_option_nbbo": "404 on every endpoint shape; forward-only",
+    "_excluded_intraday_tape_pre_2020": "minute_aggs is 2024-2026 only (~650 sessions)",
+    "_excluded_short_locate_access": "0-for-94; shorting closed at this broker",
+    "_excluded_lit_venue_routing": "100% internalised (Rule 606, 2026Q1)",
+    "_excluded_clean_iv_surface": "look-ahead purged, but the doc-294 panel stays tainted"
+  },
+
+  "history": {
+    "price_momentum": 8,
+    "exit_timing": 2,
+    "microstructure": 2,
+    "catalyst_text": 2,
+    "attention": 2,
+    "volatility": 3,
+    "market_structure_flow": 3,
+    "beta_carry": 1,
+    "relational": 1,
+    "concentration": 1
+  },
+  "_history_note": "Mechanism-class histogram of the 25 archived closures. Entropy is what diversity_bonus() moves; price_momentum at 8/25 is the crowding the term penalises.",
+
+  "designs": [
+    {
+      "name": "letf_close_window_retest",
+      "family": "market_structure_flow",
+      "n_obs": 650,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 1.0,
+      "prior_sd": 0.6,
+      "cost_days": 4.0,
+      "keystones_required": ["lower_requirement", "point_in_time_shares_outstanding"],
+      "_note": "Revived by the target re-scope. prior_mean set BELOW doc 298's 1.33-1.91 ceiling-implied Sharpe because a ceiling is an upper bound, not a central estimate. n_obs is the minute_aggs sample that exists."
+    },
+    {
+      "name": "letf_close_window_retest_if_minute_extended",
+      "family": "market_structure_flow",
+      "n_obs": 2772,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 1.0,
+      "prior_sd": 0.6,
+      "cost_days": 12.0,
+      "keystones_required": ["lower_requirement", "point_in_time_shares_outstanding", "intraday_tape_pre_2020"],
+      "_note": "The same design on an 11-year minute sample. Deliberately listed as INFEASIBLE so the planner prices the counterfactual: this is what extending minute_aggs 2024->2016 would buy."
+    },
+    {
+      "name": "sevp_event_vol_carry",
+      "family": "volatility",
+      "n_obs": 1200,
+      "cluster_size": 4,
+      "icc": 0.25,
+      "prior_mean": 0.8,
+      "prior_sd": 0.7,
+      "cost_days": 6.0,
+      "keystones_required": ["executable_prereg_fixture"],
+      "_note": "QUEUED BUILD-NEXT per the ledger; ~1,200 events, validated ceiling ~70% optimistic / ~18% pessimistic. Events cluster by announcement date, hence cluster_size 4 / icc 0.25."
+    },
+    {
+      "name": "rocket_gate_forward_ledger",
+      "family": "price_momentum",
+      "n_obs": 30,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 0.0,
+      "prior_sd": 0.4,
+      "cost_days": 0.2,
+      "keystones_required": [],
+      "_note": "Already armed and collecting (n=3/30, DEAD at 60). Listed to show what a 30-observation gate can and cannot establish. prior_mean 0.0 because its parent family is closed."
+    },
+    {
+      "name": "kalshi_zero_capital_shadow",
+      "family": "prediction_markets",
+      "n_obs": 200,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 0.3,
+      "prior_sd": 0.5,
+      "cost_days": 0.5,
+      "keystones_required": [],
+      "_note": "Collecting (~2/200 resolved). A genuinely new mechanism class, so the diversity term rewards it; zero capital at risk while it collects."
+    },
+    {
+      "name": "rv_forward_shadow_ledger",
+      "family": "volatility",
+      "n_obs": 60,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 0.2,
+      "prior_sd": 0.5,
+      "cost_days": 0.2,
+      "keystones_required": [],
+      "_note": "LIVE forward confirmation of doc 291 (n>=60 bar, review-dead at 120)."
+    },
+    {
+      "name": "vol_score_risk_shaping",
+      "family": "volatility",
+      "n_obs": 2772,
+      "cluster_size": 12,
+      "icc": 0.2,
+      "prior_mean": 0.0,
+      "prior_sd": 0.3,
+      "cost_days": 3.0,
+      "keystones_required": ["regime_coverage"],
+      "_note": "Doc 291 Stage-1 gates passed but the mean point is negative and the proposal is HELD. prior_mean 0.0 records that honestly. Within-day clustering is heavy for a per-name risk overlay."
+    },
+    {
+      "name": "overnight_etf_excess_of_cash",
+      "family": "beta_carry",
+      "n_obs": 2772,
+      "cluster_size": 1,
+      "icc": 0.0,
+      "prior_mean": 0.1,
+      "prior_sd": 0.25,
+      "cost_days": 2.0,
+      "keystones_required": ["lower_requirement", "regime_coverage"],
+      "_note": "Doc 297 measured 1.03 bps/day excess-of-cash with an interval spanning zero, and computed 3,079 sessions to certify it beats a T-bill. 11 years is 2,772 - still short. Included so the planner says so rather than the analyst."
+    },
+    {
+      "name": "anomaly_vol_scale_monetisation",
+      "family": "anomaly_followup",
+      "n_obs": 2772,
+      "cluster_size": 12,
+      "icc": 0.2,
+      "prior_mean": 0.2,
+      "prior_sd": 0.6,
+      "cost_days": 8.0,
+      "keystones_required": ["regime_coverage"],
+      "_note": "Doc 290 left behind a durable positive: volatility SCALE is predictable (rho ~0.30, attack-survived) while direction is not. Recorded as an archive anomaly. Wholly new mechanism class, so the diversity term favours it heavily; prior_mean is low because doc 290 also judged it unmonetisable in this account."
+    }
+  ]
+}

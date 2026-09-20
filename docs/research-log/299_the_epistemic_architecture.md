@@ -1,0 +1,353 @@
+# 299 — The Epistemic Architecture
+
+**Date:** 2026-09-20
+**Status:** BUILT. One retro-validation hit, one procurement item, one finding that
+strengthens the no-edge thesis rather than weakening it.
+**Code:** `src/epistemics/` (closure, archive, eig, retro), `scripts/epistemics.py`,
+`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (60 tests)
+**Data:** `data/research/stepping_stones.jsonl` (25 records),
+`data/research/design_queue.json` (9 designs, priors declared)
+
+---
+
+## 0. Why this document exists
+
+The program has good machinery for judging a result and almost none for choosing a
+question. `trial_registry.py` prices a trial after it runs. Pre-registration freezes a
+spec before it runs. The mandatory adversarial fleet attacks it once it has run. But
+nothing has ever answered "should we run this at all, and what does running it cost
+everything else?" — and nothing has answered "we just built X; what did we give up on
+*because* we didn't have X?"
+
+Both gaps were filled here, by adopting three ideas from outside the program: Peircean
+abduction as bounded search over an explicit hypothesis space, Popperian severity as
+formalised by Mayo, and generalised Bayesian optimal experimental design. A fourth idea
+— an archive of stepping stones, where a failed experiment is retained with the specific
+missing piece that caused it to fail — turned out to be the one that paid.
+
+The first thing the architecture did was tell me I was wrong about what it would find.
+
+---
+
+## 1. The discrimination problem, applied to our own graveyard
+
+`ATTEMPTS_LEDGER.md` records its closures in a column called "verdict". Read closely,
+that column conflates two statements with nothing in common:
+
+> **Short door** — net negative after borrow.
+
+A measurement of the world. Borrow costs more than the effect is worth. Nothing we build
+changes it.
+
+> **Single-name RV-vs-IV @30d** — unblinded pass VOID, runner evaluated h=1 where the
+> prereg froze h=21.
+
+A measurement of *us*. The hypothesis was never actually asked.
+
+Both were filed as closures. Only the first is evidence about markets. `src/epistemics/
+closure.py` makes the distinction machine-checkable with eight classes, three of which
+are evidence about the market (`REFUTED_BY_NATURE`, `REFUTED_BY_COST`,
+`STRUCTURALLY_UNAVAILABLE`) and five of which are evidence about us. The taxonomy has no
+"failed" category, and it enforces two rules with teeth:
+
+* a closure that is a statement about us **must name the keystone it was missing**, or it
+  is filed as `ABANDONED` — honestly, rather than dressed up as a refutation;
+* `REFUTED_BY_NATURE` **requires a recorded effect and interval**, because it is the only
+  class that is evidence the edge does not exist.
+
+### What I expected, and what the measurement said
+
+I expected the graveyard to be mostly instrument limitations. The framing that motivated
+this work says a discard pile contains a thin seam of suppressed signal, and I went in
+expecting to find that "35 families closed, zero certified edges" was really "we never
+managed to ask most of these properly."
+
+It is not. Transcribing all 25 closures:
+
+| closure class | n | evidence about |
+|---|---|---|
+| `REFUTED_BY_NATURE` | 14 | the market |
+| `REFUTED_BY_COST` | 2 | the market |
+| `STRUCTURALLY_UNAVAILABLE` | 1 | the market |
+| `REFUTED_BY_ARITHMETIC` | 5 | us |
+| `VOIDED_BY_DEFECT` | 1 | us |
+| `ABANDONED` | 2 | us |
+
+**17 of 25 closures (68%) are measurements of the market.** Mean evidential weight 0.736.
+Only 6 name a keystone and can be re-opened mechanically, and 5 of those 6 revive on the
+same thing — a re-scoped requirement, which is Pierce's decision and not a build.
+
+This is the opposite of what an enthusiastic reading of the framework predicts, and it
+**strengthens the no-edge thesis**. The program's negative results are not an artifact
+of poor instruments. They are mostly measurements, and they mostly point the wrong way.
+
+### The honest caveat, which is also a finding
+
+Only **14 of 25** records are strictly admissible. Eleven claim `REFUTED_BY_NATURE`
+without a recorded effect size or interval. That does not mean those families were not
+measured — the measurements are in the documents. It means **the ledger does not carry
+them**, so none of those eleven can be retro-scored quantitatively without re-reading
+prose. Every future closure should be written with its measurement attached; the cost of
+doing so at burial time is a minute, and the cost of recovering it later is an afternoon
+per family.
+
+---
+
+## 2. The retro-validation engine, and the one thing it found
+
+`src/epistemics/retro.py` takes the capabilities the program currently has and returns
+the archived families whose stated blocker no longer holds. The program has done this
+twice by hand — the day_aggs Q1 rebuild (doc 278) that unblocked V-RACE from doc 273 and
+triggered the contamination sweep in doc 279, and the point-in-time shares-outstanding
+unblock (doc 295 → 298) that exhumed the LETF family. Both paid. Neither was found by
+searching; both were remembered, by luck.
+
+Two hard guards, because a program that re-opens closed families whenever a data feed
+arrives will re-derive the same losses with more decimal places:
+
+1. **Closures that are evidence about the market do not revive on capability.** A
+   keystone arriving cannot undo a measurement. Re-opening one requires an explicit,
+   argued market-structure claim, which is a decision for Pierce and not for a script.
+2. **A tight, wrong-signed interval scores near zero regardless of which keystone
+   arrived.** The gapper universe measured −2.041%/ticket with a day-blocked CI of
+   [−2.823, −1.226] across three separate years. No instrument upgrade makes that a
+   candidate again, and `_plausibility()` is written so that it cannot.
+
+### The hit: LETF close-window rebalance-flow harvest
+
+Running the engine against what the program now has surfaced five families revivable on
+`lower_requirement`. Four are re-derivations. One is not.
+
+The LETF family was closed in doc 298 on arithmetic: at 50% gross it needed a mean of
+**21.07 bps** in a 15-minute window whose measured sd is **15.06 bps** — annualised
+Sharpe 22.2 — and its validated ceiling was **6.0–8.6% of requirement**, under the ≥10%
+build filter. That closure was evaluated against the then-standing 0.1%/day target.
+
+The standing target is now **5 bps/day**. The requirement halves; the effect does not
+change. So:
+
+| gate | at 0.1%/day (as closed) | at 5 bps/day (current) |
+|---|---|---|
+| ceiling as % of requirement | 6.0–8.6% → **fails** ≥10% filter | 12.0–17.2% → **clears** |
+| ceiling-implied annualised Sharpe | 1.33–1.91 | 1.33–1.91 (unchanged) |
+
+The family clears the build filter it was killed by. The binding constraint has moved —
+and the new one is not arithmetic.
+
+### Where it now fails, and the procurement item that follows
+
+The operative multiplicity bar at 34 registered trials depends only on the trial count
+and the sample length. A 15-minute close window can only be measured on minute bars, and
+**`minute_aggs` covers 2024–2026 only — about 650 sessions** — where the daily warehouse
+was extended to 2016–2026 this cycle.
+
+| intraday sample | sessions | operative bar @34 trials | ceiling 1.91 clears? |
+|---|---|---|---|
+| `minute_aggs` 2024–2026 (**what is on disk**) | 650 | **2.347** | **no** |
+| extended to 2020 | 1,510 | 1.540 | yes, at the optimistic ceiling |
+| extended to 2016 (matching daily) | 2,772 | 1.137 | yes, at both ends |
+
+So the answer is not "LETF is revived". It is:
+
+> **The LETF close-window family is now blocked on one identified, bounded piece of
+> work: extending `minute_aggs` from 2024 back to 2016, matching the daily warehouse
+> that already exists.** Without it the family cannot clear the bar at any plausible
+> effect size. With it, its validated ceiling sits above the bar.
+
+Nobody finds that by remembering. It requires jointly noticing that the target changed,
+that the build filter therefore flipped, that the daily warehouse was extended but the
+minute warehouse was not, and that this family needs minute bars. Four facts, three
+documents, two repositories. That is what the archive is for.
+
+Three caveats, stated rather than buried. The 6.0–8.6% figure is a **ceiling**, not a
+measured mean with an interval, so 1.91 is an upper bound on the deliverable Sharpe. The
+15.06 bps window sd was measured on the 2024–2026 sample and LETF rebalance mechanics
+were not stationary over 2016–2026. And the family also needs point-in-time shares
+outstanding *back to 2016*, which doc 298 confirmed is served but not how far back.
+**All three are prerequisite checks, not results.** This is a pre-registration to write,
+not a finding to act on.
+
+The first real use of the archive also caught a defect in the archive: my LETF record
+originally named only `lower_requirement`, omitting the intraday-data keystone. The
+record was wrong in exactly the way the module exists to prevent. Corrected in the
+seeder and regenerated.
+
+---
+
+## 3. Pricing an experiment before it runs
+
+`src/epistemics/eig.py` computes, for a design specified before any data is touched:
+
+* **expected information gain**, closed-form under a Gaussian conjugate model —
+  `EIG = ½·ln(1 + ω·σ₀²/σₑ²)` nats;
+* **severity** — the probability the test would have failed had the hypothesis been
+  false. Popper via Mayo, as a number. An experiment that cannot fail cannot corroborate;
+* **the multiplicity toll** — the amount by which registering this trial raises the bar
+  for every other hypothesis in the queue.
+
+The toll is the part standard experimental design does not model, and in a program gated
+on a deflated Sharpe it is the dominant cost. Running a trial does not merely spend time;
+it permanently raises the threshold everything else must clear. At 34 trials the toll of
+one more is +0.0081 Sharpe on a 2-year sample, +0.0035 on 11 years. Small per trial, and
+the reason the bar is 2.6 today. **A trial with negligible information gain is not free
+and not harmless. It is a tax on every hypothesis still in the queue.**
+
+Two design decisions worth recording because both came from getting it wrong first.
+
+**The likelihood is tempered.** Classical EIG assumes the model is right; for market
+data it is not. Following generalised Bayesian OED, the likelihood carries an epistemic
+learning rate `ω ∈ (0,1]` that inflates the effective observation variance by `1/ω`. The
+default is `ω = 0.25` — a governance choice, not a measurement, set pessimistically on
+the program's own record of results that did not survive retest (docs 277, 296). `ω = 1`
+is the optimistic bound and the gap between the two is the honest uncertainty band.
+
+**A ceremonial test cannot be detected with an absolute threshold, and I tried.** My
+first implementation flagged a design as worthless if its certification probability was
+below 1% and its information gain negligible. Writing the test for it showed the flag
+never fires: under a tempered likelihood, `p_cert` for a null-prior design is very nearly
+**invariant in sample size**, because the bar and the estimator's spread both scale with
+the same standard error. Formally `bar/σₑ ≈ √ω·(E[max]/se + 1.645)`, in which `n_obs`
+cancels. At `ω=0.25` and 34 trials that pins `p_cert ≈ 2.9%` whether the sample is one
+year or twenty-five.
+
+That is the deflated-Sharpe point restated, and it is worth stating plainly because it
+contradicts the intuition the program has been running on: **more data does not buy
+protection from multiplicity. Fewer looks do.** More data lowers the bar, which is a
+different and real benefit — it is why the LETF calculation above turns on sample length
+— but it does not reduce the rate at which a null design certifies.
+
+The fix was to replace the absolute floor with a ratio: `informativeness = p_cert /
+p_false_positive`. A design whose pass is as likely under the null as under the prior
+proves nothing whichever way it lands. This is doc 290's standing rule — always
+rank-calibrate against the strong baseline, because a weak baseline manufactures lift —
+applied to the design rather than to a model. The baseline here is the null.
+
+### Running it on the actual queue
+
+`data/research/design_queue.json` holds the program's live and queued designs with their
+priors declared and committed — including, for each, why that prior and not another. At
+33 registered trials, ω=0.25:
+
+| design | EIG (nats) | lift | bar | verdict |
+|---|---|---|---|---|
+| `letf_..._if_minute_extended` | **0.344** | **14.67** | 1.14 | **INFEASIBLE** — needs `intraday_tape_pre_2020` |
+| `anomaly_vol_scale_monetisation` | 0.135 | 1.53 | 1.14 | ADMISSIBLE |
+| `sevp_event_vol_carry` | 0.144 | 3.29 | 1.73 | ADMISSIBLE |
+| `letf_close_window_retest` | 0.104 | 5.55 | 2.35 | ADMISSIBLE |
+| `overnight_etf_excess_of_cash` | 0.079 | 1.89 | 1.14 | ADMISSIBLE |
+| `kalshi_zero_capital_shadow` | 0.024 | 1.47 | 4.23 | CEREMONIAL |
+| `vol_score_risk_shaping` | 0.037 | 1.06 | 1.14 | CEREMONIAL |
+| `rv_forward_shadow_ledger` | 0.007 | 1.15 | 7.72 | CEREMONIAL |
+| `rocket_gate_forward_ledger` | 0.002 | 1.01 | 10.92 | CEREMONIAL |
+
+Two things fall out, and the second is unwelcome.
+
+**The most informative experiment available to the program is the one it cannot run.**
+The LETF re-test on an 11-year minute sample carries 0.344 nats — 2.4× the next best —
+and a lift of 14.67 against a next-best of 5.55. It is infeasible for exactly one reason:
+`minute_aggs` stops at 2024. The planner, which knows nothing about §2, independently
+prices the same procurement item, and prices it as the highest-value action on the board.
+
+**Four armed or queued collectors cannot produce a result that clears the promotion bar.**
+`rocket_gate_forward_ledger` (n=30, bar 10.92, lift 1.01) and `rv_forward_shadow_ledger`
+(n=60, bar 7.72, lift 1.15) are *currently collecting*. At those sample lengths the
+annualised-Sharpe standard error is 2.90 and 2.05, so the deflated bar sits at ten and
+eight Sharpe respectively, and a pass is essentially as likely under the null as under
+the prior.
+
+The necessary caveat: these collectors do not state their gates as Sharpe certifications.
+The rocket-gate's declared criterion is "CI-lo > 0 plus agreement across halves at n≥30",
+which is a weaker and perfectly coherent test. So the honest claim is not that they are
+badly designed for their stated purpose. It is this:
+
+> **An armed collector can pass its own stated gate and still not license deployment,
+> because its gate is weaker than the program's promotion bar.** Doc 275 killed
+> per-experiment p<0.05 as a promote criterion in prose. This prices the gap per
+> collector, in advance.
+
+That does not mean stopping them — they are nearly free, and a *negative* result from a
+cheap collector is still worth having, which is what the `UNDISCRIMINATING` verdict is
+for as distinct from `CEREMONIAL`. It means no result from any of them may be described
+as a pass without also stating the bar it did not clear.
+
+### Anti-mode-collapse
+
+`diversity_bonus()` rewards a design in an under-represented mechanism class and
+penalises one that crowds an already-dominant family. The program is a live example of
+why: doc 290 and doc 291 both concluded that *generic* features carried whatever signal
+was present and that momentum-x's own vocabulary contributed ≈0. That is the signature
+of a search that never left its neighbourhood. An entropy term in the acquisition policy
+would have flagged it years earlier.
+
+---
+
+## 4. The first-principles gate
+
+Between "revived" and "registered as a trial" sits `first_principles_gate()`, checking
+constraints no amount of modelling argues around: cost admissibility against true NBBO
+plus regulatory fees (never a Roll estimate — measured 0.56×–3.5× off and non-positive
+on 29.5% of ticker-days), executability at this broker, capacity against ADV, and the
+doc-293 ≥10%-of-requirement filter. Any argument left unsupplied is reported as
+`UNCHECKED` rather than silently passing, so a partial gate never reads as a full one.
+
+Its purpose is narrow and mercenary: stop a revived hypothesis consuming a registered
+trial — and therefore raising the bar for everything else — when it is already dead on
+arithmetic.
+
+---
+
+## 5. Method rules this adds
+
+1. **Every closure names its class and, if it is a statement about us, its keystone.**
+   A closure that cannot name one is an abandonment and is filed as `ABANDONED`.
+2. **`REFUTED_BY_NATURE` requires a recorded effect and interval.** Without them the
+   honest class is `UNDERPOWERED`. Eleven historical records fail this and are marked.
+3. **Anomalies are recorded at burial time.** A family dies on its primary endpoint
+   while leaving behind a result nobody asked for — doc 290's predictable volatility
+   scale, doc 289's conserved-but-decoupled attention, doc 297's T-bill double-count.
+   These are the program's least crowded source of hypotheses, because by construction
+   nobody was looking for them. `scripts/epistemics.py anomalies` lists all seven
+   currently recorded.
+4. **Retro-validate on every capability landing.** Not from memory. When a feed, a
+   sample extension, or a target re-scope lands, run `epistemics.py revive`.
+5. **Price a trial before registering it.** A design that is `CEREMONIAL` or
+   `UNDISCRIMINATING` must not be registered; it cannot teach and it raises the bar.
+6. **Market-evidence closures do not revive on capability.** Only on an argued
+   market-structure change, and that argument is Pierce's to make.
+
+---
+
+## 6. What this does not do
+
+It does not manufacture an edge. Under the doc-297 identity — `return ≡ deployment ×
+turns × net-per-ticket` — better epistemics operate on none of the three terms. What
+they do is stop the program spending trials on questions that cannot answer, and make
+sure that when a capability lands, the questions it unblocks are found by a query rather
+than by luck.
+
+The honest summary of the exercise: I built it expecting to find that the graveyard was
+full of questions we had asked badly, and found instead that 68% of it is measurement.
+The architecture's first real output was to make the program's negative result *harder*
+to dismiss, and to convert one arithmetic closure into a single, bounded, checkable
+procurement item. That is a smaller claim than the framing promised and a more useful one.
+
+---
+
+## 7. Open, in order
+
+1. **Extend `minute_aggs` 2024→2016** to match the daily warehouse. This is the top item
+   in the keystone census, the sole blocker on the one family the engine revived, and —
+   independently — the highest-EIG action the planner can see (0.344 nats, lift 14.67,
+   against a next-best of 0.144 / 5.55). Verify point-in-time shares-outstanding depth at
+   the same time; doc 298 confirmed the feed is served but not how far back.
+2. **Backfill effect sizes and intervals** onto the eleven non-admissible records, from
+   the documents. Until then those closures cannot be retro-scored.
+3. **Pre-register the LETF re-test** if and only if (1) succeeds, with an executable
+   prereg fixture per doc 296 and a declared prior.
+4. **Wire `epistemics.py revive` into the nightly capability check** so a landing feed
+   triggers the query automatically.
+5. **State the bar alongside any collector result.** Four armed or queued collectors
+   have gates weaker than the promotion bar; none of their outcomes may be reported as a
+   pass without the bar it did not clear.
+6. **Pierce:** the five `lower_requirement` revivals are live only because the target
+   moved to 5 bps/day. If the target moves again, re-run the query — in either direction.

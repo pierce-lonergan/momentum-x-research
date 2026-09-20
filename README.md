@@ -1,7 +1,7 @@
 # Momentum-X
 
 **A falsification-driven research program in systematic equity trading.**
-It ran for 298 documented experiments and did not find a tradeable edge — and the interesting part
+It ran for 299 documented experiments and did not find a tradeable edge — and the interesting part
 is how thoroughly it established that.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -41,6 +41,9 @@ The rules hardened over time, usually right after something went wrong. The curr
 | **Denominator honesty** | Day-clustered or block bootstrap everywhere. Within-day intraclass correlation in these universes is 0.09–0.35; treating stock-days as independent inflates significance by roughly 2.5x. |
 | **Death dates** | Every hypothesis gets an expiry. Bar-lowering and deadline-sliding are not remedies. |
 | **Re-tune = kill** | Any change to a live gate's code, target, universe or horizon after arming voids the arm. |
+| **Typed closures** | [`src/epistemics/closure.py`](src/epistemics/closure.py) — a closure must say whether it measured *the market* or measured *us*, and a non-market closure must name the capability it was missing. `REFUTED_BY_NATURE` requires a recorded effect and interval; without one the honest class is `UNDERPOWERED`. On transcription, 11 of 25 historical closures failed that check. |
+| **Experiments priced before they run** | [`src/epistemics/eig.py`](src/epistemics/eig.py) — expected information gain, severity, and the **multiplicity toll**: the bar increment a new trial levies on every other hypothesis in the queue. A design that can neither teach nor discriminate is refused, because running it only raises the bar. |
+| **Retro-validation on every capability landing** | [`src/epistemics/retro.py`](src/epistemics/retro.py) — when a feed or sample extension arrives, query the archive for the families that died *because* it was missing, rather than trying to remember them. Closures that measured the market are excluded by construction. |
 
 The counter is not decorative. At 33 registered trials, the Sharpe a result must clear to be
 distinguishable from the best of N coin flips:
@@ -74,6 +77,36 @@ A selection from [`docs/ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (35 famili
 NBBO: index ETFs 0.72 bps, mega caps 1.76, large caps 2.27 — against roughly 61 bps in the low-float
 universe the system originally traded. A large share of the null results turn out to be one
 cost-structure result rather than sixty independent failures of imagination.
+
+### Is the negative result real, or just badly instrumented?
+
+A fair challenge to any program that closes 35 families without a win: how many of those closures
+measured the *market*, and how many merely measured the limits of the author's own data and designs?
+The second kind is not evidence of no edge — it is evidence of an unasked question.
+
+`src/epistemics/` answers this by typing every closure. Of 25 transcribed closures:
+
+| | count | |
+|---|---|---|
+| refuted by nature — measured, adequately powered, absent or wrong-signed | 14 | evidence about the market |
+| refuted by cost — the gross effect may exist; frictions exceed it | 2 | evidence about the market |
+| structurally unavailable — the action cannot be taken from this account | 1 | evidence about the market |
+| refuted by arithmetic — never tested; the ceiling sits below the requirement | 5 | evidence about us |
+| voided by defect — the implementation did not match the frozen spec | 1 | evidence about us |
+| abandoned — stopped for reasons outside the epistemics, filed honestly | 2 | evidence about us |
+
+**68% is measurement.** Only six closures can be re-opened by acquiring a capability, and five of
+those turn on the account-level target rather than on any data the program could buy. Running the
+exercise was an attempt to weaken the headline claim; it strengthened it.
+
+The check also cuts the other way, which is the point of building it rather than asserting it.
+Eleven of the twenty-five records claim `REFUTED_BY_NATURE` with **no effect size or interval
+recorded in the ledger** — the measurements are in the documents but not where a machine can reach
+them, so those families cannot be re-scored without re-reading prose. And one family (the LETF
+close-window harvest) turned out to have been killed by a requirement that has since halved: it now
+clears the build filter it failed, and is blocked instead on a specific, bounded gap — minute bars
+exist only for 2024–2026 where the daily warehouse reaches back to 2016. That is a procurement item
+found by query, not by memory, which is the whole reason the archive exists.
 
 ## The self-correction record
 
@@ -127,11 +160,14 @@ paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound ru
 ```
 docs/ATTEMPTS_LEDGER.md    every hypothesis family, its verdict, and the doc that closed it
 docs/TARGET.md             the requirements ledger - what a result must clear, and why
-docs/research-log/         298 research documents, 00-297, in chronological order
+docs/research-log/         299 research documents, in chronological order (no 298)
 docs/research-log/README.md  a curated reading path through them
 scripts/trial_registry.py  the multiplicity counter
+scripts/epistemics.py      CLI: discriminate, keystones, anomalies, revive, bar, plan
+src/epistemics/            typed closures, the stepping-stone archive, EIG planning
+data/research/             the trial registry and the stepping-stone archive, as JSONL
 src/                       the trading system: agents, execution, risk, monitoring
-tests/                     272 test files including property-based and differential suites
+tests/                     267 test files including property-based and differential suites
 ```
 
 **If you read only three documents:** [`ATTEMPTS_LEDGER.md`](docs/ATTEMPTS_LEDGER.md) (what was

@@ -1,6 +1,6 @@
 # The research log
 
-298 documents, numbered 00–297, written in chronological order as the work happened. Each one records
+299 documents, written in chronological order as the work happened. Each one records
 what was attempted, what was measured, and what the measurement licensed concluding — including, often,
 that an earlier document was wrong.
 
@@ -11,7 +11,7 @@ truth and everything here is subordinate to them.
 
 ## A reading path
 
-You do not need to read 298 documents. This is the spine of the argument, in order:
+You do not need to read 299 documents. This is the spine of the argument, in order:
 
 | # | Document | Why it matters |
 |---|---|---|
@@ -27,10 +27,20 @@ You do not need to read 298 documents. This is the spine of the argument, in ord
 | 294 | [`armed_and_blind`](294_armed_and_blind.md) | Pre-registration in its mature form: gates frozen and hashed, death dates set, and a refusal to compute any statistic before coverage certifies. |
 | 296 | [`the_wrong_horizon`](296_the_wrong_horizon.md) | The most instructive document in the repository. The first result to pass every frozen gate is **voided** — the runner used a 1-day horizon where the hashed spec said 21. Produces the executable-fixture rule. |
 | 297 | [`the_cost_result`](297_the_cost_result.md) | The synthesis. Roughly sixty null results turn out to be one cost-structure result, and a passive index position outperforms the whole program. |
+| 299 | [`the_epistemic_architecture`](299_the_epistemic_architecture.md) | Types the graveyard, asking of each closure whether it measured the market or measured us. 68% is measurement — which makes the negative result harder to dismiss, not easier. Adds the multiplicity toll: what registering one more trial costs every other hypothesis. |
 
 ## How the numbering works
 
-Documents 00–174 cover build-out, instrumentation, and early results; 175–297 cover the falsification
+**There is no document 298.** The numbers run 00–297 and then 299. The closures attributed
+to "doc 298" in [`../ATTEMPTS_LEDGER.md`](../ATTEMPTS_LEDGER.md) — passive liquidity
+provision, single-name option short-volatility, and the LETF close-window harvest — were
+made during that work cycle and recorded directly in the ledger; the narrative write-up was
+never produced. Fourteen citations across the repository point at it. The ledger entries
+themselves carry the measurements, so nothing is lost, but a reader looking for the document
+should stop looking.
+
+
+Documents 00–174 cover build-out, instrumentation, and early results; 175–299 cover the falsification
 arc, where the program turned its instruments on its own conclusions. The split is historical rather
 than principled — the discipline tightened continuously, usually immediately after something went wrong.
 
