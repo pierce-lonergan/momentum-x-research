@@ -62,7 +62,11 @@ this work says a discard pile contains a thin seam of suppressed signal, and I w
 expecting to find that "35 families closed, zero certified edges" was really "we never
 managed to ask most of these properly."
 
-It is not. Transcribing all 25 closures:
+It is not. The ledger tracks **35 families**: 22 CLOSED, 4 FILTERED, 5 OPEN, 4 QUEUED.
+The archive holds the 22 closures plus 3 of the 4 filtered — the fourth is the LETF
+family's earlier BLOCKED-AT-$0 state, superseded by its own CLOSED entry, and counting it
+twice would double-count one family. Hence **25**. The 9 open and queued families have no
+closure to type yet. Transcribing all 25:
 
 | closure class | n | evidence about |
 |---|---|---|
@@ -273,11 +277,26 @@ as a pass without also stating the bar it did not clear.
 ### Anti-mode-collapse
 
 `diversity_bonus()` rewards a design in an under-represented mechanism class and
-penalises one that crowds an already-dominant family. The program is a live example of
-why: doc 290 and doc 291 both concluded that *generic* features carried whatever signal
-was present and that momentum-x's own vocabulary contributed ≈0. That is the signature
-of a search that never left its neighbourhood. An entropy term in the acquisition policy
-would have flagged it years earlier.
+penalises one that crowds an already-dominant family.
+
+**And here the measurement contradicted my framing for the second time.** I wrote this
+term expecting to show the program's search had collapsed into one neighbourhood. It has
+not. The 25 archived closures spread across 10 mechanism classes at entropy **2.068 nats
+against a uniform maximum of 2.303 — 89.8% of maximum**, with the largest class (per-name
+price/momentum) at only 8 of 25.
+
+The thing I was conflating it with is real but different. Doc 290 and doc 291 both found
+that *generic* features carried whatever signal was present and that momentum-x's own
+vocabulary contributed ≈0. That is concentration in **feature** space, inside the families
+that were tested. It is not concentration in **hypothesis** space, and the entropy term
+does not measure it. Two distinct failure modes with similar-sounding names; only the
+first one is what this guards.
+
+So the term stays, as a guard on future selection rather than a diagnosis of past
+selection. One caveat on the number itself: entropy depends on how finely the classes are
+cut, and the assignment in `data/research/design_queue.json` is a hand-made judgement — a
+coarser taxonomy would show more concentration. The histogram ships with the number for
+exactly that reason.
 
 ---
 

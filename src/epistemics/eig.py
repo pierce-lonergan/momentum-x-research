@@ -5,8 +5,8 @@ The gap this closes
 `scripts/trial_registry.py` prices a trial *after* it runs: it counts how many
 times the program has looked and raises the bar accordingly. Nothing prices a
 trial *before* it runs. Experiments have been chosen by narrative interest —
-which is how a program ends up with 33 closures clustered in four mechanism
-classes and a bar it can no longer clear.
+which is how a program ends up having spent 33 trials and raised its own bar
+beyond what any of them could clear.
 
 Two quantities, computed here, change that.
 
@@ -395,9 +395,25 @@ def diversity_bonus(
 
     Guards against the failure mode the framework calls mode collapse: a search
     that keeps re-testing minor variants of one mechanism while leaving the rest
-    of the space uncharted. The program is a live example — doc 290 and doc 291
-    both concluded that *generic* features carried whatever signal was present,
-    which is the signature of a search that never left its neighbourhood.
+    of the space uncharted.
+
+    Measured on this program, that has NOT happened at the level of mechanism
+    class. The 25 archived closures spread over 10 classes with entropy 2.068
+    nats against a uniform maximum of 2.303 — 89.8% of maximum, with the largest
+    class (per-name price/momentum) at only 8 of 25. The term is a guard for
+    future selection, not a diagnosis of past selection, and saying otherwise
+    would be the easy and wrong reading.
+
+    What doc 290 and doc 291 found is a different thing that is easy to conflate
+    with it: within the families that were tested, *generic* features carried
+    whatever signal was present and momentum-x's own vocabulary contributed
+    about nothing. That is concentration in feature space, not in hypothesis
+    space, and this function does not measure it.
+
+    Note also that the entropy depends on how finely classes are cut, and the
+    assignment in `data/research/design_queue.json` is a hand-made judgement. A
+    coarser taxonomy would show more concentration. The number is reported with
+    its histogram for that reason.
 
     Returns lam * (H_after - H_before), which is positive for an
     under-represented family and slightly negative for an over-represented one.
