@@ -128,28 +128,50 @@ engineering in the project:
 
 ## Engineering
 
-74.5k lines across 218 modules and 272 test files, with a discovery stack that gates every commit:
-property-based state machines over the execution bridge, differential testing, static analysis for
+76k lines across 224 modules in `src/`, plus 83k lines across 267 test files, with a discovery
+stack that gates every commit: property-based state machines over the execution bridge, differential testing, static analysis for
 project-specific bug classes, Bayesian changepoint detection on the equity curve, and a nightly
 config-truth reconciliation comparing intended configuration against what the broker actually did.
 That last one fired nine genuine breaches on the day it was first enabled.
 
-### The test suite, honestly
+### The test suite
 
-`pytest -m "not slow"` runs 4,500+ tests. It is **not fully green**, and the README would be worth
-less if it claimed otherwise. Current state and what the failures are:
+`pytest -m "not slow"` runs in about 7 minutes and is green:
 
 | | count |
 |---|---|
-| passing | 4,466 |
-| failing | 46 |
+| passed | 4,569 |
+| skipped | 26 |
+| xfailed | 3 |
+| **failed** | **0** |
 
-Every remaining failure is a **test** that encodes an older shape of the system, not a defect in the
-system: fixtures built before a dependency was added, assertions hardcoding a schema list that has
-since grown, and order-dependent state leakage between tests. Where a failure did indicate a real
-bug it has been fixed — a `NameError` that crashed every sub-$500M candidate, a stop-loss
-calculation that could go negative and leave a position unprotected, and two cwd-dependent paths
-that broke whenever a script was launched from anywhere but the repo root.
+It was not green a short time ago — 83 tests failed. Almost all of them were tests
+encoding an older shape of the system rather than defects in it: fixtures built before a
+dependency was added, assertions freezing a schema list that has since grown, a stop-loss
+test written before the semantics changed, and a large block of order-dependent failures
+from `asyncio.get_event_loop()` reading a process-global loop that any earlier
+`asyncio.run()` had destroyed.
+
+Working through them surfaced seven real defects, which is the argument for doing it:
+
+- A `NameError` on the micro-cap path that crashed **every** candidate under $500M market
+  cap — the low-float universe the system was built to trade.
+- Stop-losses computed as `price - 1.5*ATR` with no floor went negative on volatile names,
+  producing unplaceable stop orders and silently unprotected positions.
+- The LLM-arena parser's last-resort salvage returned a safe NEUTRAL default *and*
+  reported `parse_success=True`. Since `scoring.py` builds a `parse_success_delta` from
+  that rate to compare prompt variants, it pinned the metric at 1.0 for every model and
+  made the comparison structurally meaningless.
+- Incidents synthesised for a past session were filed under the current date.
+- A retrain script with a hardcoded log path appended to a tracked research document on
+  every run of the fast suite.
+- Two cwd-dependent relative paths that wrote to the wrong place whenever a script was
+  launched from anywhere but the repo root — which is how the scheduled tasks start.
+- A repo-walking static-analysis test that traversed the multi-GB market-data warehouse,
+  hanging the suite.
+
+Three of those were found only because a test failed for the *wrong reason* and the reason
+was worth chasing.
 
 The static-analysis ratchets (`tests/static_analysis/`) are green and worth a look: they are
 "no new violations" gates with a committed baseline, covering silent exception handlers, relative
