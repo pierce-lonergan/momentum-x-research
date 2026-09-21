@@ -195,6 +195,14 @@ documents, two repositories. That is what the archive is for.
 > the start of 2024) and ~2,690 after a 2016 backfill. The bars move from 2.347/1.137 to
 > 2.319/1.154. **No sign changes: the ceiling sits below the bar now and above it after.**
 
+> **RESOLVED (2026-09-21).** The paragraph below flagged the 2× rescale as
+> under-determined. It is now determined, from commit timestamps rather than from the
+> 21.07 ≈ 2 × 10 inference: doc 297 set 0.1%/day at 2026-07-28 20:16 (`2af6f12`), the LETF
+> CLOSED verdict and its 21.07 bps figure were committed 2026-07-29 (`f411a28`), and doc
+> 298 set 5 bps/day at 2026-08-02 15:38 (`f4b743c`). The closure belongs to the 0.1%/day
+> era. **The requirement halves and the ≥10%-filter claim is unconditional.** The caveat
+> below is kept rather than deleted, because how it was resolved is the useful part.
+
 **A load-bearing assumption that the audit would not let stand.** The table above halves
 the requirement on the premise that the LETF closure was evaluated against a 0.1%/day
 target, inferred from 21.07 ≈ 2 × 10 bps. That inference is **under-determined**: 21.07 is

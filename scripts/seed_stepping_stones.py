@@ -22,11 +22,32 @@ record, is worse than a missing one - because the missing one is visible. If a
 number is not in the source, the field stays empty and the record stays
 inadmissible.
 
-For the same reason `closed_on` is now empty on every record: ATTEMPTS_LEDGER.md
-carries no dates, and the dates originally written here were invented. Several
-were also logically impossible, placing a closure before the document that made
-it. Recovering real dates means reading the cited documents; until then the field
-is honestly blank.
+`closed_on` is now SOURCED FROM GIT, not from a guess. ATTEMPTS_LEDGER.md carries
+no dates in its text, so the first version of this file invented all 25 - several
+of them logically impossible, placing a closure before the document that made it.
+The honest source was there all along: the commit that first recorded each row.
+
+Two semantics, and the data says which is which:
+  "2026-07-29"    EXACT. The commit added this row when the decision was made.
+  "<=2026-07-12"  UPPER BOUND. Commit 03b0432 created ATTEMPTS_LEDGER.md and
+                  backfilled 16 closures that already existed in docs 230-292,
+                  so its date bounds those closures from above rather than
+                  dating them. Narrowing one means reading its cited document.
+
+The "<=" prefix is in the value deliberately. Storing an upper bound in a field
+called `closed_on` without saying so is the same over-claim that produced the
+fabrications this docstring warns about - a bound is not a measurement, and it
+should not be possible to read it as one.
+
+One hazard found while doing this, worth stating because it bit on the first
+pass: a family whose ledger row CHANGED STATE has several commit dates, and the
+first one dates the wrong event. LETF close-window appears three times - FILTERED
+(BLOCKED-AT-$0), then CLOSED, then QUEUED - and its first appearance is
+2026-07-12, which is four days before doc 297 set the target its closure was
+evaluated against. Dating that record 2026-07-12 would have made the closure
+appear to predate the directive it depends on. It is dated 2026-07-29, from the
+commit carrying the CLOSED verdict and the 21.07 bps figure. Date the EVENT the
+record represents, not the family's first mention.
 
 Run with --check to validate without writing.
 
@@ -58,7 +79,7 @@ def _stones() -> list[dict]:
             rationale="No edge across every horizon and universe tested. The most "
                       "heavily attacked family in the corpus.",
             docs=["250-261", "283"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Exit-timing optimization (AUC to dollars)",
@@ -71,7 +92,7 @@ def _stones() -> list[dict]:
                          "our own fills, at size, in the target regime",
                          "whether the modelled exit is achievable at our size")],
             docs=["230-234"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Loss-cap / re-framed exit variants (b1/b2, c2)",
@@ -79,7 +100,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No edge in any variant.",
             docs=["236", "239"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Rocket ex-ante selection (tick/OFI/tape microstructure)",
@@ -87,7 +108,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Right tail is ex-ante random; the cross-regime money gate fails.",
             docs=["BET#3", "242-248"],
-            closed_on="",
+            closed_on="<=2026-07-12",
             anomalies=["Right-tail membership is random ex-ante but strongly "
                        "autocorrelated ex-post — the asymmetry itself was never explained."],
         ),
@@ -97,7 +118,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No transferable signal.",
             docs=["248", "256-257"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Catalyst/news amplification (PEAD Stage A/B, filing text)",
@@ -105,7 +126,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Gate fails.",
             docs=["259-260"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Coiled-catalyst / prior-runner patterns",
@@ -114,7 +135,7 @@ def _stones() -> list[dict]:
             rationale="No edge on a clean forward test — the strongest design in this "
                       "group, which is why the null is credible.",
             docs=["254"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Multi-day candidacy / dilution signal",
@@ -122,7 +143,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No edge.",
             docs=["258"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Binary-event handicapping (catalyst calendar)",
@@ -133,7 +154,7 @@ def _stones() -> list[dict]:
                          "a re-scoped account-level target",
                          "the feasibility arithmetic at the standing target")],
             docs=["261"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Blanket exit-posture flip (incl. overnight carry)",
@@ -142,7 +163,7 @@ def _stones() -> list[dict]:
             rationale="Null-to-negative; the overnight arm is the one robustly negative "
                       "component. Doc-69's '+$23K' evaporated on a clean book.",
             docs=["280"],
-            closed_on="",
+            closed_on="<=2026-07-12",
             anomalies=["Overnight carry is the single most robustly negative arm found "
                        "anywhere in the program — a durable effect pointing the wrong way."],
         ),
@@ -161,7 +182,7 @@ def _stones() -> list[dict]:
                          "pricing the door at any other broker")],
             effect=-0.6,
             docs=["283-284", "288"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Cohort-relational selection (within-cohort position)",
@@ -170,7 +191,7 @@ def _stones() -> list[dict]:
             rationale="Pre-registered channel-capacity test: cohort-to-winner channel is "
                       "approximately empty; the whisper is unbankable.",
             docs=["289"],
-            closed_on="",
+            closed_on="<=2026-07-12",
             anomalies=["Attention is conserved and condenses winner-take-all, but is "
                        "DECOUPLED from price. Structure exists in the wrong observable — "
                        "the most interesting unexplained result in the corpus."],
@@ -190,7 +211,7 @@ def _stones() -> list[dict]:
             # but the ledger does not carry the measurement that licenses the
             # strongest class.
             docs=["289-290", "292"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="H-LOCAL / micro-regime vector-DB retrieval",
@@ -200,7 +221,7 @@ def _stones() -> list[dict]:
                       "a weak-baseline artifact; roughly four neighbourhoods exist and "
                       "they lie on one smooth surface.",
             docs=["290"],
-            closed_on="",
+            closed_on="<=2026-07-12",
             anomalies=["Volatility SCALE is predictable (rho ~0.30, attack-survived) "
                        "while direction is not. Durable, positive, and unmonetisable in "
                        "this account — found inside a refutation."],
@@ -216,7 +237,7 @@ def _stones() -> list[dict]:
                          "a re-scoped account-level target",
                          "the concentration arithmetic at the standing target")],
             docs=["290", "TARGET.md"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Short-tenor (<=9d) RV forecasting vs IV",
@@ -224,7 +245,7 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Sign-negative.",
             docs=["292"],
-            closed_on="",
+            closed_on="<=2026-07-12",
         ),
         dict(
             family="Passive liquidity provision / maker rebates (~10 hypotheses)",
@@ -241,7 +262,7 @@ def _stones() -> list[dict]:
                          "order routing that reaches a rebate-paying exchange",
                          "earning any maker rebate at all")],
             docs=["298"],
-            closed_on="",
+            closed_on="2026-07-29",
         ),
         dict(
             family="Single-name option short-volatility (all defined-risk forms)",
@@ -254,7 +275,7 @@ def _stones() -> list[dict]:
             ci=(-9.9, -3.1),
             n_obs=1175,
             docs=["298"],
-            closed_on="",
+            closed_on="2026-07-29",
         ),
         dict(
             family="LETF close-window rebalance-flow harvest",
@@ -276,7 +297,11 @@ def _stones() -> list[dict]:
                          "bars, and minute_aggs covers 2024-2026 only (~650 "
                          "sessions) where the daily warehouse covers 2016-2026")],
             docs=["295", "298"],
-            closed_on="",
+            # 2026-07-29 (f411a28), the commit carrying the CLOSED verdict and the
+            # 21.07 bps figure - NOT 2026-07-12, which is this family's earlier
+            # BLOCKED-AT-$0 row. A family whose ledger row changed state has
+            # several dates and "first appearance" dates the wrong event.
+            closed_on="2026-07-29",
             anomalies=["The only family in the corpus that turned out BETTER powered than "
                        "expected. Worth understanding why the power intuition was wrong."],
         ),
@@ -303,7 +328,7 @@ def _stones() -> list[dict]:
             # without it, and that weakness is the true state of the evidence.
             effect=1.03,
             docs=["297"],
-            closed_on="",
+            closed_on="2026-07-28",
             anomalies=["A third of the sleeve's apparent net return was T-bill interest "
                        "double-counted as strategy alpha. Worth auditing whether any "
                        "other measured sleeve carries the same double-count."],
@@ -321,7 +346,7 @@ def _stones() -> list[dict]:
             ci=(-2.823, -1.226),
             n_obs=4851,
             docs=["250-261", "297"],
-            closed_on="",
+            closed_on="2026-07-28",
         ),
         dict(
             family="Single-name RV-vs-IV @30d tenor (Stage 3 + conditional VRP ladder)",
@@ -342,7 +367,7 @@ def _stones() -> list[dict]:
                          "an untainted certification on this panel")],
             effect=-4.43,
             docs=["294", "296"],
-            closed_on="",
+            closed_on="2026-07-13",
             anomalies=["The first result to pass every frozen gate in the program's "
                        "history, voided by an implementation detail. The pass itself is "
                        "evidence about the gate's reachability, not about volatility."],
@@ -357,7 +382,7 @@ def _stones() -> list[dict]:
                          "a re-scoped account-level target",
                          "the >=10%-of-requirement build filter")],
             docs=["293"],
-            closed_on="",
+            closed_on="2026-07-12",
         ),
         dict(
             family="Market-neutral 3-sigma residual-reversion spreads on liquids",
@@ -368,7 +393,7 @@ def _stones() -> list[dict]:
                       "requires doc-289/290-class novelty plus Pierce's sign-off. Filed "
                       "as abandoned rather than refuted because it was never measured.",
             docs=["293"],
-            closed_on="",
+            closed_on="2026-07-12",
         ),
         dict(
             family="Adversary NULL-CERT blanket certificate",
@@ -377,7 +402,7 @@ def _stones() -> list[dict]:
             rationale="Rejected as premature — its shape-(b) bound missed the event-vol "
                       "channel. The Stage-3 dated accept/kill payload was salvaged.",
             docs=["293"],
-            closed_on="",
+            closed_on="2026-07-12",
         ),
     ]
 

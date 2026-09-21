@@ -46,9 +46,16 @@ converts a validator that detects missing evidence into a machine that manufactu
 visible.**
 
 All three are removed. Strictly-admissible records drop **14 → 13** and the
-cannot-be-retro-scored count rises **11 → 12**. `closed_on` is blank everywhere, which
-also removes the only machine-readable field that could have settled the target-era
-question in §3. `seed_stepping_stones.py` now carries the rule explicitly.
+cannot-be-retro-scored count rises **11 → 12**. `seed_stepping_stones.py` now carries the
+rule explicitly.
+
+`closed_on` was blanked first, and then — later the same cycle — **repopulated from the
+right source**: the commit that first recorded each row in `ATTEMPTS_LEDGER.md`. Nine are
+exact; sixteen carry a `<=` prefix because commit `03b0432` created the ledger and
+backfilled closures that already existed in docs 230-292, so its date bounds them from
+above rather than dating them. The prefix is in the value on purpose — storing a bound in
+a field called `closed_on` without saying so is the same over-claim that produced the
+fabrications above. See §7 item 3 for what that field then settled.
 
 ## 2. The invariance was attached to the wrong quantity
 
@@ -119,12 +126,12 @@ edit, so they do not rest on the harness. The remainder — including claimed de
 `first_principles_gate` boundary behaviour, and several mutation-survivable functions —
 are recorded and unresolved.
 
-Also unresolved, and flagged here because doc 299 acts on it: **the LETF revival's 2×
-requirement rescale is under-determined.** It assumes the closure was evaluated against a
-0.1%/day target, inferred from 21.07 ≈ 2 × 10 bps. `TARGET.md` records a target that moved
-twice in the relevant period. The *procurement conclusion* survives either way because it
-is driven by the bar rather than the requirement, but the "clears the ≥10% build filter"
-claim is conditional.
+One finding flagged here as unresolved was **resolved later the same cycle**: the LETF
+revival's 2× requirement rescale. The audit was right that doc 299's inference — from
+21.07 ≈ 2 × 10 bps — did not establish it. But commit timestamps do, and they agree with
+doc 299: see §7 item 3. The `≥10%` build-filter claim is now unconditional. Recorded here
+rather than deleted, because "under-determined by the evidence offered" and
+"under-determined" are different claims, and the audit only ever established the first.
 
 ## 5. What survived
 
@@ -169,10 +176,40 @@ And a second, narrower one:
 
 ## 7. Open
 
-1. Re-run the audit's verification pass — 79.6% of findings are unadjudicated.
-2. Resolve the `_plausibility` dead-code claim: if every wrong-signed record is also market
-   evidence, the guard doc 299 cites never executes on real data.
-3. Settle which target era the LETF closure belongs to, which makes the §3 build-filter
-   claim unconditional or kills it.
+1. Re-run the audit's verification pass — 79.6% of findings are unadjudicated. **IN
+   PROGRESS 2026-09-21**, resumed from cache.
+2. ~~Resolve the `_plausibility` dead-code claim.~~ **RESOLVED 2026-09-21, and it was worse
+   than the audit claimed.** Not merely dead on the wrong-signed branch: all six reachable
+   records have no interval at all, so `_plausibility` was a *constant function* returning
+   0.5 and contributing nothing to the ranking. It also never read `effect`, so Stage-3
+   RV-vs-IV — measured wrong-signed at −4.43 and reachable — scored the same as a family
+   never measured. Both fixed; a test now pins the unreachability so it fails if a record
+   ever does reach the branch.
+3. ~~Settle which target era the LETF closure belongs to.~~ **RESOLVED 2026-09-21 — doc
+   299's inference was correct, and the evidence was in git all along.** Commit timestamps:
+   doc 297 set 0.1%/day at 2026-07-28 20:16 (`2af6f12`); the LETF CLOSED verdict and its
+   21.07 bps figure were committed 2026-07-29 (`f411a28`); doc 298 set 5 bps/day at
+   2026-08-02 15:38 (`f4b743c`). The closure sits one day after the 0.1%/day directive and
+   four days before 5 bps/day, so the requirement really was 10 bps/day and the 2× rescale
+   holds. **The "clears the ≥10% build filter" claim is now unconditional.** The audit was
+   right that it was under-determined *by the evidence doc 299 offered* — it just was not
+   under-determined by the repository.
 4. Backfill real effect sizes and intervals for the 12 inadmissible records, from the
-   documents — now the only honest way to raise that count.
+   documents — still the only honest way to raise that count. **The DATE half is done**:
+   all 25 `closed_on` values are now sourced from the commit that first recorded each row,
+   with `<=` marking the 16 that are upper bounds rather than dates (commit `03b0432`
+   created the ledger and backfilled closures that already existed in docs 230-292).
+
+### A method point that came out of item 3
+
+Git history is the provenance record the fabricated dates were pretending to be. Had the
+archive carried real dates from the start, item 3 would have been a one-line query instead
+of an archaeology exercise — which is the argument for the `closed_on` field existing at
+all, and against filling it with anything unsourced.
+
+One hazard, because it bit on the first pass: **a family whose ledger row changed state has
+several commit dates, and the first one dates the wrong event.** LETF appears three times
+(FILTERED → CLOSED → QUEUED) and its first appearance is 2026-07-12 — four days *before*
+the directive its closure depends on. Dating it there would have made the closure appear to
+predate the target it was evaluated against, manufacturing a contradiction out of nothing.
+Date the event the record represents, not the family's first mention.
