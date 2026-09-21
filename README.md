@@ -150,7 +150,7 @@ That last one fired nine genuine breaches on the day it was first enabled.
 
 | | count |
 |---|---|
-| passed | 4,571 |
+| passed | 4,601 |
 | skipped | 26 |
 | xfailed | 3 |
 | **failed** | **0** |

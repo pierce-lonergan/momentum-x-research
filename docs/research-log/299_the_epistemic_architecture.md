@@ -4,7 +4,7 @@
 **Status:** BUILT. One retro-validation hit, one procurement item, one finding that
 strengthens the no-edge thesis rather than weakening it.
 **Code:** `src/epistemics/` (closure, archive, eig, retro), `scripts/epistemics.py`,
-`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (64 tests)
+`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (92 tests)
 **Data:** `data/research/stepping_stones.jsonl` (25 records),
 `data/research/design_queue.json` (9 designs, priors declared)
 
