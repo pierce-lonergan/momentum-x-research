@@ -196,18 +196,49 @@ document called wrong. A prose correction that leaves the artifact stale is doc 
 failure mode wearing a different hat. Both are now measured values, and the published
 table is regenerated from the file.
 
-Two further gaps, recorded and not yet closed:
+### 4d. Both of the critic's remaining gaps, closed — and a dead branch found doing it
 
-* **Mutation score 27%** — the critic built an isolated copy and ran 41 mutations; 30
-  survived. Four of those are now killed by the tests added above; the rest are not.
-  Notably `triage()` — the function this document tells you to run after any capability
-  lands — has **zero** coverage, and every `to_dict()` is uncovered, so the entire
-  published JSON shape is untested.
-* **`UNDISCRIMINATING` has never been emitted by any execution path in this repository.**
-  Only three of the six verdict tokens are producible from the live queue
-  (`ADMISSIBLE`, `CEREMONIAL`, `INFEASIBLE`). §3 above leans on the
-  `UNDISCRIMINATING`-versus-`CEREMONIAL` distinction to justify keeping four collectors
-  armed — resting an argument on a branch that has never fired.
+**Mutation score 27% → 100% on 22 targeted mutations.** The critic built an isolated copy,
+ran 41 mutations and reported 30 surviving. Working through its list: 22 distinct
+mutations, all killed. Tests 69 → 92; coverage `eig.py` 83% → **95%**, `retro.py` 92% →
+**96%**, total **96%**, with `triage()` and every `to_dict()` now covered.
+
+Two of the mutations survived my *first* attempt at killing them, and both failures were
+mine rather than the code's — worth recording because they are a distinct error class from
+anything else in this document:
+
+* **"Drop the square"** survived a test that asserted the exactly correct EIG value. I had
+  chosen σ₀ = 0.5 with se = 0.5, so `σ₀/σₑ = 1.0` and `1.0² = 1.0` — the square is a no-op
+  at precisely that point. A true assertion at the one input where the thing it means to
+  pin is invisible. Fixed by moving to σ₀ = 1.0 (ratio 4, EIG = ½·ln5) and adding a
+  quadratic-scaling check.
+* **`effect is None or ci is None` → `and`** survived because no test had a record with a
+  point estimate and no interval. That is exactly the state the exit-timing record is in.
+
+The lesson generalises past this module: **a test can assert a true value and still pin
+nothing.** Coverage said those lines were exercised; only mutation showed they were not
+constrained.
+
+**`UNDISCRIMINATING` was never emitted — and the reason was worse than the report.** The
+critic said only three of six verdict tokens are producible from the live queue. Probing
+every branch for reachability found that **`INFORMATIVE BUT UNCERTIFIABLE` was unreachable
+by construction**: its guard is `p_cert < 0.01 <= eig`, but `p_cert < 0.01` implies
+`p_cert < 1.5 × p_fp = 0.0446`, which implies `informativeness < 1.5` — so the more
+general `UNDISCRIMINATING` branch always returned first and swallowed the more specific
+one. Reordered so the specific test runs first. All six branches now have a witness:
+
+| verdict | witness |
+|---|---|
+| `INFEASIBLE` | a missing required keystone |
+| `CEREMONIAL` | n=252, prior (0.0, 0.05) — eig 0.000, lift 1.00 |
+| `INFORMATIVE BUT UNCERTIFIABLE` | n=1008, prior (**−1.0**, 0.6) — needs a *negative* prior mean, because `p_cert ≥ p_fp` whenever the prior mean is non-negative |
+| `UNDISCRIMINATING` | n=252, prior (0.0, 0.9) — eig 0.092, lift 1.44 |
+| `NEGATIVE-SUM` | the same design against a 200-deep queue of high-prior designs; at 50 deep it is ADMISSIBLE |
+| `ADMISSIBLE` | n=252, prior (0.2, 0.9) — eig 0.092, lift 1.74 |
+
+So §3's appeal to the `UNDISCRIMINATING`-versus-`CEREMONIAL` distinction is sound in
+principle, and was resting on a branch that had never fired. It fires now, and a test
+asserts all six labels are simultaneously producible and distinct.
 
 ## 5. What survived
 

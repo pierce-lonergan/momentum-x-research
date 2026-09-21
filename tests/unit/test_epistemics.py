@@ -32,7 +32,7 @@ from src.epistemics.eig import (
     rank,
     shannon_entropy,
 )
-from src.epistemics.retro import find_revivals, first_principles_gate
+from src.epistemics.retro import find_revivals, first_principles_gate, triage
 
 
 # ── The taxonomy ─────────────────────────────────────────────────────────
@@ -101,6 +101,36 @@ class TestClosureTaxonomy:
             n_obs=4851,
         )
         assert rec.validate() == []
+
+    def test_nature_needs_effect_AND_interval_not_either(self):
+        """The conjunction must not weaken to a disjunction.
+
+        `if self.effect is None or self.ci is None` complains when EITHER is
+        missing. Mutated to `and`, it complains only when BOTH are — so a record
+        with a point estimate and no interval would pass as REFUTED_BY_NATURE.
+        That is precisely the state the exit-timing record is in (effect −1.13
+        from doc 235, and no stated n for that subset), and precisely the state
+        the rule exists to refuse. Verified by mutation: without this test the
+        or→and mutant survives.
+        """
+        effect_only = ClosureRecord(
+            family="f", closure=Closure.REFUTED_BY_NATURE,
+            rationale="measured, but no interval", effect=-1.13, n_obs=500,
+        )
+        assert any("measured effect" in p for p in effect_only.validate())
+
+        ci_only = ClosureRecord(
+            family="f", closure=Closure.REFUTED_BY_NATURE,
+            rationale="interval, but no point estimate", ci=(-1.7, -0.56),
+            n_obs=500,
+        )
+        assert any("measured effect" in p for p in ci_only.validate())
+
+        both = ClosureRecord(
+            family="f", closure=Closure.REFUTED_BY_NATURE, rationale="complete",
+            effect=-1.13, ci=(-1.7, -0.56), n_obs=500,
+        )
+        assert both.validate() == []
 
     def test_non_market_closure_must_name_a_keystone(self):
         rec = ClosureRecord(
@@ -575,19 +605,34 @@ class TestAppraisal:
         trade-off in these units. Caught by the doc-300 audit
         (test-adequacy/eig-03).
 
-        Closed form: sigma_0 = 0.5, n_obs = 1008, omega = 1.0
+        Closed form with sigma_0 = 1.0, n_obs = 1008, omega = 1.0:
           se    = sqrt(252/1008) = 0.5
-          ratio = (sigma_0/se)^2 = 1.0
-          EIG   = 0.5 * ln(1 + 1) = 0.5 * ln 2 = 0.34657 nats
+          ratio = (sigma_0/se)^2 = 4.0
+          EIG   = 0.5 * ln(1 + 4) = 0.5 * ln 5 = 0.80472 nats
+
+        sigma_0 is deliberately NOT 0.5. At sigma_0 = se the ratio is 1.0 and
+        1.0**2 == 1.0, so squaring is a no-op and a mutation dropping the square
+        survives. The first version of this test used 0.5 and did exactly that —
+        it asserted a true value at the one point where the thing it meant to
+        pin is invisible. Verified by mutation: at 0.5 the dropped-square
+        mutant survives; at 1.0 it dies.
         """
         a = appraise(
-            Design(name="d", family="f", n_obs=1008, prior_sd=0.5),
+            Design(name="d", family="f", n_obs=1008, prior_sd=1.0),
             n_trials_registered=34,
             omega=1.0,
         )
-        assert a.eig_nats == pytest.approx(0.5 * math.log(2), abs=1e-9)
-        # And the posterior sd it implies: 1/sqrt(1/0.25 + 1/0.25) = 0.35355
-        assert a.posterior_sd == pytest.approx(0.5 / math.sqrt(2), abs=1e-9)
+        assert a.eig_nats == pytest.approx(0.5 * math.log(5), abs=1e-9)
+        # Posterior sd: 1/sqrt(1/1.0 + 1/0.25) = 1/sqrt(5) = 0.44721
+        assert a.posterior_sd == pytest.approx(1.0 / math.sqrt(5), abs=1e-9)
+        # And the ratio must scale QUADRATICALLY: doubling sigma_0 from 1.0 to
+        # 2.0 takes the ratio from 4 to 16, not from 2 to 4.
+        b = appraise(
+            Design(name="d", family="f", n_obs=1008, prior_sd=2.0),
+            n_trials_registered=34,
+            omega=1.0,
+        )
+        assert b.eig_nats == pytest.approx(0.5 * math.log(17), abs=1e-9)
 
     def test_posterior_is_never_wider_than_the_prior(self):
         d = Design(name="d", family="f", n_obs=1008, prior_sd=0.5)
@@ -848,3 +893,253 @@ class TestSteppingStoneSerialisation:
         assert again.stone_id == "SS0001"
         assert again.anomalies == ["something odd"]
         assert again.keystone_keys == {"clean_iv_surface"}
+
+class TestVerdictBranches:
+    """Every branch of `Appraisal.verdict`, pinned and proved reachable.
+
+    The doc-300 completeness critic reported that `UNDISCRIMINATING` had never
+    been emitted by any execution path in this repository, and that deleting
+    three of the six verdict strings left the suite green. Probing every branch
+    for reachability turned up something worse: **INFORMATIVE BUT UNCERTIFIABLE
+    was unreachable by construction.** Its guard is `p_cert < 0.01 <= eig`, but
+    `p_cert < 0.01` implies `p_cert < 1.5 * p_fp = 0.0446`, which implies
+    `informativeness < 1.5` — so the more general `UNDISCRIMINATING` branch
+    always returned first and swallowed it. Reordered so the specific test runs
+    first; every branch now has a witness below.
+    """
+
+    def test_infeasible(self):
+        d = Design(name="d", family="f", n_obs=1008,
+                   keystones_required=("historical_option_nbbo",))
+        assert appraise(d, n_trials_registered=33,
+                        available_keystones=set()).verdict == "INFEASIBLE"
+
+    def test_ceremonial(self):
+        d = Design(name="d", family="f", n_obs=252, prior_mean=0.0, prior_sd=0.05)
+        assert appraise(d, n_trials_registered=33).verdict.startswith("CEREMONIAL")
+
+    def test_informative_but_uncertifiable_is_reachable_at_all(self):
+        """The branch that was dead. It needs a NEGATIVE prior mean.
+
+        `p_cert` is bounded below by `p_false_positive` whenever prior_mean >= 0,
+        because s_pred = sqrt(s0^2 + se^2) >= se — so p_cert can only fall below
+        1% if the analyst believes the effect is wrong-signed. That is a legal
+        and meaningful design ("I expect this to fail; I want to know how
+        badly"), and this verdict exists to say: run it to learn, never to
+        promote.
+        """
+        d = Design(name="d", family="f", n_obs=1008, prior_mean=-1.0, prior_sd=0.6)
+        a = appraise(d, n_trials_registered=33)
+        assert a.p_cert < 0.01 <= a.eig_nats
+        assert a.verdict.startswith("INFORMATIVE BUT UNCERTIFIABLE")
+
+    def test_undiscriminating(self):
+        d = Design(name="d", family="f", n_obs=252, prior_mean=0.0, prior_sd=0.9)
+        a = appraise(d, n_trials_registered=33)
+        assert a.eig_nats >= 0.05 and a.informativeness < 1.5
+        assert a.verdict.startswith("UNDISCRIMINATING")
+
+    def test_negative_sum_needs_a_large_queue(self):
+        """Reachable, but only when the queue it taxes is big enough.
+
+        The design must first survive CEREMONIAL and UNDISCRIMINATING — so
+        p_cert >= ~0.0446 — and only then can the summed toll exceed it. At 200
+        queued high-prior designs it does; at 50 it does not.
+        """
+        me = Design(name="me", family="f", n_obs=1008, prior_mean=0.5, prior_sd=0.6)
+        small = [me] + [Design(name=f"q{i}", family="g", n_obs=1008,
+                               prior_mean=2.0, prior_sd=0.5) for i in range(50)]
+        big = [me] + [Design(name=f"q{i}", family="g", n_obs=1008,
+                             prior_mean=2.0, prior_sd=0.5) for i in range(200)]
+        assert appraise(me, n_trials_registered=33, queue=small).verdict == "ADMISSIBLE"
+        assert appraise(me, n_trials_registered=33,
+                        queue=big).verdict.startswith("NEGATIVE-SUM")
+
+    def test_admissible(self):
+        d = Design(name="d", family="f", n_obs=252, prior_mean=0.2, prior_sd=0.9)
+        assert appraise(d, n_trials_registered=33).verdict == "ADMISSIBLE"
+
+    def test_all_six_verdicts_are_distinct_and_witnessed(self):
+        """Guards against a mutation that collapses two labels into one."""
+        seen = set()
+        seen.add(appraise(Design(name="d", family="f", n_obs=1008,
+                                 keystones_required=("x",)),
+                          n_trials_registered=33,
+                          available_keystones=set()).verdict.split(" ")[0])
+        for pm, ps, n in [(0.0, 0.05, 252), (-1.0, 0.6, 1008),
+                          (0.0, 0.9, 252), (0.2, 0.9, 252)]:
+            seen.add(appraise(Design(name="d", family="f", n_obs=n, prior_mean=pm,
+                                     prior_sd=ps),
+                              n_trials_registered=33).verdict.split(" ")[0])
+        me = Design(name="me", family="f", n_obs=1008, prior_mean=0.5, prior_sd=0.6)
+        q = [me] + [Design(name=f"q{i}", family="g", n_obs=1008, prior_mean=2.0,
+                           prior_sd=0.5) for i in range(200)]
+        seen.add(appraise(me, n_trials_registered=33, queue=q).verdict.split(" ")[0])
+        assert seen == {"INFEASIBLE", "CEREMONIAL", "INFORMATIVE",
+                        "UNDISCRIMINATING", "NEGATIVE-SUM", "ADMISSIBLE"}, seen
+
+    def test_is_ceremonial_requires_BOTH_conditions(self):
+        """`and` must not become `or`. A design can be uninformative without
+        being undiscriminating, and vice versa; only the conjunction is
+        worthless."""
+        a = appraise(Design(name="d", family="f", n_obs=252, prior_mean=0.0,
+                            prior_sd=0.9), n_trials_registered=33)
+        assert a.eig_nats >= 0.05 and a.informativeness < 1.5
+        assert not a.is_ceremonial
+        b = appraise(Design(name="d", family="f", n_obs=6300, prior_mean=3.0,
+                            prior_sd=0.02), n_trials_registered=33)
+        assert b.eig_nats < 0.05 and b.informativeness >= 1.5
+        assert not b.is_ceremonial
+
+
+class TestGateBoundaries:
+    """`first_principles_gate`'s comparisons, at the boundary.
+
+    All three boundary mutations survived the critic's run: `net <= 0` to
+    `net < 0`, `participation > limit` to `>=`, and `frac < floor` to
+    `frac < floor*0.5`. Each constraint had a failing-case test and no boundary
+    test.
+    """
+
+    def test_exactly_break_even_is_not_admissible(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=10.0,
+                                  round_trip_cost_bps=10.0)
+        assert not g.passed, "net == 0 must fail, not pass"
+
+    def test_a_hair_above_break_even_clears_the_cost_check(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=10.01,
+                                  round_trip_cost_bps=10.0)
+        assert not any("cost-inadmissible" in f for f in g.failures)
+
+    def test_participation_exactly_at_the_limit_passes(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=50.0,
+                                  round_trip_cost_bps=1.0,
+                                  required_size_usd=10_000, adv_usd=1_000_000,
+                                  max_adv_participation=0.01)
+        assert not any("capacity" in f for f in g.failures), g.failures
+
+    def test_participation_a_hair_over_the_limit_fails(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=50.0,
+                                  round_trip_cost_bps=1.0,
+                                  required_size_usd=10_100, adv_usd=1_000_000,
+                                  max_adv_participation=0.01)
+        assert any("capacity" in f for f in g.failures)
+
+    def test_ceiling_exactly_at_the_ten_percent_floor_passes(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=11.0,
+                                  round_trip_cost_bps=1.0,
+                                  requirement_bps_per_ticket=100.0)
+        assert not any("build filter" in f for f in g.failures), g.failures
+
+    def test_ceiling_a_hair_under_the_floor_fails(self):
+        g = first_principles_gate(gross_edge_bps_per_ticket=10.9,
+                                  round_trip_cost_bps=1.0,
+                                  requirement_bps_per_ticket=100.0)
+        assert any("build filter" in f for f in g.failures)
+
+    def test_the_filter_refuses_to_run_on_gross(self):
+        """The fix for code-bugs/retro-01, pinned.
+
+        With no cost supplied the requirement filter must report UNCHECKED, not
+        compute a ceiling on gross edge and pass it.
+        """
+        g = first_principles_gate(gross_edge_bps_per_ticket=2.0,
+                                  requirement_bps_per_ticket=100.0)
+        assert not any("build filter" in f for f in g.failures)
+        assert any("no round-trip cost supplied" in n for n in g.notes), g.notes
+
+
+class TestRankTerms:
+    """`rank()`'s score has three terms and the critic killed none of them.
+
+    Flipping the toll sign, deleting the toll, and deleting the diversity term
+    all survived. Each now has its own directional assertion.
+    """
+
+    def test_the_toll_is_SUBTRACTED_not_added(self):
+        """A design that taxes a queue must score BELOW the same design alone.
+        If the sign flips, taxing the queue would look like a benefit."""
+        a = Design(name="a", family="f", n_obs=1008, prior_mean=2.0, prior_sd=0.5)
+        padding = [Design(name=f"p{i}", family="f", n_obs=1008, prior_mean=2.0,
+                          prior_sd=0.5) for i in range(60)]
+        alone = rank([a], n_trials_registered=33)[0][1]
+        taxed = [sc for ap, sc in rank([a] + padding, n_trials_registered=33)
+                 if ap.design.name == "a"][0]
+        assert taxed < alone, f"alone={alone}, taxed={taxed}"
+
+    def test_the_diversity_term_actually_moves_the_score(self):
+        novel = Design(name="n", family="brand_new_class", n_obs=1008)
+        crowded = Design(name="c", family="price_momentum", n_obs=1008)
+        history = {"price_momentum": 30, "other": 1}
+        with_lam = dict((ap.design.name, sc) for ap, sc in
+                        rank([novel, crowded], n_trials_registered=33,
+                             history=history, lam=0.5))
+        assert with_lam["n"] > with_lam["c"], with_lam
+        # At lam=0 the two must tie, which proves the gap came from the term.
+        flat = dict((ap.design.name, sc) for ap, sc in
+                    rank([novel, crowded], n_trials_registered=33,
+                         history=history, lam=0.0))
+        assert flat["n"] == pytest.approx(flat["c"], abs=1e-12)
+
+    def test_rank_does_not_mutate_the_history_it_is_given(self):
+        """`diversity_bonus` is called once per design with the SAME history
+        object. If it mutated rather than copied, later designs would see
+        earlier ones already counted and two identical calls would disagree."""
+        history = {"price_momentum": 8, "volatility": 3}
+        snapshot = dict(history)
+        designs = [Design(name=f"d{i}", family="price_momentum", n_obs=1008)
+                   for i in range(3)]
+        first = [sc for _, sc in rank(designs, n_trials_registered=33,
+                                      history=history)]
+        second = [sc for _, sc in rank(designs, n_trials_registered=33,
+                                       history=history)]
+        assert history == snapshot, "rank() mutated the caller's history"
+        assert first == second
+
+
+class TestTriage:
+    """`triage()` had ZERO coverage — the function doc 299 tells you to run
+    after any capability lands, and a CLI subcommand."""
+
+    def test_triage_returns_every_documented_key(self, archive):
+        archive.bury(family="f", claim="c", closure=Closure.INSTRUMENT_LIMITED,
+                     rationale="r",
+                     keystones=[Keystone("clean_iv_surface", "iv")],
+                     anomalies=["something odd"])
+        t = triage({"clean_iv_surface"}, archive=archive)
+        assert set(t) == {"available_keystones", "discrimination", "revivals",
+                          "fully_unblocked", "keystone_census", "anomalies"}
+        assert t["revivals"] and t["revivals"][0]["fully_unblocked"]
+        assert t["fully_unblocked"] == ["f"]
+        assert t["anomalies"][0]["anomaly"] == "something odd"
+        assert t["discrimination"]["n"] == 1
+
+    def test_triage_on_an_empty_archive_does_not_crash(self, archive):
+        t = triage({"anything"}, archive=archive)
+        assert t["revivals"] == [] and t["discrimination"]["n"] == 0
+
+
+class TestPublishedJsonShape:
+    """Every `to_dict()` was uncovered, so the published JSON shape was
+    untested — and it is exactly what `scripts/epistemics.py` prints."""
+
+    def test_appraisal_to_dict_carries_every_published_column(self):
+        a = appraise(Design(name="d", family="f", n_obs=1008),
+                     n_trials_registered=33)
+        d = a.to_dict()
+        for k in ("name", "family", "n_obs", "n_eff", "eig_nats", "eig_per_day",
+                  "posterior_sd", "prior_sd", "severity", "p_cert",
+                  "p_false_positive", "informativeness", "mde", "bar_before",
+                  "bar_after", "toll_sharpe", "toll_p_cert", "feasible",
+                  "blocked_by", "verdict"):
+            assert k in d, f"published column {k} missing from to_dict()"
+        assert json.loads(json.dumps(d))["verdict"] == a.verdict
+
+    def test_revival_to_dict_is_json_round_trippable(self, archive):
+        archive.bury(family="f", claim="c", closure=Closure.VOIDED_BY_DEFECT,
+                     rationale="r",
+                     keystones=[Keystone("executable_prereg_fixture", "fx")])
+        r = find_revivals({"executable_prereg_fixture"}, archive=archive)[0]
+        d = json.loads(json.dumps(r.to_dict()))
+        assert d["fully_unblocked"] is True
+        assert d["closure"] == "voided_by_defect"

@@ -256,10 +256,21 @@ class Appraisal:
             return "INFEASIBLE"
         if self.is_ceremonial:
             return "CEREMONIAL — a pass would be indistinguishable from noise"
-        if self.informativeness < 1.5:
-            return "UNDISCRIMINATING — informative to run, but a pass proves nothing"
+        # INFORMATIVE-BUT-UNCERTIFIABLE is checked BEFORE UNDISCRIMINATING, not
+        # after. In the original order it was unreachable by construction:
+        # p_cert < 0.01 implies p_cert < 1.5*p_fp = 0.0446, which implies
+        # informativeness < 1.5, so the more general branch always returned
+        # first and swallowed the more specific one. The distinction is worth
+        # having - "teaches but cannot certify" is a different instruction to
+        # the analyst than "a pass proves nothing" - so the specific test runs
+        # first. Verified reachable at prior_mean=-1.0, n_obs=1008,
+        # prior_sd=0.6: p_cert 0.0067, eig 0.154. Found by probing every branch
+        # for reachability after the doc-300 completeness critic reported that
+        # UNDISCRIMINATING had never been emitted by any execution path.
         if self.p_cert < 0.01 <= self.eig_nats:
             return "INFORMATIVE BUT UNCERTIFIABLE — run only to learn, never to promote"
+        if self.informativeness < 1.5:
+            return "UNDISCRIMINATING — informative to run, but a pass proves nothing"
         if self.toll_p_cert > self.p_cert:
             return "NEGATIVE-SUM — costs the queue more certification than it can win"
         return "ADMISSIBLE"
