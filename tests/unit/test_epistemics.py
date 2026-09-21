@@ -276,10 +276,77 @@ class TestRetroValidation:
         assert not r.fully_unblocked
         assert r.still_missing == ["clean_iv_surface"]
 
-    def test_a_tight_wrong_signed_interval_scores_near_zero(self, archive):
-        """No instrument upgrade makes a decisively negative measurement a
-        candidate again. This is the guard against collapsing into wishful
-        thinking when mining the discard pile."""
+    def test_a_point_estimate_without_an_interval_is_still_read(self, archive):
+        """`_plausibility` used to ignore `effect` entirely.
+
+        A family whose measured point estimate pointed the WRONG way scored the
+        same 0.5 as one that had never been measured — the maximum "genuine
+        ignorance" value. On the real archive this is the branch that actually
+        fires: all six reachable records have `ci=None`, so before this fix
+        `_plausibility` was a constant function and contributed nothing to the
+        ranking. Caught by the doc-300 audit.
+        """
+        from src.epistemics.retro import _plausibility
+
+        def stone(effect):
+            arc = Archive(archive.path.parent / f"p{effect}.jsonl")
+            return arc.bury(
+                family="f", claim="c", closure=Closure.VOIDED_BY_DEFECT,
+                rationale="r", effect=effect,
+                keystones=[Keystone("executable_prereg_fixture", "fixture")],
+            )
+
+        wrong_signed = _plausibility(stone(-4.43))
+        favourable = _plausibility(stone(1.03))
+        unmeasured = _plausibility(stone(None))
+
+        assert wrong_signed < unmeasured < favourable
+        assert unmeasured == 0.5
+        # Compressed toward 0.5: a point estimate carries no precision, so it
+        # cannot justify the decisive scores the interval branch can reach.
+        assert 0.0 < wrong_signed < 0.5 < favourable < 1.0
+
+    def test_the_wrong_signed_interval_branch_is_currently_unreachable(self):
+        """Doc 299 cited this guard as what protects the archive. It does not.
+
+        Every record carrying a wrong-signed interval is ALSO a market-evidence
+        closure, so the market-evidence guard excludes it first; and both such
+        records name no keystone, so they would be skipped regardless. Two
+        independent exclusions fire before `_plausibility` is consulted.
+
+        This test documents that state rather than asserting it is desirable. If
+        it starts failing, a record has appeared that genuinely reaches the
+        branch, and doc 299's claim becomes true — at which point update the
+        prose rather than the test.
+        """
+        stones = Archive().load()
+        if not stones:
+            pytest.skip("real archive not present")
+
+        reachable = [
+            s for s in stones
+            if not s.closure.closure.is_evidence_about_market and s.closure.keystones
+        ]
+        assert reachable, "expected some reachable records"
+        wrong_signed_and_reachable = [
+            s for s in reachable if s.closure.ci is not None and s.closure.ci[1] <= 0
+        ]
+        assert wrong_signed_and_reachable == [], (
+            "a wrong-signed record now reaches _plausibility; doc 299's claim "
+            "about this guard is no longer vacuous, so update the document"
+        )
+
+    def test_a_tight_wrong_signed_interval_scores_near_zero_as_a_unit_test(self, archive):
+        """A unit test of `_plausibility`, NOT evidence about the real archive.
+
+        It has to file the record as UNDERPOWERED to reach the branch at all,
+        because a REFUTED_BY_NATURE record — which is what every wrong-signed
+        family in the real archive actually is — is excluded by the
+        market-evidence guard before `_plausibility` runs. See
+        test_the_wrong_signed_interval_branch_is_currently_unreachable. Doc 299
+        cited this passing test as though it established something about the
+        archive; it does not.
+        """
         archive.bury(
             family="gapper universe", claim="c", closure=Closure.UNDERPOWERED,
             rationale="measured negative",

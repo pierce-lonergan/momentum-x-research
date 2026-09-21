@@ -37,7 +37,17 @@ Two guards, both hard:
 
 2. **Revival is a licence to re-ask, not a licence to believe.** A revived
    family re-enters at the *front of the pre-registration process*, not at the
-   front of the promotion queue. It must pass the first-principles gate below,
+   front of the promotion queue.
+
+A caveat on guard (2) that the doc-300 audit forced, and that doc 299 stated too
+confidently. On the *current* archive the wrong-signed branch of
+`_plausibility` is **unreachable**: every record carrying a wrong-signed
+interval is also a market-evidence closure, so guard (1) excludes it first, and
+both such records additionally name no keystone, so they are skipped anyway.
+Two independent exclusions fire before `_plausibility` is consulted. The branch
+is defence-in-depth against a record that does not yet exist — worth keeping,
+but it is not what is protecting the archive today, and citing it as though it
+were was wrong. It must pass the first-principles gate below,
    then be registered as a fresh trial — which raises the bar for everything
    else, exactly as it should.
 """
@@ -85,7 +95,15 @@ def _plausibility(stone: SteppingStone) -> float:
 
     Returns a value in [0, 1]. The logic is deliberately conservative:
 
-    * No measurement recorded -> 0.5. Genuine ignorance, not optimism.
+    * No measurement at all -> 0.5. Genuine ignorance, not optimism.
+    * A point estimate with NO interval -> 0.3 if wrong-signed, 0.7 if
+      favourable. The sign is real information and was previously discarded:
+      this function did not read `effect` at all, so a family whose measured
+      point estimate pointed the wrong way scored the same 0.5 as one never
+      measured. Both values are compressed toward 0.5 rather than reaching the
+      extremes the interval branch can, because a point estimate carries no
+      precision and cannot justify a decisive score. Added after the doc-300
+      audit; on the current archive this is the branch that actually fires.
     * An interval whose upper bound is below zero -> low. The measurement saw
       the effect pointing the wrong way, and a new data feed does not change the
       sign of something already measured on adequate data.
@@ -98,10 +116,15 @@ def _plausibility(stone: SteppingStone) -> float:
     [-2.823, -1.226] across three separate years; no instrument upgrade makes
     that a candidate again.
     """
-    if stone.closure.effect is None or stone.closure.ci is None:
-        return 0.5
+    effect, ci = stone.closure.effect, stone.closure.ci
 
-    lo, hi = stone.closure.ci
+    if ci is None:
+        if effect is None:
+            return 0.5
+        # Sign only. See the docstring: compressed toward the ignorance value.
+        return 0.3 if effect < 0 else 0.7
+
+    lo, hi = ci
     if hi <= 0:
         # Wholly unfavourable interval. Scale by how close it came to zero, so
         # a marginal negative keeps a little more room than a decisive one.

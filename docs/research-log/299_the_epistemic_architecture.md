@@ -4,7 +4,7 @@
 **Status:** BUILT. One retro-validation hit, one procurement item, one finding that
 strengthens the no-edge thesis rather than weakening it.
 **Code:** `src/epistemics/` (closure, archive, eig, retro), `scripts/epistemics.py`,
-`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (62 tests)
+`scripts/seed_stepping_stones.py`, `tests/unit/test_epistemics.py` (64 tests)
 **Data:** `data/research/stepping_stones.jsonl` (25 records),
 `data/research/design_queue.json` (9 designs, priors declared)
 
@@ -105,9 +105,10 @@ prose.
 > tally of pre-declared regime cells, not an effect size, and 32 counts *cells* rather
 > than observations. Both were invented to clear the very admissibility rule this section
 > is about. They are removed; the count is now 13/12. **All 25 `closed_on` dates were
-> also invented** — the ledger carries no dates — and are now blank. Every future closure should be written with its measurement attached; the cost of
-doing so at burial time is a minute, and the cost of recovering it later is an afternoon
-per family.
+> also invented** — the ledger carries no dates — and are now blank.
+
+Every future closure should be written with its measurement attached; the cost of doing so
+at burial time is a minute, and the cost of recovering it later is an afternoon per family.
 
 ---
 
@@ -130,6 +131,17 @@ arrives will re-derive the same losses with more decimal places:
    arrived.** The gapper universe measured −2.041%/ticket with a day-blocked CI of
    [−2.823, −1.226] across three separate years. No instrument upgrade makes that a
    candidate again, and `_plausibility()` is written so that it cannot.
+
+> **CORRECTION (doc 300).** Guard 2 is real code but, on the current archive, **it never
+> executes**. Every record carrying a wrong-signed interval is also a market-evidence
+> closure, so guard 1 excludes it first — and both such records name no keystone, so they
+> are skipped regardless. Two independent exclusions fire before `_plausibility` is
+> consulted, and all six records that *do* reach it have no interval at all, which made
+> `_plausibility` a constant function returning 0.5. Citing it as what protects the
+> archive was wrong: guard 1 is doing that work alone. The audit also found the function
+> never read `effect`, so a family with a measured wrong-signed point estimate (Stage-3
+> RV-vs-IV, −4.43) scored the same as one never measured. Both fixed; a test now pins the
+> unreachability so that it fails if a record ever does reach the branch.
 
 ### The hit: LETF close-window rebalance-flow harvest
 
