@@ -93,7 +93,7 @@ the power gate may be consulted, and any pass is PROVISIONAL until the mandatory
   A closure in the second group **must name the keystone it was missing**, or it is filed as
   `ABANDONED` — honestly, rather than dressed up as a refutation. `src/epistemics/closure.py`.
 - **`REFUTED_BY_NATURE` requires a recorded effect and interval.** Without them the honest class is
-  `UNDERPOWERED`. On transcription, **11 of 25 historical closures fail this** — the measurements exist
+  `UNDERPOWERED`. On transcription, **13 of 25 historical closures fail this** — the measurements exist
   in the documents but not in the ledger, so those families cannot be retro-scored without re-reading
   prose. Every future closure ships its measurement.
 - **Discrimination of the existing graveyard: 17/25 (68%) are measurements of the market.** Mean

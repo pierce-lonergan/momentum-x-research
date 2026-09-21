@@ -31,16 +31,17 @@
     "executable_prereg_fixture",
     "point_in_time_shares_outstanding",
     "regime_coverage",
-    "third_party_ground_truth"
+    "third_party_ground_truth",
+    "intraday_tape_pre_2020"
   ],
   "_keystone_notes": {
     "lower_requirement": "target re-scoped to 5 bps/day (docs/TARGET.md)",
     "executable_prereg_fixture": "the doc-296 rule is in force",
     "point_in_time_shares_outstanding": "confirmed served (doc 298); DEPTH UNVERIFIED",
-    "regime_coverage": "daily warehouse spans 2016-2026, 11 years",
+    "regime_coverage": "daily AND minute warehouses both span 2016-2026",
     "third_party_ground_truth": "day_aggs tape-validated in the doc-278 rebuild",
     "_excluded_historical_option_nbbo": "404 on every endpoint shape; forward-only",
-    "_excluded_intraday_tape_pre_2020": "minute_aggs is 2024-2026 only (~650 sessions)",
+    "intraday_tape_pre_2020": "LANDED 2026-09-21. minute_aggs is now 2,691 sessions, 2016-01-04..2026-09-17, 3.94B bars, verified by DuckDB on ts_et. Flat files were entitled back to 2016-01-05 all along; nobody had checked.",
     "_excluded_short_locate_access": "0-for-94; shorting closed at this broker",
     "_excluded_lit_venue_routing": "100% internalised (Rule 606, 2026Q1)",
     "_excluded_clean_iv_surface": "look-ahead purged, but the doc-294 panel stays tainted"
@@ -64,26 +65,26 @@
     {
       "name": "letf_close_window_retest",
       "family": "market_structure_flow",
-      "n_obs": 650,
+      "n_obs": 666,
       "cluster_size": 1,
       "icc": 0.0,
       "prior_mean": 1.0,
       "prior_sd": 0.6,
       "cost_days": 4.0,
       "keystones_required": ["lower_requirement", "point_in_time_shares_outstanding"],
-      "_note": "Revived by the target re-scope. prior_mean set BELOW doc 298's 1.33-1.91 ceiling-implied Sharpe because a ceiling is an upper bound, not a central estimate. n_obs is the minute_aggs sample that exists."
+      "_note": "Revived by the target re-scope. prior_mean set BELOW doc 298's 1.33-1.91 ceiling-implied Sharpe because a ceiling is an upper bound, not a central estimate. n_obs = 666, MEASURED from the warehouse with DuckDB on ts_et (2024-01-16..2026-09-17), not the 650 estimate this file originally carried - doc 300 corrected it and the reproduction command must agree with the document."
     },
     {
       "name": "letf_close_window_retest_if_minute_extended",
       "family": "market_structure_flow",
-      "n_obs": 2772,
+      "n_obs": 2690,
       "cluster_size": 1,
       "icc": 0.0,
       "prior_mean": 1.0,
       "prior_sd": 0.6,
       "cost_days": 12.0,
       "keystones_required": ["lower_requirement", "point_in_time_shares_outstanding", "intraday_tape_pre_2020"],
-      "_note": "The same design on an 11-year minute sample. Deliberately listed as INFEASIBLE so the planner prices the counterfactual: this is what extending minute_aggs 2024->2016 would buy."
+      "_note": "The same design on the full minute sample. n_obs = 2690, MEASURED after the 2026-09-21 backfill (2,691 sessions in the warehouse, 2016-01-04..2026-09-17), not the nominal 11x252=2772 this file originally carried. NOTE: intraday_tape_pre_2020 HAS NOW LANDED, so this design is no longer infeasible - it is the live counterfactual made real."
     },
     {
       "name": "sevp_event_vol_carry",

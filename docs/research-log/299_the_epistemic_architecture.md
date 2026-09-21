@@ -91,10 +91,10 @@ of poor instruments. They are mostly measurements, and they mostly point the wro
 
 ### The honest caveat, which is also a finding
 
-Only **13 of 25** records are strictly admissible. Twelve claim `REFUTED_BY_NATURE`
+Only **12 of 25** records are strictly admissible. Thirteen claim `REFUTED_BY_NATURE`
 without a recorded effect size or interval. That does not mean those families were not
 measured — the measurements are in the documents. It means **the ledger does not carry
-them**, so none of those twelve can be retro-scored quantitatively without re-reading
+them**, so none of those thirteen can be retro-scored quantitatively without re-reading
 prose.
 
 > **CORRECTION (doc 300).** This originally read 14 and eleven. The audit found that two
@@ -244,7 +244,8 @@ seeder and regenerated.
 The toll is the part standard experimental design does not model, and in a program gated
 on a deflated Sharpe it is the dominant cost. Running a trial does not merely spend time;
 it permanently raises the threshold everything else must clear. At 34 trials the toll of
-one more is +0.0081 Sharpe on a 2-year sample, +0.0035 on 11 years. Small per trial, and
+one more is +0.0081 Sharpe on a 2.08-year sample (524 sessions, the length used elsewhere
+in this document) and +0.0035 on 11 years (2,772). Small per trial, and
 the reason the bar is 2.6 today. **A trial with negligible information gain is not free
 and not harmless. It is a tax on every hypothesis still in the queue.**
 
@@ -318,30 +319,40 @@ priors declared and committed — including, for each, why that prior and not an
 
 | design | EIG (nats) | lift | bar | verdict |
 |---|---|---|---|---|
-| `letf_..._if_minute_extended` | **0.344** | **14.67** | 1.14 | **INFEASIBLE** — needs `intraday_tape_pre_2020` |
-| `anomaly_vol_scale_monetisation` | 0.135 | 2.31 | 2.03 | ADMISSIBLE |
+| `letf_..._if_minute_extended` | **0.337** | **14.42** | 1.15 | **ADMISSIBLE** |
 | `sevp_event_vol_carry` | 0.144 | 4.85 | 2.29 | ADMISSIBLE |
-| `letf_close_window_retest` | 0.104 | 5.55 | 2.35 | ADMISSIBLE |
+| `anomaly_vol_scale_monetisation` | 0.135 | 2.31 | 2.03 | ADMISSIBLE |
+| `letf_close_window_retest` | 0.107 | 5.64 | 2.32 | ADMISSIBLE |
 | `overnight_etf_excess_of_cash` | 0.079 | 1.89 | 1.14 | ADMISSIBLE |
-| `kalshi_zero_capital_shadow` | 0.024 | 1.47 | 4.23 | CEREMONIAL |
 | `vol_score_risk_shaping` | 0.037 | 1.17 | 2.03 | CEREMONIAL |
+| `kalshi_zero_capital_shadow` | 0.024 | 1.47 | 4.23 | CEREMONIAL |
 | `rv_forward_shadow_ledger` | 0.007 | 1.15 | 7.72 | CEREMONIAL |
 | `rocket_gate_forward_ledger` | 0.002 | 1.01 | 10.92 | CEREMONIAL |
 
-> **CORRECTION (doc 300).** Three rows moved. `appraise()` computed the multiplicity bar
-> on the *nominal* sample while computing the estimator's spread on the *effective*
-> (cluster-corrected) one, so every clustered design's bar was understated — 1.14 where it
-> should be 2.03. Fixed; the three affected rows are the three with `icc > 0`. **No verdict
-> flipped.** The bug also broke the `p_false_positive` invariance for clustered designs,
-> which is how it was found.
+> **CORRECTIONS (doc 300).** This table has moved three times and every move is a
+> correction rather than a re-tune, so all three are recorded:
+> 1. Three rows had understated bars because `appraise()` computed the bar on the
+>    *nominal* sample while computing the estimator's spread on the *effective* one. Fixed;
+>    the three affected rows are the three with `icc > 0`. No verdict flipped.
+> 2. `n_obs` for the two LETF rows was 650 and 2,772 — an estimate and a nominal 11×252.
+>    They are now 666 and 2,690, **measured** from the warehouse. The document had already
+>    corrected these in prose while `design_queue.json` still held the old values, so
+>    `epistemics.py plan` — the command this section tells you to run — printed the numbers
+>    the same document called wrong. Caught by the doc-300 completeness critic.
+> 3. `letf_..._if_minute_extended` was **INFEASIBLE** when this was written, blocked on
+>    `intraday_tape_pre_2020`. **That keystone landed 2026-09-21** and the design is now
+>    ADMISSIBLE and top-ranked. The counterfactual the row existed to price became real.
 
 Two things fall out, and the second is unwelcome.
 
-**The most informative experiment available to the program is the one it cannot run.**
-The LETF re-test on an 11-year minute sample carries 0.344 nats — 2.4× the next best —
-and a lift of 14.67 against a next-best of 5.55. It is infeasible for exactly one reason:
-`minute_aggs` stops at 2024. The planner, which knows nothing about §2, independently
-prices the same procurement item, and prices it as the highest-value action on the board.
+**The most informative experiment available to the program was the one it could not
+run — and now it can.** The LETF re-test on the full minute sample carries 0.337 nats,
+2.3× the next best, at a lift of 14.42 against a next-best of 5.64. When this section was
+written it was infeasible for exactly one reason: `minute_aggs` stopped at 2024. The
+planner, which knows nothing about §2, independently priced the same procurement item as
+the highest-value action on the board — and on 2026-09-21 that item was acquired
+(2,691 sessions, 3.94 billion bars, 0 download errors). It is now the top-ranked
+admissible design. Nothing has been *measured* yet; what changed is that it can be.
 
 **Four armed or queued collectors cannot produce a result that clears the promotion bar.**
 `rocket_gate_forward_ledger` (n=30, bar 10.92, lift 1.01) and `rv_forward_shadow_ledger`
@@ -411,7 +422,7 @@ arithmetic.
 1. **Every closure names its class and, if it is a statement about us, its keystone.**
    A closure that cannot name one is an abandonment and is filed as `ABANDONED`.
 2. **`REFUTED_BY_NATURE` requires a recorded effect and interval.** Without them the
-   honest class is `UNDERPOWERED`. Eleven historical records fail this and are marked.
+   honest class is `UNDERPOWERED`. Twelve historical records fail this and are marked.
 3. **Anomalies are recorded at burial time.** A family dies on its primary endpoint
    while leaving behind a result nobody asked for — doc 290's predictable volatility
    scale, doc 289's conserved-but-decoupled attention, doc 297's T-bill double-count.
@@ -445,12 +456,24 @@ procurement item. That is a smaller claim than the framing promised and a more u
 
 ## 7. Open, in order
 
-1. **Extend `minute_aggs` 2024→2016** to match the daily warehouse. This is the top item
-   in the keystone census, the sole blocker on the one family the engine revived, and —
-   independently — the highest-EIG action the planner can see (0.344 nats, lift 14.67,
-   against a next-best of 0.144 / 5.55). Verify point-in-time shares-outstanding depth at
-   the same time; doc 298 confirmed the feed is served but not how far back.
-2. **Backfill effect sizes and intervals** onto the eleven non-admissible records, from
+1. **Extend `minute_aggs` 2024→2016** to match the daily warehouse. It is the
+   **highest-EIG action the planner can see** (0.344 nats, lift 14.67, against a next-best
+   of 0.144 / 5.55) and the sole blocker on the one family the engine revived. Verify
+   point-in-time shares-outstanding depth at the same time; doc 298 confirmed the feed is
+   served but not how far back.
+
+   > **CORRECTION (doc 300).** This originally called it "the top item in the keystone
+   > census". It is not. The census ranks by *families blocked*, and
+   > `epistemics.py keystones` puts `intraday_tape_pre_2020` at **1 family, fifth of
+   > eight**; the top row is `lower_requirement` at 5. Two different rankings —
+   > families-blocked and expected-information-gain — were conflated, and the procurement
+   > recommendation was framed on the wrong one. The recommendation itself survives,
+   > because EIG is the ranking that should drive it, but the stated reason was wrong.
+
+   **DONE 2026-09-21.** 2,691 sessions / 2016-01-04→2026-09-17 / 3.94 billion minute bars.
+   The bar moved 2.319 → 1.153, against the 1.137 this document predicted at an assumed
+   2,772 sessions.
+2. **Backfill effect sizes and intervals** onto the thirteen non-admissible records, from
    the documents. Until then those closures cannot be retro-scored.
 3. **Pre-register the LETF re-test** if and only if (1) succeeds, with an executable
    prereg fixture per doc 296 and a declared prior.

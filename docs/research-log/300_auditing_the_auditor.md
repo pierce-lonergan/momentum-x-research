@@ -4,7 +4,9 @@
 **Status:** Doc 299 was published with three fabricated measurements, one misattributed
 derivation, one real code defect, and several overstated counts. All corrected here.
 **Method:** 10-lens adversarial audit, 3 refute-by-default verifiers per finding.
-**Coverage:** incomplete — see §4. This document is not a clean bill of health.
+**Coverage:** first pass 20.4% (session limit). **Second pass 2026-09-21: 305/305 agents,
+full adjudication — see §4b.** Still not a clean bill of health: the second pass ran against
+already-fixed code, which inflates its refuted count.
 
 ---
 
@@ -132,6 +134,80 @@ revival's 2× requirement rescale. The audit was right that doc 299's inference 
 doc 299: see §7 item 3. The `≥10%` build-filter claim is now unconditional. Recorded here
 rather than deleted, because "under-determined by the evidence offered" and
 "under-determined" are different claims, and the audit only ever established the first.
+
+## 4b. The verification pass, completed (2026-09-21)
+
+Re-run from cache: **305/305 agents, 0 errors**, full adjudication where the first pass
+managed 20.4%. Of 98 findings, **9 confirmed** (4 major, 5 minor, **0 critical**), 89
+refuted, 139 clean claims.
+
+One frame the completeness critic named that belongs here: **this was a second pass over a
+tree that had already been partially fixed.** The verifiers ran against current code, so
+the fabrications and the `_plausibility` constant-function defect now refute *because they
+were fixed*, not because they were never real. The 89 "refuted" therefore conflates "never
+was a defect" with "was a defect, already corrected" — and the drop from 2 criticals to 0
+is the fixes landing, not a cleaner tree. Read the count with that in mind.
+
+| | finding | action |
+|---|---|---|
+| major | **`periods_per_year` leak.** `operative_bar()` forwarded ppy into both terms; `promotion_threshold()` had no such parameter and hardcoded 252. The planner's bar equalled `sqrt(ppy/252)` × the gate's — 4.58× at ppy=12, in the dangerous direction. A verifier flipped a design CEREMONIAL→ADMISSIBLE with a one-key JSON edit, crossing doc 299's own rule. | **Fixed.** `promotion_threshold()` takes ppy. Monte Carlo settles which side was wrong: over 252 iid monthly returns the true annualised-Sharpe sd is 0.2188, which `sqrt(ppy/n_obs)` reproduces (0.2182) and a hardcoded `sqrt(252/n_obs)` does not (1.0) — the *gate* was under-specified, so the parameter was added rather than removed. Pinned by a test over ppy ∈ {12, 52, 252, 1638}. No published number moved: all 9 live designs omit the key. |
+| major | **Exit-timing misclassified.** Filed `REFUTED_BY_COST` with the rationale "the frictions are what consumed it" — a cost claim appearing nowhere in the ledger, and contradicted by one of the record's own cited documents. | **Fixed.** Doc 235 line 111 measures the primary endpoint at **−1.13%, CI [−1.70, −0.56], excludes zero**, and concludes *"the edge does not merely vanish — it REVERSES SIGN."* A sign reversal is nature. Reclassified `REFUTED_BY_NATURE`, measurement carried, cost keystone dropped. **This LOWERED admissibility 13 → 12**, because the stronger class demands `n_obs` too and doc 235 does not state it for that subset. Documented rather than inferred. |
+| major | **EIG magnitude untested.** The leading `0.5` could be wrong and the suite stayed green, while doc 299 publishes absolute EIG values that rank the queue. | **Fixed.** A literal closed-form assertion: σ₀=0.5, n=1008, ω=1 ⟹ EIG = ½·ln2 = 0.34657. |
+| major | **"Top item in the keystone census."** | **Fixed.** It is the top *EIG* item; the census ranks it 1 family, fifth of eight, behind `lower_requirement` at 5. Two rankings conflated. |
+| minor | **`first_principles_gate` free lunch.** `(round_trip_cost_bps or 0.0)` turned a missing cost into zero inside the one filter whose premise is that cost kills these families — so the gate against an already-dead revival could pass it on *gross*. | **Fixed.** Cost is now required; absent it, the filter reports UNCHECKED. |
+| minor | Evidential-weight table 5/8 unpinned, feeding the published 0.736. | **Fixed** — full table asserted. |
+| minor | Design-effect arithmetic unpinned; `(m−1)ρ` could become `mρ`. | **Fixed** — literal assertion, plus `Design.n_eff` propagation. |
+| minor | Rocket anomaly unsourced, and doc 254 answers its "never explained" premise. | **Removed.** The other six anomalies check out. |
+| minor | *"The +0.0081 toll does not reproduce at any natural reading."* | **PARTLY REFUTED — and this is the audit's own error.** Both figures reproduce exactly at the stated 34 trials: 524 obs → 0.00812, 2,772 → 0.00353. What is wrong is the *label*: the doc said "2-year" where the sample is 2.08-year (524, not 504). A precision error, not a wrong number. Corrected to say 2.08-year. |
+
+Tests: 64 → **68**, all four additions targeting mutations the audit demonstrated surviving.
+
+## 4c. What the completeness critic found, which is the most useful part
+
+The critic ran this time (it had died on the session limit), and its job was "what did the
+audit itself fail to check?" Its answer was: **the fixes.** No dimension audited the
+commits that corrected the first pass, which is exactly where the live defects had moved.
+Three, all verified by hand before being acted on:
+
+**The published invariance figure matched nothing the code emits.** 2.9342% is the value
+at **34 registered** trials. The registry holds 33, `design_queue.json` declares 33, and
+all nine live designs emit **0.029735**. "At 34 trials" was ambiguous between *34
+registered* and *the bar after registering the 34th*, and the figure quoted was the wrong
+reading — pinned by a test that asserted the wrong number. Corrected to 2.9735% at 33
+registered, which is what a reader reproduces. The audit itself computed 2.973500%
+correctly in its own `verified_correct` list and then **refuted the finding that said the
+figure was misstated.**
+
+**A caveat I wrote was falsified by the fix in the same commit — retracted, not softened.**
+`eig.py` claimed `informativeness < 1.5` reduces to an absolute `p_cert` floor only for
+*unclustered* designs. Putting the bar on the effective sample (§3) made `n_eff` cancel
+exactly as `n_obs` does, so `p_false_positive` is invariant under clustering too. Measured
+across 27 designs spanning icc 0.00/0.20/0.25 and cluster sizes 1/4/12, it takes **exactly
+one value**: 0.0297350005. So it *is* an absolute floor, at 4.46025%, with no exception.
+The original auditor who called the quantity design-independent outright was **right**, and
+§2 above calling that "too strong" was wrong. Both corrected, and the retraction is pinned
+by a test so it cannot drift back.
+
+**The document had corrected itself in prose while the reproducible command still
+disagreed.** §2 said the real session counts are 666 and ~2,690 and that the bars move to
+2.319/1.154, while `design_queue.json` still held 650 and 2,772 — so
+`epistemics.py plan`, the command §3 tells you to run, printed the numbers the same
+document called wrong. A prose correction that leaves the artifact stale is doc 296's
+failure mode wearing a different hat. Both are now measured values, and the published
+table is regenerated from the file.
+
+Two further gaps, recorded and not yet closed:
+
+* **Mutation score 27%** — the critic built an isolated copy and ran 41 mutations; 30
+  survived. Four of those are now killed by the tests added above; the rest are not.
+  Notably `triage()` — the function this document tells you to run after any capability
+  lands — has **zero** coverage, and every `to_dict()` is uncovered, so the entire
+  published JSON shape is untested.
+* **`UNDISCRIMINATING` has never been emitted by any execution path in this repository.**
+  Only three of the six verdict tokens are producible from the live queue
+  (`ADMISSIBLE`, `CEREMONIAL`, `INFEASIBLE`). §3 above leans on the
+  `UNDISCRIMINATING`-versus-`CEREMONIAL` distinction to justify keeping four collectors
+  armed — resting an argument on a branch that has never fired.
 
 ## 5. What survived
 

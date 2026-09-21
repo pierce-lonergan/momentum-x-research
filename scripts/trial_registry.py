@@ -199,18 +199,34 @@ def expected_max_sharpe(n_trials: int, n_obs: int = 252, periods_per_year: int =
     return se_sharpe * ((1 - _EULER) * _z(1 - 1.0 / n) + _EULER * _z(1 - 1.0 / (n * math.e)))
 
 
-def promotion_threshold(sharpe: float, n_obs: int, n_trials: int | None = None) -> dict:
+def promotion_threshold(sharpe: float, n_obs: int, n_trials: int | None = None,
+                        periods_per_year: int = 252) -> dict:
     """The bar this observation must clear, given how many trials the program has run.
 
     Returns both the deflated-Sharpe view and the expected-maximum view. They are reported
     together on purpose: when they disagree, that disagreement is information.
+
+    `periods_per_year` exists because this function previously hardcoded 252 in BOTH terms
+    while `epistemics.eig.operative_bar()` forwarded a caller-supplied value into both of
+    its own — so the planner's bar equalled sqrt(ppy/252) times the bar this gate actually
+    enforces. At ppy=12 that is a factor of 4.58, in the dangerous direction: a monthly
+    design got a bar far too low. A verifier demonstrated a one-key edit to
+    data/research/design_queue.json flipping a design from CEREMONIAL to ADMISSIBLE across
+    doc 299's own rule that a ceremonial design must not be registered.
+
+    The gate was the under-specified side, not the planner: Monte Carlo over 252 iid
+    monthly returns gives a true annualised-Sharpe sd of 0.2188, which sqrt(ppy/n_obs) at
+    ppy=12 reproduces (0.2182) and a hardcoded sqrt(252/n_obs) does not (1.0). So the
+    parameter is added here rather than removed there. Caught by the doc-300 audit
+    (bar-agreement/eig-02).
     """
     n_trials = trial_count() if n_trials is None else n_trials
-    emax = expected_max_sharpe(max(n_trials, 2), n_obs=n_obs)
+    emax = expected_max_sharpe(max(n_trials, 2), n_obs=n_obs,
+                               periods_per_year=periods_per_year)
     # Deflated Sharpe ratio (normal-returns simplification; no skew/kurtosis adjustment because
     # the program does not yet measure them reliably — stated, not hidden). `se` is the standard
     # error of the annualised Sharpe estimate on this sample, matching emax's units.
-    se = math.sqrt(252.0 / max(n_obs, 2))
+    se = math.sqrt(float(periods_per_year) / max(n_obs, 2))
     z = (sharpe - emax) / se if se > 0 else 0.0
     # standard normal CDF
     dsr = 0.5 * (1 + math.erf(z / math.sqrt(2)))

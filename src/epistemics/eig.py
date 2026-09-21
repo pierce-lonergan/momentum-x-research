@@ -214,7 +214,14 @@ class Appraisal:
         `p_cert`. Because the bar and the estimator's spread carry the same
         standard error, bar/sigma_e = sqrt(omega) * (E[max]/se + 1.6449) with n
         cancelling exactly, so p_false_positive is identical at every sample
-        length: 2.9342% at omega=0.25 and 34 trials, from one year to a hundred.
+        length: **2.9735% at omega=0.25 with 33 trials registered**, from one
+        year to a hundred. (Earlier versions of this docstring and doc 299 said
+        2.9342%, which is the value at 34 REGISTERED trials. The registry holds
+        33, `design_queue.json` declares 33, and every one of the nine live
+        designs emits 0.029735 - so the published figure matched nothing the
+        shipped planner produces. "At 34 trials" was ambiguous between 34
+        registered and the bar after registering the 34th; the figure quoted is
+        now the one a reader reproduces.)
 
         `p_cert` is NOT invariant. It also carries the prior, through
         sqrt(sigma_0^2 + sigma_e^2), and at this module's own default
@@ -226,12 +233,20 @@ class Appraisal:
         beats an absolute floor: a design whose pass is no more likely under the
         prior than under the null has proved nothing, whatever its sample size.
 
-        One honest caveat. For an UNCLUSTERED design p_false_positive depends
-        only on (n_trials, omega), so within a single planning run
-        `informativeness < 1.5` reduces to an absolute floor on p_cert at
-        1.5 * p_fp. It is not a floor across runs, and not one for clustered
-        designs, but the difference from an absolute threshold is smaller than
-        doc 299 originally implied.
+        And a caveat that has to be RETRACTED rather than softened. This
+        docstring previously said the floor equivalence held only for unclustered
+        designs. That was written in the same commit as the fix that put the bar
+        on the effective sample - and the fix falsified it, because n_eff now
+        cancels exactly as n_obs does. Measured across 27 designs spanning
+        icc 0.00/0.20/0.25 and cluster sizes 1/4/12, p_false_positive takes
+        exactly ONE value: 0.0297350005.
+
+        So `informativeness < 1.5` IS an absolute floor on p_cert, at 4.46025%,
+        with no clustering exception. It is still not a floor ACROSS runs, since
+        p_fp moves with (n_trials, omega). The auditor who called the quantity
+        design-independent outright was right, and calling that "too strong" was
+        wrong - the qualification I added to defend the framing had already been
+        made false by my own fix. Caught by the doc-300 completeness critic.
         """
         return self.eig_nats < 0.05 and self.informativeness < 1.5
 

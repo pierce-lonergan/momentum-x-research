@@ -306,9 +306,16 @@ def first_principles_gate(
     if (
         requirement_bps_per_ticket is not None
         and gross_edge_bps_per_ticket is not None
+        and round_trip_cost_bps is not None
         and requirement_bps_per_ticket > 0
     ):
-        net = gross_edge_bps_per_ticket - (round_trip_cost_bps or 0.0)
+        # round_trip_cost_bps is REQUIRED here, not optional-with-a-zero-default.
+        # It previously read `(round_trip_cost_bps or 0.0)`, which turned a missing
+        # cost into a free lunch inside the one filter whose entire premise (doc 293,
+        # doc 297) is that the cost structure is what kills these families. The gate
+        # that exists to stop an already-dead revival could green-light it on gross.
+        # Caught by the doc-300 audit (code-bugs/retro-01).
+        net = gross_edge_bps_per_ticket - round_trip_cost_bps
         frac = net / requirement_bps_per_ticket
         if frac < ceiling_fraction_floor:
             failures.append(
@@ -317,8 +324,13 @@ def first_principles_gate(
             )
         else:
             notes.append(f"ceiling {frac:.1%} of requirement")
-    else:
+    elif requirement_bps_per_ticket is None:
         notes.append("requirement filter UNCHECKED (no requirement supplied)")
+    else:
+        notes.append(
+            "requirement filter UNCHECKED (no round-trip cost supplied - a ceiling "
+            "computed on GROSS edge is not a ceiling)"
+        )
 
     return GateResult(passed=not failures, failures=failures, notes=notes)
 

@@ -84,14 +84,32 @@ def _stones() -> list[dict]:
         dict(
             family="Exit-timing optimization (AUC to dollars)",
             claim="A better exit rule converts classifier AUC into realised dollars.",
-            closure=Closure.REFUTED_BY_COST,
-            rationale="Discrimination was measurable; it did not survive conversion to "
-                      "dollars. Filed as cost rather than nature because the signal was "
-                      "detectable and the frictions are what consumed it.",
-            keystones=[K("realised_fill_distribution",
-                         "our own fills, at size, in the target regime",
-                         "whether the modelled exit is achievable at our size")],
-            docs=["230-234"],
+            closure=Closure.REFUTED_BY_NATURE,
+            rationale="The edge REVERSES SIGN out of period. Doc 235 Stage 2, primary "
+                      "endpoint (pooled 2024+25, top-2, ADV>=$1M, 30-min), Mode A frozen "
+                      "2026->OOP: -1.13% CI [-1.70, -0.56], excludes zero; every primary "
+                      "cell negative and CI-excluding-zero, and it survives a Bonferroni "
+                      "98.75% interval. Doc 235's own words: the edge does not merely "
+                      "vanish, it reverses sign.",
+            # Was filed REFUTED_BY_COST with the rationale "the frictions are what
+            # consumed it" and a realised_fill_distribution keystone, i.e. revivable on
+            # "a cheaper venue, instrument, or size regime". That cost claim appears
+            # NOWHERE in the ledger - it was the transcriber's inference - and doc 235,
+            # one of this record's own cited documents, measured a sign reversal rather
+            # than a friction drag. A sign reversal is nature. Reclassified and the
+            # measurement carried across, which also makes the record admissible.
+            # Caught by the doc-300 audit (seed-fidelity/eig-04).
+            effect=-1.13,
+            ci=(-1.70, -0.56),
+            # n_obs deliberately ABSENT, which keeps this record inadmissible. Doc 235
+            # gives a corpus of 632,020 rows / 10,786 ticker-days, but the primary
+            # endpoint is a SUBSET of it (pooled 2024+25, top-2, ADV>=$1M, 30-min, so
+            # roughly 2 selections x 493 sessions) and the document does not state that
+            # cell's n. Writing 10,786 would attach the corpus size to a subset
+            # measurement; writing 986 would be arithmetic of my own. Narrowing it means
+            # reading doc 235's runner. Until then it stays empty - the same rule that
+            # removed the fabricated intervals applies to the one I would rather have.
+            docs=["230-235"],
             closed_on="<=2026-07-12",
         ),
         dict(
@@ -109,8 +127,15 @@ def _stones() -> list[dict]:
             rationale="Right tail is ex-ante random; the cross-regime money gate fails.",
             docs=["BET#3", "242-248"],
             closed_on="<=2026-07-12",
-            anomalies=["Right-tail membership is random ex-ante but strongly "
-                       "autocorrelated ex-post — the asymmetry itself was never explained."],
+            # Anomaly removed. It read: "Right-tail membership is random ex-ante but
+            # strongly autocorrelated ex-post - the asymmetry itself was never
+            # explained." Two problems: no source in the ledger or the cited documents,
+            # and its "never explained" premise is answered in doc 254, which measured
+            # the prior-runner variance effect on a clean forward test. An unsourced
+            # editorial anomaly in an archive whose purpose is trustworthy record-keeping
+            # is the same defect class as a fabricated interval, just less numeric.
+            # Caught by the doc-300 audit (seed-fidelity/eig-07). The other six anomalies
+            # check out against their documents.
         ),
         dict(
             family="Deep-set raw-tape screens / RL scalper",

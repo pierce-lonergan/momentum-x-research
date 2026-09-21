@@ -58,6 +58,25 @@ class TestClosureTaxonomy:
             c.evidential_weight for c in Closure
         )
 
+    def test_the_full_evidential_weight_table_is_pinned(self):
+        """Five of the eight weights were unpinned, and they feed a published number.
+
+        Doc 299 publishes "mean evidential weight 0.736", computed from all eight
+        weights across the 25 records — so two of them could be changed
+        arbitrarily with the suite green and the published figure would move.
+        Caught by the doc-300 audit (test-adequacy/closure-01).
+        """
+        assert {c: c.evidential_weight for c in Closure} == {
+            Closure.REFUTED_BY_NATURE: 1.00,
+            Closure.REFUTED_BY_COST: 0.80,
+            Closure.STRUCTURALLY_UNAVAILABLE: 0.70,
+            Closure.REFUTED_BY_ARITHMETIC: 0.40,
+            Closure.UNDERPOWERED: 0.15,
+            Closure.INSTRUMENT_LIMITED: 0.00,
+            Closure.VOIDED_BY_DEFECT: 0.00,
+            Closure.ABANDONED: 0.05,
+        }
+
     def test_every_class_has_a_revival_predicate(self):
         for c in Closure:
             assert c.revives_on, f"{c} has no revival predicate"
@@ -452,6 +471,45 @@ class TestBarAgreement:
                 gate["OPERATIVE_BAR"], abs=1e-3
             )
 
+    def test_planner_and_gate_agree_at_every_periods_per_year(self):
+        """The agreement test above only ever exercised ppy=252.
+
+        `operative_bar()` forwarded a caller-supplied `periods_per_year` into both
+        of its terms while `promotion_threshold()` had no such parameter and
+        hardcoded 252 in both of its own — so the planner's bar equalled
+        sqrt(ppy/252) times the bar the gate enforces. At ppy=12 that is 4.58x,
+        in the dangerous direction, and `periods_per_year` is settable straight
+        from `data/research/design_queue.json` with no guard. A verifier
+        demonstrated a one-key edit flipping a design from CEREMONIAL to
+        ADMISSIBLE, across doc 299's own rule that a ceremonial design must not
+        be registered. Caught by the doc-300 audit (bar-agreement/eig-02).
+        """
+        import importlib.util
+        import pathlib
+
+        spec = importlib.util.spec_from_file_location(
+            "_tr",
+            pathlib.Path(__file__).resolve().parents[2] / "scripts" / "trial_registry.py",
+        )
+        tr = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tr)
+
+        for ppy in (12, 52, 252, 1638):
+            for n_obs in (252, 1008):
+                gate = tr.promotion_threshold(
+                    0.0, n_obs=n_obs, n_trials=33, periods_per_year=ppy
+                )["OPERATIVE_BAR"]
+                # abs=5e-5, not a relative tolerance: promotion_threshold()
+                # rounds every value it reports to 4 decimals, so half of the
+                # last reported decimal is the tightest agreement observable
+                # through its public return. The underlying arithmetic is
+                # identical - both sides call the same expected_max_sharpe and
+                # the same sqrt(ppy/n_obs) - and a relative tolerance fails on
+                # the smallest bars purely from that rounding.
+                assert operative_bar(33, n_obs, ppy) == pytest.approx(gate, abs=5e-5), (
+                    f"planner and gate disagree at ppy={ppy}, n_obs={n_obs}"
+                )
+
     def test_bar_falls_with_sample_length(self):
         """The scale term is the SE of an annualised Sharpe, which shrinks with
         sample length. Omitting it returns a z-score, not a Sharpe."""
@@ -464,6 +522,27 @@ class TestBarAgreement:
 class TestEffectiveN:
     def test_independence_is_the_identity(self):
         assert effective_n(1000, cluster_size=1, icc=0.0) == 1000
+
+    def test_the_design_effect_arithmetic_is_exact(self):
+        """`(m-1)*rho` could become `m*rho` with the suite green.
+
+        The correction is a design-stage requirement (doc 278: rho 0.09-0.35,
+        ~2.5x SE inflation) and five of the nine live designs set cluster_size
+        and icc, so it reaches published output. Caught by the doc-300 audit
+        (test-adequacy/eig-07).
+
+        n_eff = n / (1 + (m-1)*rho) = 1000 / (1 + 19*0.3) = 1000 / 6.7
+        """
+        assert effective_n(1000, cluster_size=20, icc=0.3) == pytest.approx(
+            1000 / 6.7, abs=1e-9
+        )
+        # m*rho instead of (m-1)*rho would give 1000/7.0 = 142.86, not 149.25.
+        assert effective_n(1000, cluster_size=20, icc=0.3) != pytest.approx(
+            1000 / 7.0, abs=0.5
+        )
+        # And Design must actually propagate it rather than ignoring clustering.
+        d = Design(name="d", family="f", n_obs=1000, cluster_size=20, icc=0.3)
+        assert d.n_eff == pytest.approx(1000 / 6.7, abs=1e-9)
 
     def test_clustering_shrinks_the_sample(self):
         """rho 0.09-0.35 within-day was measured to inflate SE ~2.5x. The
@@ -485,6 +564,30 @@ class TestAppraisal:
         big = Design(name="b", family="f", n_obs=6300)
         assert (appraise(big, n_trials_registered=34).eig_nats
                 > appraise(small, n_trials_registered=34).eig_nats)
+
+    def test_the_eig_closed_form_has_the_right_MAGNITUDE(self):
+        """Every other EIG test checked only ordering, so the magnitude was free.
+
+        The leading 0.5 and the scale of the variance ratio could both be wrong
+        and the whole suite stayed green — while doc 299 publishes absolute EIG
+        values (0.344, 0.144, 0.135, ...) that rank the live queue and justify
+        the top procurement item, and `rank()` denominates its EIG-versus-toll
+        trade-off in these units. Caught by the doc-300 audit
+        (test-adequacy/eig-03).
+
+        Closed form: sigma_0 = 0.5, n_obs = 1008, omega = 1.0
+          se    = sqrt(252/1008) = 0.5
+          ratio = (sigma_0/se)^2 = 1.0
+          EIG   = 0.5 * ln(1 + 1) = 0.5 * ln 2 = 0.34657 nats
+        """
+        a = appraise(
+            Design(name="d", family="f", n_obs=1008, prior_sd=0.5),
+            n_trials_registered=34,
+            omega=1.0,
+        )
+        assert a.eig_nats == pytest.approx(0.5 * math.log(2), abs=1e-9)
+        # And the posterior sd it implies: 1/sqrt(1/0.25 + 1/0.25) = 0.35355
+        assert a.posterior_sd == pytest.approx(0.5 / math.sqrt(2), abs=1e-9)
 
     def test_posterior_is_never_wider_than_the_prior(self):
         d = Design(name="d", family="f", n_obs=1008, prior_sd=0.5)
@@ -582,10 +685,14 @@ class TestAppraisal:
                     vals.add(round(appraise(
                         Design(name="d", family="f", n_obs=n,
                                prior_mean=prior_mean, prior_sd=prior_sd),
-                        n_trials_registered=34, omega=0.25,
+                        n_trials_registered=33, omega=0.25,
                     ).p_false_positive, 9))
         assert len(vals) == 1, f"p_false_positive should be invariant, got {sorted(vals)}"
-        assert abs(vals.pop() - 0.029342) < 1e-5
+        # 0.029735 at 33 REGISTERED trials - the count the registry and the live
+        # queue actually hold, and the value all nine shipped designs emit. The
+        # earlier 0.029342 was the 34-registered value and matched nothing the
+        # planner produces. Caught by the doc-300 completeness critic.
+        assert vals.pop() == pytest.approx(0.0297350005, abs=1e-9)
 
     def test_the_bar_is_computed_on_the_effective_sample(self):
         """The bar must see the same sampling noise the estimator does.
@@ -616,6 +723,28 @@ class TestAppraisal:
             for n in (1008, 2772, 6300)
         }
         assert len(fps) == 1, f"clustered p_fp should also be invariant, got {sorted(fps)}"
+
+
+    def test_informativeness_is_an_absolute_p_cert_floor_including_clustering(self):
+        """The retraction, pinned so it cannot drift back.
+
+        `eig.py` once claimed the floor equivalence held only for unclustered
+        designs. Putting the bar on the effective sample (doc 300 §3) made n_eff
+        cancel exactly as n_obs does, so p_false_positive is invariant under
+        clustering too — and `informativeness < 1.5` is therefore an absolute
+        floor on p_cert at 1.5 × p_fp, with no exception.
+        """
+        vals = set()
+        for n in (252, 1008, 2772):
+            for cs, icc in ((1, 0.0), (4, 0.25), (12, 0.2)):
+                for psd in (0.25, 0.5, 0.7):
+                    vals.add(round(appraise(
+                        Design(name="d", family="f", n_obs=n, prior_sd=psd,
+                               cluster_size=cs, icc=icc),
+                        n_trials_registered=33,
+                    ).p_false_positive, 10))
+        assert len(vals) == 1, f"clustering must not move p_fp, got {sorted(vals)}"
+        assert 1.5 * vals.pop() == pytest.approx(0.0446025, abs=1e-6)
 
     def test_a_well_powered_design_discriminates(self):
         """The contrast case: a prior mean well above the bar makes a pass far
