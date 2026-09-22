@@ -81,9 +81,17 @@ have no closure to type yet. Transcribing all 25:
 | `VOIDED_BY_DEFECT` | 1 | us |
 | `ABANDONED` | 2 | us |
 
-**17 of 25 closures (68%) are measurements of the market.** Mean evidential weight 0.736.
-Only 6 name a keystone and can be re-opened mechanically, and 5 of those 6 revive on the
-same thing — a re-scoped requirement, which is Pierce's decision and not a build.
+**15 of 25 closures (60%) are measurements of the market.** Mean evidential weight 0.676.
+Eight name a keystone and can be re-opened mechanically, and 5 of those revive on the same
+thing — a re-scoped requirement, which is Pierce's decision and not a build.
+
+> **CORRECTION (doc 301).** This read 17/25 (68%), weight 0.736, 6 revivable. Reading the
+> thirteen inadmissible records out of their own cited documents found two claiming
+> `REFUTED_BY_NATURE` on measurements that cannot support it — catalyst/news at **+2.82%**
+> positive in both samples with a zero-spanning interval, and H-LOCAL at **+0.136**, a
+> positive effect that failed its frozen gate on p by one permutation draw. Both are now
+> `UNDERPOWERED`. The headline moves eight points **against** the program, and the
+> correction came entirely from sources the archive already cited.
 
 This is the opposite of what an enthusiastic reading of the framework predicts, and it
 **strengthens the no-edge thesis**. The program's negative results are not an artifact
@@ -91,10 +99,10 @@ of poor instruments. They are mostly measurements, and they mostly point the wro
 
 ### The honest caveat, which is also a finding
 
-Only **12 of 25** records are strictly admissible. Thirteen claim `REFUTED_BY_NATURE`
+**14 of 25** records are strictly admissible. Eleven claim `REFUTED_BY_NATURE`
 without a recorded effect size or interval. That does not mean those families were not
 measured — the measurements are in the documents. It means **the ledger does not carry
-them**, so none of those thirteen can be retro-scored quantitatively without re-reading
+them**, so none of those eleven can be retro-scored quantitatively without re-reading
 prose.
 
 > **CORRECTION (doc 300).** This originally read 14 and eleven. The audit found that two

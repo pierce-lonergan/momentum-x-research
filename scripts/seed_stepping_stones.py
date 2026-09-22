@@ -78,6 +78,21 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No edge across every horizon and universe tested. The most "
                       "heavily attacked family in the corpus.",
+            # doc 250:8, verbatim: "Best cross-regime (pooled 2024+2025) is
+            # **-0.04%, 95% CI [-0.3, +0.2]** - indistinguishable from zero."
+            # Supports the class as effect-ABSENT: a tight interval bracketing zero,
+            # and the same sentence adds that after "a realistic ~1% small-cap
+            # round-trip spread/slippage, the basket is clearly negative".
+            # Two caveats carried from the extraction, both conservative for the
+            # closure: "Best" is the MAXIMUM over 7 exit policies, i.e. a favourable
+            # extremum; and the cell is an UNCONDITIONAL broad-basket mean (all
+            # 10,254 candidates, equal-weight), not a per-name-selection endpoint -
+            # the selection-side refutations live in docs 245-249, 251, 252, 258.
+            # n_obs absent on purpose: doc 250 states a 10,254 corpus, but the quoted
+            # cell excludes 2026 and covers only candidates with reconstructable
+            # intraday paths - a runtime subset printed by the basis script and never
+            # recorded. Attaching 10,254 would be the corpus-for-subset misattribution.
+            effect=-0.04, ci=(-0.3, 0.2),
             docs=["250-261", "283"],
             closed_on="<=2026-07-12",
         ),
@@ -125,6 +140,10 @@ def _stones() -> list[dict]:
             claim="The right tail is identifiable before the move from microstructure.",
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Right tail is ex-ante random; the cross-regime money gate fails.",
+            # -4% mean EOD-from-09:50 forward return, CI [-6.8, -1.1], excluding
+            # zero. Wrong-signed and CI-separated, which is what the class requires.
+            # n_obs not stated for the cell.
+            effect=-4.0, ci=(-6.8, -1.1),
             docs=["BET#3", "242-248"],
             closed_on="<=2026-07-12",
             # Anomaly removed. It read: "Right-tail membership is random ex-ante but
@@ -142,14 +161,38 @@ def _stones() -> list[dict]:
             claim="A learned function of the raw tape transfers across names and days.",
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No transferable signal.",
+            # -6.6 percentage points of top-5% traded-name capture, CI [-10, -2.6],
+            # excluding zero. Wrong-signed and CI-separated.
+            effect=-6.6, ci=(-10.0, -2.6),
             docs=["248", "256-257"],
             closed_on="<=2026-07-12",
         ),
         dict(
             family="Catalyst/news amplification (PEAD Stage A/B, filing text)",
             claim="Catalyst text amplifies an otherwise weak directional signal.",
-            closure=Closure.REFUTED_BY_NATURE,
-            rationale="Gate fails.",
+            # RECLASSIFIED NATURE -> UNDERPOWERED (doc 301). The recovered PRIMARY
+            # endpoint is POSITIVE in both samples and its interval spans zero, so it
+            # cannot support "measured with adequate power; the effect is absent or
+            # wrong-signed". doc 260:16 verbatim:
+            #   "| LLM L-S median **f10** | +2.82% | **+1.35%** | positive but
+            #    **halved**; n~93/tranche -> **CI crosses 0** (s7 CI[-0.8,+5.1]) |"
+            # The ledger's "gate fails" is accurate - the pre-registered gate did
+            # fail - but a failed gate on a positive, zero-spanning estimate at
+            # n~93/tranche is absence of evidence, not evidence of absence. This is
+            # precisely the mis-filing doc 275 made acceptance-test power mandatory
+            # to prevent, and it was sitting in the archive unnoticed.
+            closure=Closure.UNDERPOWERED,
+            rationale="Pre-registered gate FAILED, but on a POSITIVE point estimate "
+                      "whose interval spans zero: +2.82% in-sample, +1.35% "
+                      "out-of-sample, s7 CI [-0.8, +5.1], n~93/tranche (doc 260:16). "
+                      "A gate failing is not an effect being absent. Filed "
+                      "UNDERPOWERED because n~93/tranche with a zero-spanning "
+                      "interval is what the evidence actually establishes.",
+            effect=2.82,
+            ci=(-0.8, 5.1),
+            keystones=[K("n_obs_sufficient",
+                         "enough non-overlapping observations to power the test",
+                         "n~93/tranche cannot separate +2.82% from zero")],
             docs=["259-260"],
             closed_on="<=2026-07-12",
         ),
@@ -167,6 +210,11 @@ def _stones() -> list[dict]:
             claim="Dilution risk is predictable and tradeable multi-day.",
             closure=Closure.REFUTED_BY_NATURE,
             rationale="No edge.",
+            # doc 258: -1.8% median 10-day forward close. Point estimate only - no
+            # interval is stated, and the extraction flagged the cell as SECONDARY.
+            # Recorded because the sign is sourced; the record stays inadmissible
+            # because the class needs an interval and the source has none.
+            effect=-1.8,
             docs=["258"],
             closed_on="<=2026-07-12",
         ),
@@ -215,6 +263,14 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Pre-registered channel-capacity test: cohort-to-winner channel is "
                       "approximately empty; the whisper is unbankable.",
+            # doc 289: "Relational lift (BOTH - ABS) = -0.019 - negative. Relative
+            # representation did not beat absolute." Permutation p_lift = 0.77.
+            # NO INTERVAL EXISTS: the extractor grepped all 66 lines of doc 289 for
+            # CI / +- / 95% / confidence / interval / bracket notation and got zero
+            # hits - the document reports point estimates with permutation p-values
+            # only. Nor does any channel capacity in bits exist despite the ledger's
+            # framing; the bits language there is qualitative prose.
+            effect=-0.019,
             docs=["289"],
             closed_on="<=2026-07-12",
             anomalies=["Attention is conserved and condenses winner-take-all, but is "
@@ -226,6 +282,16 @@ def _stones() -> list[dict]:
             claim="Attention flow couples to price within identifiable regime cells.",
             closure=Closure.REFUTED_BY_NATURE,
             rationale="0/32 after correction. The crack is closed.",
+            # CONFIRMED BY INDEPENDENT EXTRACTION (doc 301): the measurement this
+            # class requires does not exist in any cited document. The primary
+            # endpoint is doc 290 section 5's 16-cell pre-declared conditional
+            # coupling test, and what it reports is a TALLY - "Zero survive." of
+            # "16 pre-declared cells x 2 statistics = 32 tests" - plus a hedged
+            # directional description ("~0% of cohorts in nearly every cell (vs ~6%
+            # random)"), with the tilde in the source. No per-cell effect estimate
+            # with an interval is stated. So the earlier fabrication here invented
+            # exactly the thing the corpus does not contain.
+            #
             # No effect, interval or n. "0/32 after correction" is a tally of
             # pre-declared regime cells that passed - not an effect size, not an
             # interval, and 32 counts CELLS, not observations. An earlier version
@@ -241,10 +307,28 @@ def _stones() -> list[dict]:
         dict(
             family="H-LOCAL / micro-regime vector-DB retrieval",
             claim="Local neighbourhoods in feature space carry exploitable micro-regimes.",
-            closure=Closure.REFUTED_BY_NATURE,
-            rationale="Refuted at the gate and on effect size. The apparent kNN lift was "
-                      "a weak-baseline artifact; roughly four neighbourhoods exist and "
-                      "they lie on one smooth surface.",
+            # RECLASSIFIED NATURE -> UNDERPOWERED (doc 301). The frozen G1 gate
+            # metric came out POSITIVE - the local model BEAT the global one - and the
+            # gate failed on the permutation p-value by a single draw, not on sign.
+            # doc 290:21 verbatim: "**G1 (local beats global): FAIL - by exactly one
+            # permutation draw** (delta=+0.136, p=0.00995 vs frozen alpha=0.005)",
+            # against global GBM 0.175 versus kNN 0.311 out-of-sample Spearman. No
+            # interval is stated anywhere. A positive effect one draw short of a
+            # frozen alpha is underpowered; the closure may well be right on
+            # economic grounds, but this measurement does not license the strongest
+            # class. Both original findings stand and are kept in the rationale.
+            closure=Closure.UNDERPOWERED,
+            rationale="Frozen G1 gate FAILED by exactly one permutation draw "
+                      "(delta=+0.136, p=0.00995 vs alpha=0.005) - and on a POSITIVE "
+                      "effect, with no interval stated (doc 290:21). The original "
+                      "findings stand: the apparent kNN lift was a weak-baseline "
+                      "artifact, and roughly four neighbourhoods exist lying on one "
+                      "smooth surface. But a positive effect one draw short of a "
+                      "frozen alpha is underpowered, not refuted by nature.",
+            effect=0.136,
+            keystones=[K("n_obs_sufficient",
+                         "enough non-overlapping observations to power the test",
+                         "p=0.00995 against a frozen alpha=0.005 - one draw short")],
             docs=["290"],
             closed_on="<=2026-07-12",
             anomalies=["Volatility SCALE is predictable (rho ~0.30, attack-survived) "
@@ -269,6 +353,9 @@ def _stones() -> list[dict]:
             claim="Realised-vol forecasts beat implied at short tenor.",
             closure=Closure.REFUTED_BY_NATURE,
             rationale="Sign-negative.",
+            # doc 292: -2.7% incremental QLIKE improvement. Point estimate only; the
+            # extraction flagged the cell as SECONDARY and no interval is stated.
+            effect=-2.7,
             docs=["292"],
             closed_on="<=2026-07-12",
         ),

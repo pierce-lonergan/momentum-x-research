@@ -126,3 +126,31 @@ the power gate may be consulted, and any pass is PROVISIONAL until the mandatory
   ⚠ **doc 300**: the 2× requirement rescale this revival rests on is under-determined — it assumes the
   closure was evaluated at 0.1%/day. The procurement conclusion is bar-driven and survives either way;
   the "clears the ≥10% filter" claim is conditional until the target era is settled.
+
+**Doc 300 addition — the governance stop rule (adopted 2026-09-21 on Pierce's directive):**
+- ⛔ **NO NEW EPISTEMICS CODE WITHOUT A CANDIDATE STRATEGY IN FLIGHT.** The testing harness
+  (96% coverage, 100% kill on 22 targeted mutations) and the provenance ledger (25/25 rows
+  dated from git, `<=` marking bounds) are **COMPLETE. Freeze them.** Doc 276 established
+  that recursive self-audit does not converge, and three rounds have now demonstrated it:
+  every pass generated meta-observations about the previous pass (whether the
+  informativeness floor cancels n_eff, 33-versus-34 trial labels, 2.0-versus-2.08-year
+  nomenclature). Past this point the operational cost of auditing the harness exceeds any
+  statistical edge it could protect. **An immune system does not generate metabolic
+  energy.** The bottleneck is the alpha pipeline, and it gets the attention.
+- ⚠ **The corollary, which is the harder half.** "Take risk" is not the same as "deploy on
+  a measured-negative edge." Under the doc-297 identity deployment and turns are
+  sign-preserving multipliers on the requirement side, and this book's per-ticket return is
+  measured at **−2.041%, CI [−2.823, −1.226], negative in 2024, 2025 and 2026 separately**.
+  Raising deployment against that is not courage, it is arithmetic pointed the wrong way.
+  Freezing the harness means spending effort on MEASURING candidates, not on sizing up
+  un-measured ones.
+- **`risk_aversion_lambda` — what the provenance finding does and does not license.** The
+  CE=0.541 / F1=0.667 / P=0.500 / R=1.000 figures behind the 0.15→0.25 hike have **no
+  artifact** (`data/llm_arena/` is empty; they appear only in a `config/settings.py`
+  comment). That means they may not be **cited as measured**. It does **not** license
+  reverting λ, because `mfcs = weighted_sum − (λ × risk_score)`, so a lower λ raises MFCS,
+  passes more candidates, and *increases deployment on the negative edge above*. The
+  unsourced number and the parameter's value are separate questions: the first is settled
+  (annotated, not citable), the second is a trading decision that needs a measured edge,
+  not a provenance audit. Re-running the arena settles both — it regenerates the artifact
+  **and** produces the reliability-versus-resolution decomposition the Jev gate needs.

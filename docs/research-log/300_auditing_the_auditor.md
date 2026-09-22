@@ -248,8 +248,12 @@ independently confirmed **139 claims**. Among them —
 - the EIG closed form, verified by Monte Carlo against the analytic KL;
 - the tempering direction, severity, and `mde` constructions;
 - `operative_bar()` agreeing with `trial_registry.promotion_threshold()` across the grid;
-- the discrimination headline: **17/25 (68%) market evidence**, mean evidential weight
-  0.736, and the class counts;
+- the discrimination headline: 17/25 (68%) market evidence, mean evidential weight 0.736,
+  and the class counts — **later corrected to 15/25 (60%) and 0.676 by doc 301**, which
+  read the thirteen inadmissible records out of their own documents and found two filed
+  under the strongest class on measurements that could not support it. The audit confirmed
+  the arithmetic of the headline; it did not check whether the inputs were correctly
+  classified, and they were not;
 - the single-name VRP record, which an auditor suspected of inheriting a corrupt
   denominator — the ledger genuinely states −6.5%, CI [−9.9, −3.1], n = 1,175;
 - the LETF bar arithmetic, and the conclusion that extending `minute_aggs` moves the

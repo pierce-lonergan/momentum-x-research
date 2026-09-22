@@ -1,7 +1,7 @@
 # Momentum-X
 
 **A falsification-driven research program in systematic equity trading.**
-It ran for 300 documented experiments and did not find a tradeable edge — and the interesting part
+It ran for 301 documented experiments and did not find a tradeable edge — and the interesting part
 is how thoroughly it established that.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -88,16 +88,24 @@ The second kind is not evidence of no edge — it is evidence of an unasked ques
 
 | | count | |
 |---|---|---|
-| refuted by nature — measured, adequately powered, absent or wrong-signed | 14 | evidence about the market |
-| refuted by cost — the gross effect may exist; frictions exceed it | 2 | evidence about the market |
+| refuted by nature — measured, adequately powered, absent or wrong-signed | 13 | evidence about the market |
+| refuted by cost — the gross effect may exist; frictions exceed it | 1 | evidence about the market |
 | structurally unavailable — the action cannot be taken from this account | 1 | evidence about the market |
 | refuted by arithmetic — never tested; the ceiling sits below the requirement | 5 | evidence about us |
+| underpowered — the test could not have detected what it looked for | 2 | evidence about us |
 | voided by defect — the implementation did not match the frozen spec | 1 | evidence about us |
 | abandoned — stopped for reasons outside the epistemics, filed honestly | 2 | evidence about us |
 
-**68% is measurement.** Only six closures can be re-opened by acquiring a capability, and five of
-those turn on the account-level target rather than on any data the program could buy. Running the
-exercise was an attempt to weaken the headline claim; it strengthened it.
+**60% is measurement.** Eight closures can be re-opened by acquiring a capability, and five of
+those turn on the account-level target rather than on any data the program could buy.
+
+That figure was first published as 68%. [Doc 301](docs/research-log/301_reading_the_sources.md)
+read all thirteen inadmissible records out of their own cited documents and found two of them
+filed under the strongest class — *refuted by nature* — on measurements that cannot support it:
+one positive in both samples with an interval spanning zero, one a positive effect that missed
+its frozen significance gate by a single permutation draw. Both are now *underpowered*. The
+headline moved eight points against the program, from sources the archive had been citing all
+along.
 
 The check also cuts the other way, which is the point of building it rather than asserting it.
 Twelve of the twenty-five records claim `REFUTED_BY_NATURE` with **no effect size or interval
@@ -199,7 +207,7 @@ paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound ru
 ```
 docs/ATTEMPTS_LEDGER.md    every hypothesis family, its verdict, and the doc that closed it
 docs/TARGET.md             the requirements ledger - what a result must clear, and why
-docs/research-log/         300 research documents, in chronological order (no 298)
+docs/research-log/         301 research documents, in chronological order (no 298)
 docs/research-log/README.md  a curated reading path through them
 scripts/trial_registry.py  the multiplicity counter
 scripts/epistemics.py      CLI: discriminate, keystones, anomalies, revive, bar, plan
