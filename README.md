@@ -1,7 +1,7 @@
 # Momentum-X
 
 **A falsification-driven research program in systematic equity trading.**
-It ran for 301 documented experiments and did not find a tradeable edge — and the interesting part
+It ran for 302 documented experiments and did not find a tradeable edge — and the interesting part
 is how thoroughly it established that.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -207,7 +207,7 @@ paths, PowerShell pipe deadlocks, async leaks, and a pyright possibly-unbound ru
 ```
 docs/ATTEMPTS_LEDGER.md    every hypothesis family, its verdict, and the doc that closed it
 docs/TARGET.md             the requirements ledger - what a result must clear, and why
-docs/research-log/         301 research documents, in chronological order (no 298)
+docs/research-log/         302 research documents, in chronological order (no 298)
 docs/research-log/README.md  a curated reading path through them
 scripts/trial_registry.py  the multiplicity counter
 scripts/epistemics.py      CLI: discriminate, keystones, anomalies, revive, bar, plan

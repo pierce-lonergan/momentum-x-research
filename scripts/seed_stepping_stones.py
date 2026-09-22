@@ -92,6 +92,24 @@ def _stones() -> list[dict]:
             # cell excludes 2026 and covers only candidates with reconstructable
             # intraday paths - a runtime subset printed by the basis script and never
             # recorded. Attaching 10,254 would be the corpus-for-subset misattribution.
+            # ⚠ THE INTERVAL IS TOO NARROW, and the source says so by accident.
+            # doc 250:50 describes the method as "day-block CIs", but
+            # scripts/rocket_basket_exits_doc250.py:81 does a FLAT i.i.d. resample:
+            #   rng.integers(0, len(x), len(x))  on a plain row vector, no session
+            #   grouping, called at line 90 on the pooled 2024+2025 rows.
+            # Gapper candidates cluster heavily within sessions - which is exactly
+            # why the document claims day-blocking - so an i.i.d. bootstrap
+            # understates the interval. At doc 278's measured ~2.5x SE inflation the
+            # honest interval is nearer [-0.67, +0.58] than [-0.30, +0.20].
+            # The class still holds: the interval brackets zero either way, and the
+            # same doc-250 sentence says the basket is "clearly negative" after a
+            # realistic ~1% small-cap round trip. What does NOT survive intact is the
+            # ADEQUATE-POWER leg. The stated interval is carried here because it is
+            # what the source publishes; it must not be treated as denominator-honest.
+            # This is doc 296's prose-versus-code failure class in a document that
+            # predates the rule. Found by the doc-301 verifier, confirmed by reading
+            # the script. NOT silently recomputed - that would change a published
+            # number without re-running the analysis.
             effect=-0.04, ci=(-0.3, 0.2),
             docs=["250-261", "283"],
             closed_on="<=2026-07-12",

@@ -1,6 +1,6 @@
 # The research log
 
-301 documents, written in chronological order as the work happened. Each one records
+302 documents, written in chronological order as the work happened. Each one records
 what was attempted, what was measured, and what the measurement licensed concluding — including, often,
 that an earlier document was wrong.
 
@@ -11,7 +11,7 @@ truth and everything here is subordinate to them.
 
 ## A reading path
 
-You do not need to read 301 documents. This is the spine of the argument, in order:
+You do not need to read 302 documents. This is the spine of the argument, in order:
 
 | # | Document | Why it matters |
 |---|---|---|
@@ -33,7 +33,7 @@ You do not need to read 301 documents. This is the spine of the argument, in ord
 
 ## How the numbering works
 
-**There is no document 298.** The numbers run 00–297 and then 299–301. The closures attributed
+**There is no document 298.** The numbers run 00–297 and then 299–302. The closures attributed
 to "doc 298" in [`../ATTEMPTS_LEDGER.md`](../ATTEMPTS_LEDGER.md) — passive liquidity
 provision, single-name option short-volatility, and the LETF close-window harvest — were
 made during that work cycle and recorded directly in the ledger; the narrative write-up was
@@ -42,7 +42,7 @@ themselves carry the measurements, so nothing is lost, but a reader looking for 
 should stop looking.
 
 
-Documents 00–174 cover build-out, instrumentation, and early results; 175–301 cover the falsification
+Documents 00–174 cover build-out, instrumentation, and early results; 175–302 cover the falsification
 arc, where the program turned its instruments on its own conclusions. The split is historical rather
 than principled — the discipline tightened continuously, usually immediately after something went wrong.
 

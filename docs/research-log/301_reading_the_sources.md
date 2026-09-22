@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-21
 **Status:** The thirteen inadmissible records were read out of their own documents.
-All thirteen extractions passed an independent anti-fabrication check. Two records turned
+All thirteen survived an independent anti-fabrication check. Two records turned
 out to claim the strongest closure class on measurements that cannot support it.
 **The published 68% market-evidence headline is wrong. It is 60%.**
 **Method:** one agent per record reading only its cited documents; each extraction then
@@ -31,7 +31,9 @@ at the top of every agent's prompt:
 
 Every extraction was then passed to a verifier whose explicit job was to grep the whole
 repository for each reported number and return `misattributed` if any value appeared only
-in the extraction. **13 of 13 came back `confirmed_verbatim`.** Not one fabrication.
+in the extraction. The result: **12 `confirmed_verbatim` and 1 `not_found`** — where
+`not_found` is the *correct* verdict for the one record whose measurement genuinely does not
+exist. **Zero fabrications, zero misattributions.**
 
 ---
 
@@ -127,8 +129,11 @@ constraint is not the effect and not the interval — it is **`n_obs`**.
 The documents state corpus sizes readily and cell sizes almost never. Doc 235 gives
 "632,020 rows, 10,786 ticker-days" while its primary endpoint is a top-2 selection over a
 pooled subset. Doc 250 gives 10,254 candidates while its quoted cell excludes 2026 and
-covers only those with reconstructable intraday paths — a runtime subset the basis script
-prints and never records. Every extractor was warned about this trap specifically, and
+covers only 2024+2025 candidates, a count no document states. (An extractor originally
+justified the gap by pointing at incomplete path coverage; its verifier corrected that —
+doc 288 audited exactly this and found coverage is 100%. The conclusion held, the stated
+reason did not, and the verifier caught it. That is the phase earning its keep on something
+other than fabrication.) Every extractor was warned about this trap specifically, and
 every one of them left `n_obs` empty rather than attach a corpus to a subset.
 
 So the honest state of the archive is no longer "inadmissible, measurements unknown." It is
@@ -144,6 +149,45 @@ fabrications, one document ago. The rule stays; the records stay inadmissible; t
 is now written down.
 
 ---
+
+## 3b. A defect in the corpus, not in the archive
+
+The SS0001 verifier found something while checking the interval, and it is the most
+consequential single thing in this document after the two reclassifications.
+
+**Doc 250 claims day-blocked confidence intervals. The code does an i.i.d. bootstrap.**
+
+Doc 250:50 describes the method as `day-block CIs`. But
+`scripts/rocket_basket_exits_doc250.py:81` is:
+
+```python
+rng = np.random.default_rng(seed)
+m = [x[rng.integers(0, len(x), len(x))].mean() for _ in range(reps)]
+```
+
+— a flat i.i.d. resample of candidate rows with no session grouping, called at line 90 on
+the pooled 2024+2025 row vector. Gapper candidates cluster heavily within sessions, which
+is precisely *why* the document claims day-blocking. An i.i.d. bootstrap therefore
+**understates** the interval. At doc 278's measured ~2.5× SE inflation the honest interval
+is nearer **[−0.67, +0.58]** than the published **[−0.30, +0.20]**.
+
+What this does and does not change:
+
+* **The closure survives.** The interval brackets zero either way, and doc 250's own
+  sentence adds that after "a realistic ~1% small-cap round-trip spread/slippage, the
+  basket is clearly negative."
+* **The adequate-power leg does not survive intact.** `REFUTED_BY_NATURE` asserts
+  measurement with adequate power, and the power here is ~2.5× worse than the published
+  interval implies.
+* **It was not silently recomputed.** Changing a published number requires re-running the
+  analysis against the warehouse, not editing a CI in an archive. The stated interval is
+  carried with the caveat attached.
+
+This is doc 296's prose-versus-code failure class — a specification that says one thing
+while the runner does another — found in a document written before that rule existed. It
+is worth noting that doc 288's re-audit examined this very script's denominator and
+returned "**doc-250 EOD-hold denominator — CLEAN**", because it was checking *path
+coverage* rather than *bootstrap structure*. A clean audit of the wrong property.
 
 ## 4. Method rules this adds
 
@@ -164,7 +208,12 @@ is now written down.
 ## 5. Open
 
 1. The `n_obs` gap on eleven records. Requires re-running analyses, not reading.
-2. SS0010's recovered cell (n=14, CI spanning ±$8–9k) does not match the ledger's
+2. **The doc-250 bootstrap.** Re-run `rocket_basket_exits_doc250.py` with a session-blocked
+   resample and publish the corrected interval. Until then SS0001's interval is known to be
+   too narrow. Grep the rest of the corpus for the same pattern — any script claiming
+   day-blocked intervals whose `boot_ci` resamples flat rows has the same defect, and doc
+   288's audit would not have caught it because it checked coverage rather than structure.
+3. SS0010's recovered cell (n=14, CI spanning ±$8–9k) does not match the ledger's
    "overnight robustly negative" claim. Either the extractor found a secondary cell or the
    ledger overstates. Not resolved here; flagged rather than guessed.
-3. The LETF pre-registration, drafted separately.
+4. The LETF pre-registration, drafted separately.
