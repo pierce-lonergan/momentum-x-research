@@ -68,8 +68,28 @@ Three things worth keeping:
    against a 09:45 open of 0.939. It is modestly wider than the 15:30 trough (0.559) and still
    *cheaper* than the open. The standing `TARGET.md §2b` figure of **6.42 bps at 15:50** is a
    cross-tier median dominated by low-priced names and overstates this universe by **~7×**.
-   Doc 298 flagged this and asked for `TARGET.md §2b` to be tiered. That is still not done.
-3. **Depth is not the binding constraint.** Median displayed size at the touch is **$6.9M** against
+   Doc 298 flagged this and asked for `TARGET.md §2b` to be tiered; that is done in item 3.
+3. **The close is not the expensive window at any tier — and the open is.** The 15:50 figure above
+   prompted a full tiered rebuild of the intraday cost curve, since `TARGET.md` §2b carried a
+   pooled claim that trading near the close costs ~4× mid-afternoon. **3,471 true-NBBO observations
+   across all five tiers × 20 sessions × 7 instants say it does not, anywhere:**
+
+   | tier | 09:45 | 10:30 | 11:30 | 13:00 | 14:30 | 15:30 | **15:50** | close vs 14:30 |
+   |---|---|---|---|---|---|---|---|---|
+   | index ETFs (9) | 0.939 | 0.679 | 0.674 | 0.570 | 0.578 | 0.559 | **0.862** | 1.49× |
+   | mega caps | 2.371 | 1.741 | 1.516 | 1.225 | 1.200 | 0.944 | **0.902** | **0.75×** |
+   | large caps | 5.519 | 2.806 | 2.364 | 1.958 | 1.838 | 1.847 | **1.821** | 0.99× |
+   | mid-liquid | 7.550 | 7.302 | 7.345 | 7.260 | 7.321 | 7.307 | **7.372** | 1.01× |
+   | low-priced | 22.346 | 21.884 | 21.164 | 22.701 | 22.080 | 22.247 | **22.858** | 1.04× |
+
+   **No tier shows a 4× close premium; the maximum is 1.49× and mega caps are *cheaper* into the
+   close.** Large caps run **5.519 bps at the open against 1.821 at 15:50 — the open is 3.0× the
+   close.** Re-pooled, the curve is 1.84 bps at 14:30 vs 1.82 at 15:50, a ratio of **0.99× against
+   the claimed 3.96×**. The old figure is most consistent with **uneven per-instant tier coverage**
+   in a 613-observation pooled sample — drop a few liquid quotes at one clock time and the pooled
+   median jumps a whole tier. `TARGET.md` §2b is corrected and tiered as of this document.
+
+4. **Depth is not the binding constraint.** Median displayed size at the touch is **$6.9M** against
    a $190K account. The "small size" assumption behind using quoted spread as the cost is not an
    assumption here by any stretch.
 
@@ -361,9 +381,13 @@ applied is a landmine with a two-month fuse.**
 
 ## 8. Open
 
-1. **`TARGET.md §2b` still says 6.42 bps at 15:50.** Measured here at **0.862** for liquid ETFs —
-   ~7× overstated. Doc 298 asked for this to be tiered; it is still not. *This is a live filter that
-   may be silently killing other close-window designs*, and it is the highest-value open item here.
+1. ~~`TARGET.md §2b` still says 6.42 bps at 15:50.~~ **DONE this session.** Rebuilt tiered from
+   3,471 observations (§1.3); the ~4× close premium is retracted as wrong in both magnitude and
+   direction. **Scope correction to my own claim above:** I wrote that the stale figure "may be
+   silently killing other close-window designs." A grep of the corpus shows **only Draft 302 ever
+   cited it** as a blocking consideration — and that draft is now void. So the exposure was
+   **prospective, not realised**: no surviving family was filtered on it. The fix still matters,
+   because the filter was live and the next close-window design would have hit it.
 2. **Step 4.4 quarantine** — specified, not applied. Requires Pierce.
 3. **`.env` 40% deployment** — reconcile against the quarantine.
 4. The doc-250 bootstrap and the `n_obs` gap on eleven records (doc 301 §5) remain open and

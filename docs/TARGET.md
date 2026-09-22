@@ -129,8 +129,33 @@ $0.0000206 × value on sells, TAF $0.000195/share on sells, CAT $0.000003/share 
 1,343 real fills): it bills TAF at a retired rate and never charges the SEC fee at all. Any cost
 figure taken from paper activity is optimistic by that factor.
 
-Intraday timing matters ~4×: median 1.62 bps at 14:30–15:30 ET versus **6.42 bps at 15:50** and 2.72 bps
-at 09:45. Trading near the close costs four times trading mid-afternoon.
+**Intraday timing, TIERED** (doc 303; 3,471 true-NBBO observations, 5 tiers × 20 sessions × 7 ET
+instants; quoted spread, fees not included):
+
+| tier | 09:45 | 10:30 | 11:30 | 13:00 | 14:30 | 15:30 | **15:50** | close vs 14:30 |
+|---|---|---|---|---|---|---|---|---|
+| **index ETFs** (9 names) | 0.939 | 0.679 | 0.674 | 0.570 | 0.578 | 0.559 | **0.862** | 1.49× |
+| **mega caps** | 2.371 | 1.741 | 1.516 | 1.225 | 1.200 | 0.944 | **0.902** | **0.75×** |
+| **large caps** | 5.519 | 2.806 | 2.364 | 1.958 | 1.838 | 1.847 | **1.821** | 0.99× |
+| **mid-liquid** | 7.550 | 7.302 | 7.345 | 7.260 | 7.321 | 7.307 | **7.372** | 1.01× |
+| **low-priced** | 22.346 | 21.884 | 21.164 | 22.701 | 22.080 | 22.247 | **22.858** | 1.04× |
+
+⚠⚠ **RETRACTED (doc 303): "intraday timing matters ~4×; median 1.62 bps at 14:30–15:30 versus 6.42 bps
+at 15:50; trading near the close costs four times trading mid-afternoon."** That claim was a **pooled
+cross-tier median over 613 observations**, and it is **wrong in magnitude and wrong in direction.**
+
+* **No tier shows a 4× close premium. Not one.** The largest is index ETFs at **1.49×**; mega caps are
+  **cheaper** at the close (0.75×) and the three illiquid tiers are flat to within 4%.
+* **The OPEN is the expensive instant, not the close.** Large caps cost **5.519 bps at 09:45 against
+  1.821 at 15:50 — the open is 3.0× the close.** Every liquid tier is monotonically cheaper through
+  the session until a small uptick into the last ten minutes.
+* Re-pooled across these five tiers the curve is **~1.84 bps at 14:30 versus ~1.82 at 15:50 — a ratio
+  of 0.99×, not 3.96×.** The old 6.42 is most consistent with **uneven per-instant tier coverage** in a
+  613-observation sample: drop a few liquid quotes at one clock time and the pooled median jumps a
+  tier. This is the composition-shift failure mode, and it is why this table is tiered.
+
+**Use the tier row, never a pooled number.** A pooled intraday median has no referent: it describes a
+portfolio nobody trades, and its value is set by which tiers happened to answer at that instant.
 
 ⚠ **Two prior cost figures are RETRACTED (doc 298):**
 - **"7.2 bps for liquid names / index ETFs" had no artifact behind it.** It was never measured; doc 297's
