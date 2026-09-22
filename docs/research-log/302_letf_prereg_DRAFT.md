@@ -1,3 +1,23 @@
+> # ⛔ VOID — withdrawn 2026-09-22 by doc 303
+>
+> **This draft was never frozen and no trial was registered. The registry stays at 33 trials.**
+>
+> It is retained because it is the record of a correctly-executed design against an **obsolete
+> ground**. The family it tests was already adjudicated CLOSED by doc-298 M4 on 2026-07-29 on an
+> objection this draft does not address (required R² 47.6% vs published 2–3%; 5.8–9.2× Sharpe
+> shortfall with denominators matched). The revival that motivated the draft has been retracted.
+>
+> **Two errors inside are instructive and are left uncorrected in place:**
+> 1. § line 146 declares the gross/net status of the ceiling unknowable and pre-registers a
+>    conservative GROSS default. It is **net**, and the source states it —
+>    `m4_letf_addendum.json` field `net_bps_unit_gross`. Every "% of bar" figure below that treats
+>    1.2642–1.8120 as gross therefore **double-counts cost**.
+> 2. The cost prerequisite P-4 has since been **executed** (doc 303 §1): all-in round trip is
+>    **0.575 bps** on the primary tier, ~25% of the 2.268 bps gross ceiling. Cost never was the
+>    binding constraint.
+
+---
+
 # 302 — LETF close-window re-test: PRE-REGISTRATION (DRAFT, NOT FROZEN)
 
 **Status: DRAFT. Not frozen, not hashed, no trial registered.** Freezing consumes

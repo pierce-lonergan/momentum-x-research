@@ -413,20 +413,28 @@ def _stones() -> list[dict]:
             closure=Closure.REFUTED_BY_ARITHMETIC,
             rationale="The doc-295 $0 blocker was genuinely lifted and the design proved "
                       "WELL-POWERED (3.3-15.1x MDE), contradicting the expectation that "
-                      "it was underpowered. It fails on arithmetic: at the maximum the "
-                      "standing constraints permit (10 families x 5% cap = 50% gross) it "
-                      "needs a mean of 21.07 bps in a 15-minute window whose measured sd "
-                      "is 15.06 bps — annualised Sharpe 22.2. Ceiling 6.0-8.6% of "
-                      "requirement against the >=10% build filter.",
+                      "it was underpowered. It fails on arithmetic: to carry 5 bps/day at "
+                      "the only permitted deployment (10 families x 5% cap = 50% gross) it "
+                      "must explain R^2 >= 47.6% of day-demeaned close-window return "
+                      "variance, against published LETF rebalance-flow estimates of 2-3% "
+                      "- a 16-24x shortfall. Annualised Sharpe required 11.67 (residual "
+                      "sd 15.06) against a PERFECT-predictor ceiling of 1.27-1.80: "
+                      "5.8-9.2x short with denominators matched. Even at R^2=10%, five "
+                      "times the published estimates, it is 2.5-2.8x short. "
+                      "COST IS NOT THE GROUND: measured all-in round trip is 0.575 bps on "
+                      "the primary tier incl. SEC/TAF/CAT (doc 303, 576 NBBO quotes), 25% "
+                      "of the 2.268 bps gross ceiling; an independent 1,192-quote doc-298 "
+                      "measurement agrees at 1.068 bps blended. "
+                      "NOTE: this record previously carried the ground 'ceiling 6.0-8.6% "
+                      "vs the >=10% build filter', which doc-298 M4 adjudicated as the "
+                      "NON-binding one on 2026-07-29 and asked to have replaced. The "
+                      "unapplied amendment caused the doc-299 revival, retracted by doc 303.",
             keystones=[K("lower_requirement",
                          "a re-scoped account-level target",
-                         "the 21.07 bps requirement that makes Sharpe 22.2 necessary"),
-                       K("intraday_tape_pre_2020",
-                         "minute bars for the pre-2024 sample",
-                         "a 15-minute close window can only be measured on minute "
-                         "bars, and minute_aggs covers 2024-2026 only (~650 "
-                         "sessions) where the daily warehouse covers 2016-2026")],
-            docs=["295", "298"],
+                         "the requirement that makes R^2>=47.6% necessary; halving the "
+                         "target from 10 to 5 bps/day already happened and moved the "
+                         "shortfall from infinite to 16-24x, which is not enough")],
+            docs=["295", "298", "303"],
             # 2026-07-29 (f411a28), the commit carrying the CLOSED verdict and the
             # 21.07 bps figure - NOT 2026-07-12, which is this family's earlier
             # BLOCKED-AT-$0 row. A family whose ledger row changed state has
@@ -543,15 +551,32 @@ def main() -> int:
                     help="validate and report without writing")
     ap.add_argument("--path", default=None, help="archive path override")
     ap.add_argument("--force", action="store_true",
-                    help="append even if the archive is non-empty")
+                    help="APPEND to a non-empty archive. Almost never what you want: "
+                         "re-seeding after editing a record needs --replace. Appending a "
+                         "second copy of the corpus leaves EVERY published ratio unchanged "
+                         "(market_evidence_frac, mean_evidential_weight) and doubles only "
+                         "n, so the summary output looks correct on a corrupt archive.")
+    ap.add_argument("--replace", action="store_true",
+                    help="truncate the archive and re-seed from source. This is the right "
+                         "flag after editing a stone.")
     args = ap.parse_args()
 
     arc = Archive(args.path)
     existing = arc.load()
-    if existing and not args.check and not args.force:
-        print(f"archive already holds {len(existing)} stones at {arc.path}")
-        print("refusing to duplicate; pass --force if that is genuinely intended")
-        return 1
+    if existing and not args.check:
+        if args.replace:
+            arc.path.write_text("", encoding="utf-8")
+            print(f"--replace: truncated {len(existing)} existing stones at {arc.path}")
+        elif args.force:
+            print("")
+            print(f"  !!  --force APPENDS. The archive already holds {len(existing)} stones,")
+            print(f"  !!  so this run will leave {len(existing) + len(_stones())} and every ratio")
+            print("  !!  will look unchanged. Use --replace if you edited a record.")
+            print("")
+        else:
+            print(f"archive already holds {len(existing)} stones at {arc.path}")
+            print("refusing to duplicate; pass --replace to re-seed (or --force to append)")
+            return 1
 
     rows = _stones()
     strict_ok, non_strict, unknown_keys = 0, [], []
