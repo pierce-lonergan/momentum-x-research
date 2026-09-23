@@ -249,6 +249,16 @@ baseline — against the document that established it.** Not a candidate.
 
 ### 4b. SS0006 (catalyst/news) — the margin is real, and it is behind a tombstoned door
 
+> ⚠ **CORRECTED by doc 304 — this section's conclusion is wrong.** The short leg is **not** behind the
+> doc-284 tombstone. That tombstone was measured on the **gapper** BUY ledger, and doc 284:18 and doc
+> 297:274-275 scope it to that universe. Only **34 of 1,447** stage-B tickers overlap its borrow data,
+> and **80.7%** of eligible stage-B names are easy-to-borrow at Alpaca (paper flags, indicative).
+> Doc 260 *asserted* a borrow wall and never measured one. This section applied a universe-specific
+> result to a different universe: the same summary-without-adjudication error §6 describes, made
+> here by me. SS0006 stays `UNDERPOWERED`, not `STRUCTURALLY_UNAVAILABLE`. Its binding problems are
+> power, an anchor look-ahead (universe median f10 −1.74% → −0.40% under a knowable anchor), and the
+> OOS failure against the reaction baseline. The text below is left as written.
+
 Here the directive's premise holds up: the effect is positive in both samples and the sole failure
 mode was sample size. But the cited cell is a **long-short median**, and doc 260:16 decomposes it:
 

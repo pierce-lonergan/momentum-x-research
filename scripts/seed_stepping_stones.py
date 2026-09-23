@@ -205,13 +205,20 @@ def _stones() -> list[dict]:
                       "out-of-sample, s7 CI [-0.8, +5.1], n~93/tranche (doc 260:16). "
                       "A gate failing is not an effect being absent. Filed "
                       "UNDERPOWERED because n~93/tranche with a zero-spanning "
-                      "interval is what the evidence actually establishes.",
+                      "interval is what the evidence actually establishes. "
+                      "doc 304: the event anchor carries look-ahead (the universe "
+                      "median f10 is -1.74% on the argmax anchor and -0.40% on a "
+                      "knowable first-spike anchor), so the historical short-leg "
+                      "magnitude is an upper bound. The short leg is NOT behind a "
+                      "borrow wall: 80.7% of eligible names are easy-to-borrow "
+                      "(doc 260 assumed the wall and never measured it). The clean "
+                      "test is forward, drafted as 304b and not frozen.",
             effect=2.82,
             ci=(-0.8, 5.1),
             keystones=[K("n_obs_sufficient",
                          "enough non-overlapping observations to power the test",
                          "n~93/tranche cannot separate +2.82% from zero")],
-            docs=["259-260"],
+            docs=["259-260", "301", "304"],
             closed_on="<=2026-07-12",
         ),
         dict(
