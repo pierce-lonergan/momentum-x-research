@@ -436,11 +436,14 @@ def _stones() -> list[dict]:
                       "vs the >=10% build filter', which doc-298 M4 adjudicated as the "
                       "NON-binding one on 2026-07-29 and asked to have replaced. The "
                       "unapplied amendment caused the doc-299 revival, retracted by doc 303.",
-            keystones=[K("lower_requirement",
-                         "a re-scoped account-level target",
-                         "the requirement that makes R^2>=47.6% necessary; halving the "
-                         "target from 10 to 5 bps/day already happened and moved the "
-                         "shortfall from infinite to 16-24x, which is not enough")],
+            # doc 306: re-keyed. "lower_requirement" is AVAILABLE (the 5 bps/day target), so
+            # `revive` ranked this stone unblocked although the target cut did not move the
+            # binding ground. The key is now the evidence the ground actually needs.
+            keystones=[K("letf_flow_r2_evidence",
+                         "measured evidence that LETF rebalance flow explains >= 47.6% of "
+                         "day-demeaned close-window return variance",
+                         "the 16-24x shortfall against the published 2-3% estimates; the "
+                         "10 -> 5 bps/day target cut already happened and did not close it")],
             docs=["295", "298", "303"],
             # 2026-07-29 (f411a28), the commit carrying the CLOSED verdict and the
             # 21.07 bps figure - NOT 2026-07-12, which is this family's earlier
@@ -462,9 +465,16 @@ def _stones() -> list[dict]:
                       "Sharpe 4/4 in 2025+, effective independent bets 1.50. Certifying "
                       "it beats a T-bill needs 3,079 sessions (12.2 yr); certifying 10 "
                       "bps/day is impossible at any n.",
-            keystones=[K("lower_requirement",
-                         "a re-scoped account-level target",
-                         "the 10 bps/day line that is unreachable at any sample size")],
+            # doc 306: re-keyed. On "lower_requirement" (available since the 5 bps/day target)
+            # `revive` ranked this stone #1 FULLY UNBLOCKED, but no ground of the closure depends
+            # on the bar: excess-of-cash spans zero, buy-and-hold wins 4/4, 46-59% is beta.
+            keystones=[K("overnight_excess_of_cash_ci_above_zero",
+                         "a measured excess-of-cash interval above zero for the close-to-open sleeve",
+                         "the 1.03 bps/day point whose interval spans zero; certifying it needs "
+                         "~3,079 sessions and 2,692 exist (doc 306)"),
+                       K("beats_buy_and_hold_total_return",
+                         "the sleeve beating buy-and-hold on total return and Sharpe out of sample",
+                         "buy-and-hold wins 4/4 in 2025+; a beta sleeve cannot be an overlay")],
             # effect only. The ledger states "excess-of-cash 1.03 bps/day with CI
             # spanning zero" and does NOT give the bounds. An earlier version of
             # this file carried ci=(-1.0, 3.1), which appears in no artifact

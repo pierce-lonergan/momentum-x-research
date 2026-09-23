@@ -16,8 +16,8 @@ of the target — which is a different kind of path than hunting an edge.
 
 | line | bps/day | % of the 5 bps bar | status |
 |---|---|---|---|
-| **buy-and-hold SPY, 2016–2026** | **+6.13** | **123%** | **the baseline clears the rung by itself** — CAGR 14.91%/yr, vol 17.55%, max DD −33.79% |
-| 80% SPY / 20% cash | +5.19 | **104%** | the minimum unlevered allocation that clears; 14.04% vol, max DD −27.7% (−$52,867), worst day −8.62% |
+| **buy-and-hold SPY, 2016–2026** | **+6.27** | **125%** | **the baseline clears the rung by itself** — total return CAGR **15.29%/yr**, vol 17.73%, max DD −33.70% (Polygon official closes + cash dividends, 2016-01-04 → 2026-09-22; doc 306). ~~6.13 / 14.91% / 17.55% / −33.79%~~ came from the warehouse series, which carries wrong March-2020 closes and omits two SPY dividends (2016-03-18, 2018-06-15); over the same window to 07-28 it understated CAGR by 0.11 pp |
+| 80% SPY / 20% cash | +5.19 (80/20 SPY/**BIL** total return: **+5.16 arith / 4.76 geo**, CAGR 12.74%, doc 306) | **104%** | the minimum unlevered allocation that clears; 14.04% vol, max DD −27.7% (−$52,867), worst day −8.62% |
 | current live book, last 30 sessions | **−28.09** | **−562%** | ⚠ CI95 [−53.00, −3.18] — **excludes zero on the WRONG side** |
 | cash carry on idle balances | +1.44 | 28.8% | ⚠ **NOT bankable on this account** — zero INT rows ever; live-account item |
 | addressable execution cost | **≤0.48** | **≤9.6%** | ⚠ **re-scoped from 2.80–3.10** — see below; and VOID if the overlay stops |
@@ -67,9 +67,38 @@ deterministic column cannot reach the bar.** Research contributed +0.00. What cl
 passive index position is a "ghost" to that path and would be sold every evening. Also noted:
 `.env:72` sets `EXEC_MAX_POSITIONS=8` (40% gross), not the 3 the D162 docstring claims.
 
+## 0a. The binding standard (doc 306 — pinned on Pierce's directive of 2026-09-22)
+
+**The target is compound: +1% per month = +12.6825%/yr CAGR = 4.7394 bps/day GEOMETRIC** (1.01^(12/252) − 1).
+It binds on a trailing-252-session window: a sleeve, strategy or account meets the target iff its trailing-252
+geometric return is ≥ 4.7394 bps/day. **"5 bps/day" is an arithmetic shorthand and never the pass test.**
+
+Why compound binds: the account compounds, and an arithmetic mean is flattered by volatility. At the 80/20
+core's 14.1% vol the drag is 0.39 bps/day, so the two standards disagree: over 2016–2026 the 80/20 sleeve met
+the 5.00 shorthand in 60.7% of trailing-252 windows and the binding bar in 59.5%. Below ~11.5% annual vol the
+drag is under 0.26 bps/day and the ordering reverses (the geometric bar becomes the looser one). A calm
+strategy can pass the binding bar while failing the shorthand; a volatile one the reverse.
+
+**The scoreboard is the shadow core, not the target.** `scripts/shadow_benchmark_tracker.py` (private repo)
+keeps a $0 shadow 80/20 SPY/BIL total-return sleeve (official closes + cash distributions, month-end reset,
+cost charged) and prints nightly, via `post_close_scorecard.py`, STRATEGY (broker equity) vs SHADOW vs CASH.
+Calibration 2016-01-04 → 2026-09-22 (independently re-derived to 3e-13 by a skeptic):
+
+| sleeve | CAGR | arith bps/day | geo bps/day | vol | MaxDD | trailing-252 windows meeting the binding bar |
+|---|---|---|---|---|---|---|
+| SPY TR | 15.29% | 6.274 | 5.648 | 17.73% | −33.70% | 68.6% |
+| **80/20 SPY/BIL** | **12.74%** | **5.155** | **4.761** | 14.08% | −27.48% | **59.5%** |
+| 60/40 | 10.15% | 4.056 | 3.837 | 10.49% | −20.98% | 36.2% |
+| BIL TR | 2.14% | 0.842 | 0.842 | 0.26% | −0.21% | 0.0% |
+
+The 80/20 core clears the binding bar by **0.02 bps/day** over the whole window — i.e. it *is* the target,
+with a −27.5% drawdown, and 40.5% of its trailing-252 windows missed it. Any active strategy is therefore judged
+as an **overlay**: its contribution is (strategy − shadow), not (strategy − target). Since 2026-07-06 that
+difference is **−5.31 pp (−$10,229) over 55 sessions** (STRATEGY −1.88% vs SHADOW +3.44%).
+
 ## 1. The compounding fact
 
-1%/month compounds to **+12.7%/yr**. For scale: the only audited 12-year live retail systematic track
+1%/month compounds to **+12.68%/yr** (binding definition in §0a). For scale: the only audited 12-year live retail systematic track
 the program could find (Carver) runs Sharpe 0.80 for ≈13%/yr — so **this target is roughly a
 Carver-equivalent outcome**, which is demanding but documented, rather than beyond the frontier.
 Medallion ran ≈0.20%/day gross before fees.

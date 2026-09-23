@@ -16,10 +16,10 @@ authenticated calls went through a helper that never exposes a key.
 
 | deliverable | result |
 |---|---|
-| **1. Security and state** | Rotation: **Pierce's action**. `scripts/verify_credentials.py` confirms it without printing a value. Baseline: Alpaca, Polygon and Finnhub return 200. **Together returns 403 on every endpoint, including the free model listing**, so the problem is the key or the account, not one endpoint. The secrets file is cleaned, with every effective value unchanged. `TARGET.md` §2 is amended. **Mode B is live and tested.** |
+| **1. Security and state** | Rotation: **Pierce's action**. `scripts/verify_credentials.py` confirms it without printing a value. Baseline: Alpaca, Polygon and Finnhub return 200. ~~Together returns 403 on every endpoint, including the free model listing, so the problem is the key or the account, not one endpoint.~~ **[Corrected in doc 306: the 403 was my checker's fault, not the key.** Together sits behind Cloudflare, which answers 403 to urllib's default `Python-urllib` User-Agent. With any normal User-Agent, `/v1/models` returns 200 and chat completions return **402 `credit_limit`**. The key works. The account is out of credit.**]** The secrets file is cleaned, with every effective value unchanged. `TARGET.md` §2 is amended. **Mode B is live and tested.** |
 | **2. Rocket-gate T00027** | **NOT PASSED** at its frozen n ≥ 30 evaluation point: n=36, CI [−$11,084, +$7,582] per session, halves +$60,053 / −$133,205. The forward interval **excludes the +$21,912/session it was mined on**. Replicated from the frozen prose; five sessions re-priced from raw bars to the cent. Closed, `REFUTED_BY_NATURE` |
 | **3. Graveyard** | SEVP → `INSTRUMENT_LIMITED`. Kalshi → `REFUTED_BY_NATURE`: LLM Brier worse by +0.135, CI [+0.114, +0.158], n=793. Kalshi task disabled. The design queue is down to 3 live designs |
-| **4. SS0006 P-4/5/6** | **P-6 done:** Alpaca's easy-to-borrow fee is **0.00%**, so the freeze stays at 1.2127% (4.8 bps/ticket). **P-5, retrospective parts:** nominal pass, but the median spread at entry is **20.3 bps, ~2× the draft's cost assumption**, and **Rule 201 blocks 31%**. **P-4 blocked** (Together 403). Nothing kills 304b |
+| **4. SS0006 P-4/5/6** | **P-6 done:** Alpaca's easy-to-borrow fee is **0.00%**, so the freeze stays at 1.2127% (4.8 bps/ticket). **P-5, retrospective parts:** nominal pass, but the median spread at entry is **20.3 bps, ~2× the draft's cost assumption**, and **Rule 201 blocks 31%**. **P-4 blocked** (Together ~~403~~ **402 credit_limit**; doc 306). Nothing kills 304b |
 | **5. Treasury** | **The premise needs two corrections.** Paper cash cannot earn yield, because Alpaca paper pays no interest and simulates no dividends. T-bills yield **~3.7% (1.45 bps/day), not 5%**. On total return, an 80/20 SPY/BIL core cleared 5 bps/day over 2016-2026 by 0.16 bps/day, with a −27.5% drawdown, and failed on 2007-2026 (§5) |
 
 ---
@@ -45,11 +45,13 @@ built instead:
 | Alpaca data, latest SPY quote | 200 |
 | Polygon `GET /v3/reference/tickers` | 200 |
 | Finnhub `GET /quote` | 200 |
-| **Together `GET /v1/models`** | **403** |
-| Together 1-token chat: Qwen3-235B-tput / Qwen3.5-397B / gpt-oss-120b | **403 / 403 / 403** |
+| **Together `GET /v1/models`** | ~~403~~ **200 with a normal User-Agent** (doc 306) |
+| Together 1-token chat: Qwen3-235B-tput / Qwen3.5-397B / gpt-oss-120b | ~~403 / 403 / 403~~ **402 `credit_limit`** on Qwen3-235B-tput and Llama-3.3-70B (doc 306) |
 | secrets-file ACL | already restricted to you, SYSTEM and Administrators |
 
 ### 1b. Together: account-wide now, not endpoint-specific
+
+**[Corrected in doc 306: the 403 was my checker's fault, not the key.** Together sits behind Cloudflare, which answers 403 to urllib's default `Python-urllib` User-Agent. With any normal User-Agent, `/v1/models` returns 200 and chat completions return **402 `credit_limit`**. The key works. The account is out of credit.**]** The paragraph below is kept as written; its revocation/suspension reading is wrong.
 
 The August failures were **endpoint-specific**. The red-flag scorer's calls to the `-tput` model got
 **402**, while the bot's own calls, whose last one today went to `meta-llama/Llama-3.3-70B`, kept
@@ -165,7 +167,7 @@ risk-shaping, and overnight ETF excess-of-cash. **None of them has a positive me
 
 | # | status | result |
 |---|---|---|
-| **P-4** model access | **blocked** | Together 403 on every endpoint (§1b). MODEL_ECHO and the canaries cannot run. The directive's kill rule ("latency/errors exceed tolerance") is about the *restored* endpoint, and an unfunded or revoked account is not a property of the design, so this is not treated as a kill |
+| **P-4** model access | **blocked** | Together ~~403 on every endpoint~~ **402 credit_limit; the key is valid** (§1b, corrected in doc 306). MODEL_ECHO and the canaries cannot run. The directive's kill rule ("latency/errors exceed tolerance") is about the *restored* endpoint, and an unfunded or revoked account is not a property of the design, so this is not treated as a kill |
 | **P-5** plumbing | **retrospective parts: nominal pass; forward part not run** | EDGAR discovery complete: EFTS matches the daily index on all 11 published days; items match the submissions JSON on 2,343/2,343. 10 off-season sessions yield 106 Item-2.02 events and **64 eligible**. **The default feed is SIP.** **SIP ±60 s at 15:30: 63/64 = 98.4%**, a pass only on the eligible denominator (all 101 mapped events: 91.1%), so that reading must be frozen. **Rule 201 in force at entry: 31.2%**, CI 21–43%, vs the 10.6% planning rate. **The frozen EX-99 regex misses 35.9%** of eligible filings, all of which carry an EX-99 |
 | **P-6** borrow fee | **done** | Alpaca's published schedule (revised 2026-09-17; sha256 recorded): **easy-to-borrow borrow fee is free**. Freeze b = max(0%, 1.2127%) = **1.2127% = 4.81 bps per 10-session ticket**. The paper account does not simulate borrow; no API exposes a rate. ETB share of the eligible universe today: **92.4%** |
 
@@ -297,7 +299,7 @@ a satellite.
 
 1. **Rotate** the Alpaca paper pair and the Together, Finnhub and Polygon keys, then run
    `python scripts/verify_credentials.py`.
-2. **Together:** restore the account or key. The 403 is account- or key-wide.
+2. **Together:** ~~restore the account or key. The 403 is account- or key-wide.~~ Add credit: the key is valid and the account is out of credit (doc 306).
 3. **Tier-1 model:** confirm the `-tput` model is intended (§1c).
 4. **Target definition:** 5.00 bps/day arithmetic, or 12.7%/yr CAGR (§5b).
 5. **Benchmark:** approve the shadow SPY/BIL benchmark ledger (§5c item 1). Anything with an order path

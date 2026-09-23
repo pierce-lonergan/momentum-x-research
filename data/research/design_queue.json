@@ -25,7 +25,6 @@
  "omega": 0.25,
  "lam": 0.5,
  "available_keystones": [
-  "lower_requirement",
   "executable_prereg_fixture",
   "point_in_time_shares_outstanding",
   "regime_coverage",
@@ -33,7 +32,6 @@
   "intraday_tape_pre_2020"
  ],
  "_keystone_notes": {
-  "lower_requirement": "target re-scoped to 5 bps/day (docs/TARGET.md)",
   "executable_prereg_fixture": "the doc-296 rule is in force",
   "point_in_time_shares_outstanding": "confirmed served (doc 298); DEPTH UNVERIFIED",
   "regime_coverage": "daily AND minute warehouses both span 2016-2026",
@@ -42,7 +40,8 @@
   "intraday_tape_pre_2020": "LANDED 2026-09-21. minute_aggs is now 2,691 sessions, 2016-01-04..2026-09-17, 3.94B bars, verified by DuckDB on ts_et. Flat files were entitled back to 2016-01-05 all along; nobody had checked.",
   "_excluded_short_locate_access": "0-for-94; shorting closed at this broker",
   "_excluded_lit_venue_routing": "100% internalised (Rule 606, 2026Q1)",
-  "_excluded_clean_iv_surface": "look-ahead purged, but the doc-294 panel stays tainted"
+  "_excluded_clean_iv_surface": "look-ahead purged, but the doc-294 panel stays tainted",
+  "_consumed_lower_requirement": "CONSUMED 2026-07-29, removed from available_keystones in doc 306. The target was re-scoped to 5 bps/day and TARGET.md section 0 re-checked all 35 ledger families at the halved bar: zero changed status. Left 'available', it made `revive` rank every stone keyed on it FULLY UNBLOCKED forever (SS0020 #1), which is the doc-303 root cause. A further re-scope of the target would be a NEW keystone, not this one."
  },
  "history": {
   "price_momentum": 8,
@@ -57,49 +56,7 @@
   "concentration": 1
  },
  "_history_note": "Mechanism-class histogram of the 25 archived closures. Entropy is what diversity_bonus() moves; price_momentum at 8/25 is the crowding the term penalises.",
- "designs": [
-  {
-   "name": "rv_forward_shadow_ledger",
-   "family": "volatility",
-   "n_obs": 60,
-   "cluster_size": 1,
-   "icc": 0.0,
-   "prior_mean": 0.2,
-   "prior_sd": 0.5,
-   "cost_days": 0.2,
-   "keystones_required": [],
-   "_note": "LIVE forward confirmation of doc 291 (n>=60 bar, review-dead at 120)."
-  },
-  {
-   "name": "vol_score_risk_shaping",
-   "family": "volatility",
-   "n_obs": 2772,
-   "cluster_size": 12,
-   "icc": 0.2,
-   "prior_mean": 0.0,
-   "prior_sd": 0.3,
-   "cost_days": 3.0,
-   "keystones_required": [
-    "regime_coverage"
-   ],
-   "_note": "Doc 291 Stage-1 gates passed but the mean point is negative and the proposal is HELD. prior_mean 0.0 records that honestly. Within-day clustering is heavy for a per-name risk overlay."
-  },
-  {
-   "name": "overnight_etf_excess_of_cash",
-   "family": "beta_carry",
-   "n_obs": 2772,
-   "cluster_size": 1,
-   "icc": 0.0,
-   "prior_mean": 0.1,
-   "prior_sd": 0.25,
-   "cost_days": 2.0,
-   "keystones_required": [
-    "lower_requirement",
-    "regime_coverage"
-   ],
-   "_note": "Doc 297 measured 1.03 bps/day excess-of-cash with an interval spanning zero, and computed 3,079 sessions to certify it beats a T-bill. 11 years is 2,772 - still short. Included so the planner says so rather than the analyst. | doc 304: fails the 2026-09-22 directive's registration floor (gross >= 20 bps/ticket): 1.03 bps/day. M4 (doc 298) also keeps the family CLOSED, with four of its five objections bar-free. A planner ADMISSIBLE is a statement about information value, not a licence to register."
-  }
- ],
+ "designs": [],
  "retired": [
   {
    "name": "anomaly_vol_scale_monetisation",
@@ -189,6 +146,50 @@
    "keystones_required": [],
    "_note": "Already armed and collecting (n=3/30, DEAD at 60). Listed to show what a 30-observation gate can and cannot establish. prior_mean 0.0 because its parent family is closed.",
    "_retired": "doc 305: T00027 CLOSED REFUTED_BY_NATURE (NOT PASSED at n=36; CI [-11,084, +7,582] $/session; futility stop)."
+  },
+  {
+   "name": "rv_forward_shadow_ledger",
+   "family": "volatility",
+   "n_obs": 60,
+   "cluster_size": 1,
+   "icc": 0.0,
+   "prior_mean": 0.2,
+   "prior_sd": 0.5,
+   "cost_days": 0.2,
+   "keystones_required": [],
+   "_note": "LIVE forward confirmation of doc 291 (n>=60 bar, review-dead at 120).",
+   "_retired": "doc 306: RETIRED, closure ABANDONED (retired before its frozen gate was ever computed; blind intact, no outcome field read). CEREMONIAL at the default prior N(0, 0.5): EIG 0.0074 nats, p_cert 0.0307, informativeness 1.032; also CEREMONIAL at its declared N(0.2, 0.5) (p_cert 0.0342, informativeness 1.150). ADMISSIBLE only at prior sd >= 1.964 (mean 0) / >= 1.674 (mean 0.2), or at n_eff >= 927 sessions under N(0, 0.5). The planner prices it as a Sharpe test while its frozen bar is a QLIKE gate (n>=60, CI>0, >=2%), and by its own prereg the ledger 'changes no decision': every route from an RV forecast to money is closed or retired (RV-vs-IV Stage 3 VOID at h=1 and -4.43% at the frozen h=21; vol-scale monetisation retired doc 304; single-name short vol CLOSED doc 298). State at retirement: 47/60 forward sessions (2026-07-13..2026-09-17); 2026-08-28 is absent from minute_aggs, so it was never scored; and the 2016-2023 backfill (landed 2026-09-21) sits inside build_panel's glob, which has no date floor, so the 4 forward rows written after it (07-31, 08-31, 09-16, 09-17) were scored on a different training panel from the other 43 (inferred from mtimes and code, not re-run). Trial T00030. Nightly append STOPPED in doc 306 (post_close_scorecard.py _RV_FORWARD_CLOSED), on the doc-305 precedent that a closed trial must not keep collecting; the ledger is frozen blind at 47 forward rows."
+  },
+  {
+   "name": "vol_score_risk_shaping",
+   "family": "volatility",
+   "n_obs": 2772,
+   "cluster_size": 12,
+   "icc": 0.2,
+   "prior_mean": 0.0,
+   "prior_sd": 0.3,
+   "cost_days": 3.0,
+   "keystones_required": [
+    "regime_coverage"
+   ],
+   "_note": "Doc 291 Stage-1 gates passed but the mean point is negative and the proposal is HELD. prior_mean 0.0 records that honestly. Within-day clustering is heavy for a per-name risk overlay.",
+   "_retired": "doc 306: RETIRED, closure ABANDONED (the doc-291 config-diff that was HELD is declined; nothing is left to shape). UNDISCRIMINATING at the default prior N(0, 0.5): EIG 0.0973 nats, p_cert 0.0436, informativeness 1.467 (< 1.5); CEREMONIAL at its declared N(0, 0.3). FRAGILE: ADMISSIBLE at prior sd >= 0.517, or at icc <= 0.180 against the declared 0.20. It is retired on grounds that do not depend on the prior. It is a risk overlay for the low-float gapper book, which is SEARCH CLOSED (doc 297: -2.041%/ticket, CI [-2.823, -1.226]) and quarantined in observe mode (doc 305). Sizing and vetoes are sign-preserving (doc-297 identity), and both passing uses lower the point mean (U1 top-quintile -0.87%/event, CI [-3.05%, +0.83%]; U2 -0.82%/dollar, CI [-2.92%, +0.81%]; stage1_defensive.json, 875 events / 51 sessions). A drawdown tool, not an edge. n_obs 2772 is nominal; this design was never built. Trial T00021."
+  },
+  {
+   "name": "overnight_etf_excess_of_cash",
+   "family": "beta_carry",
+   "n_obs": 2772,
+   "cluster_size": 1,
+   "icc": 0.0,
+   "prior_mean": 0.1,
+   "prior_sd": 0.25,
+   "cost_days": 2.0,
+   "keystones_required": [
+    "lower_requirement",
+    "regime_coverage"
+   ],
+   "_note": "Doc 297 measured 1.03 bps/day excess-of-cash with an interval spanning zero, and computed 3,079 sessions to certify it beats a T-bill. 11 years is 2,772 - still short. Included so the planner says so rather than the analyst. | doc 304: fails the 2026-09-22 directive's registration floor (gross >= 20 bps/ticket): 1.03 bps/day. M4 (doc 298) also keeps the family CLOSED, with four of its five objections bar-free. A planner ADMISSIBLE is a statement about information value, not a licence to register.",
+   "_retired": "doc 306: RETIRED on the evidence, not the planner. The planner still rates it ADMISSIBLE: at N(0, 0.5) p_cert 0.0734, informativeness 2.469; at its declared N(0.1, 0.25) p_cert 0.0562, informativeness 1.889; threshold sd 0.289 at mean 0. Doc 297 killed the sleeve: 1.566 of its 4.769 net bps is T-bill interest; excess of cash is 1.03 bps/day in 2025+, CI [-7.15, +7.63], and all 8 excess-of-cash CIs span zero; 46-59% of gross is beta x a bull sample; buy-and-hold beats it on total return 4/4 in both windows and on Sharpe 4/4 in 2025+; effective independent bets 1.50. Certifying that it beats a T-bill needs 3,079 sessions, and minute_aggs holds 2,693 SPY sessions (2,692 close-to-open pairs, 2016-01-04..2026-09-21, counted doc 306). Fails the registration floor (gross >= 20 bps/ticket). The exposure it harvests is available by holding the index, which is an allocation decision and Pierce's. WARNING: stepping stone SS0020 is still refuted_by_arithmetic keyed on lower_requirement, so `epistemics.py revive` ranks it #1 FULLY UNBLOCKED today. Re-key it or it will be re-proposed (doc 303's root cause). Trial T00024."
   }
  ]
 }
