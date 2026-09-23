@@ -82,6 +82,13 @@ Three things worth keeping:
    | mid-liquid | 7.550 | 7.302 | 7.345 | 7.260 | 7.321 | 7.307 | **7.372** | 1.01× |
    | low-priced | 22.346 | 21.884 | 21.164 | 22.701 | 22.080 | 22.247 | **22.858** | 1.04× |
 
+   > ⚠ **CORRECTED by doc 305.** This table's probe truncated multi-symbol quote requests at 1,000 and never
+   > paged. The index-ETF row therefore dropped later-alphabet tickers at busy moments; SPY survived in 3 of
+   > 19 sessions, which is the "uneven n" noted below. Re-measured one symbol per request: index-ETF 15:30
+   > **0.945** (was 0.559), 15:50 **1.010** (was 0.862), close premium **1.01×** (was 1.49×). Per-ticker
+   > medians and the primary-tier all-in cost (0.575 → **0.576**) are unchanged, and so is the LETF verdict.
+   > The stock tiers moved by a few percent.
+
    **No tier shows a 4× close premium; the maximum is 1.49× and mega caps are *cheaper* into the
    close.** Large caps run **5.519 bps at the open against 1.821 at 15:50 — the open is 3.0× the
    close.** Re-pooled, the curve is 1.84 bps at 14:30 vs 1.82 at 15:50, a ratio of **0.99× against

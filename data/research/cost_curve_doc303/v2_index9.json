@@ -1,0 +1,153 @@
+{
+  "per_ticker": {
+    "SPY": {
+      "tier": "custom",
+      "n": 132,
+      "median_rel_spread_bps": 0.261,
+      "ci95_session_clustered": [
+        0.258,
+        0.262
+      ],
+      "p75_bps": 0.264,
+      "median_depth_at_touch_usd": 9206160.0
+    },
+    "QQQ": {
+      "tier": "custom",
+      "n": 133,
+      "median_rel_spread_bps": 0.281,
+      "ci95_session_clustered": [
+        0.279,
+        0.282
+      ],
+      "p75_bps": 0.418,
+      "median_depth_at_touch_usd": 5756760.0
+    },
+    "IWM": {
+      "tier": "custom",
+      "n": 132,
+      "median_rel_spread_bps": 0.348,
+      "ci95_session_clustered": [
+        0.344,
+        0.35
+      ],
+      "p75_bps": 0.668,
+      "median_depth_at_touch_usd": 5927650.0
+    },
+    "DIA": {
+      "tier": "custom",
+      "n": 133,
+      "median_rel_spread_bps": 0.572,
+      "ci95_session_clustered": [
+        0.563,
+        0.579
+      ],
+      "p75_bps": 0.763,
+      "median_depth_at_touch_usd": 2147060.0
+    },
+    "SOXX": {
+      "tier": "custom",
+      "n": 133,
+      "median_rel_spread_bps": 1.692,
+      "ci95_session_clustered": [
+        1.331,
+        1.969
+      ],
+      "p75_bps": 2.329,
+      "median_depth_at_touch_usd": 2101440.0
+    },
+    "XLF": {
+      "tier": "custom",
+      "n": 133,
+      "median_rel_spread_bps": 1.747,
+      "ci95_session_clustered": [
+        1.731,
+        1.765
+      ],
+      "p75_bps": 1.769,
+      "median_depth_at_touch_usd": 59261050.0
+    },
+    "XBI": {
+      "tier": "custom",
+      "n": 130,
+      "median_rel_spread_bps": 2.535,
+      "ci95_session_clustered": [
+        2.455,
+        2.599
+      ],
+      "p75_bps": 3.695,
+      "median_depth_at_touch_usd": 1652650.0
+    },
+    "GDX": {
+      "tier": "custom",
+      "n": 133,
+      "median_rel_spread_bps": 1.064,
+      "ci95_session_clustered": [
+        1.047,
+        1.934
+      ],
+      "p75_bps": 2.074,
+      "median_depth_at_touch_usd": 1974100.0
+    },
+    "TLT": {
+      "tier": "custom",
+      "n": 130,
+      "median_rel_spread_bps": 1.222,
+      "ci95_session_clustered": [
+        1.216,
+        1.231
+      ],
+      "p75_bps": 1.232,
+      "median_depth_at_touch_usd": 59681650.0
+    }
+  },
+  "per_tier": {
+    "custom": {
+      "tickers": 9,
+      "median_rel_spread_bps": 1.064,
+      "round_trip_bps": 1.064,
+      "median_depth_at_touch_usd": 5756760.0
+    }
+  },
+  "median_bps_by_et_time": {
+    "09:45": 1.223,
+    "10:30": 1.099,
+    "11:30": 1.16,
+    "13:00": 1.031,
+    "14:30": 0.996,
+    "15:30": 0.945,
+    "15:50": 1.01
+  },
+  "n_observations": 1189,
+  "note": "round_trip_bps = one full quoted spread (cross to enter, cross to exit). Excludes impact beyond the displayed touch, adverse selection, and fees. Check median_depth_at_touch_usd against intended order size before using.",
+  "sessions_sampled": [
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21",
+    "2026-09-22"
+  ],
+  "et_times_sampled": [
+    "09:45",
+    "10:30",
+    "11:30",
+    "13:00",
+    "14:30",
+    "15:30",
+    "15:50"
+  ]
+}

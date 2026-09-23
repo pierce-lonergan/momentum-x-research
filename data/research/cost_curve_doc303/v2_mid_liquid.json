@@ -1,0 +1,120 @@
+{
+  "per_ticker": {
+    "F": {
+      "tier": "custom",
+      "n": 128,
+      "median_rel_spread_bps": 7.21,
+      "ci95_session_clustered": [
+        7.163,
+        7.286
+      ],
+      "p75_bps": 7.345,
+      "median_depth_at_touch_usd": 9374925.0
+    },
+    "PLUG": {
+      "tier": "custom",
+      "n": 109,
+      "median_rel_spread_bps": 47.281,
+      "ci95_session_clustered": [
+        46.189,
+        47.733
+      ],
+      "p75_bps": 47.962,
+      "median_depth_at_touch_usd": 18006800.0
+    },
+    "SOFI": {
+      "tier": "custom",
+      "n": 127,
+      "median_rel_spread_bps": 5.739,
+      "ci95_session_clustered": [
+        5.551,
+        5.812
+      ],
+      "p75_bps": 5.846,
+      "median_depth_at_touch_usd": 4951750.0
+    },
+    "RIVN": {
+      "tier": "custom",
+      "n": 127,
+      "median_rel_spread_bps": 6.343,
+      "ci95_session_clustered": [
+        6.264,
+        6.433
+      ],
+      "p75_bps": 6.454,
+      "median_depth_at_touch_usd": 2059850.0
+    },
+    "AAL": {
+      "tier": "custom",
+      "n": 129,
+      "median_rel_spread_bps": 7.631,
+      "ci95_session_clustered": [
+        7.51,
+        7.695
+      ],
+      "p75_bps": 7.713,
+      "median_depth_at_touch_usd": 8746850.0
+    },
+    "SNAP": {
+      "tier": "custom",
+      "n": 129,
+      "median_rel_spread_bps": 17.937,
+      "ci95_session_clustered": [
+        17.59,
+        18.298
+      ],
+      "p75_bps": 18.365,
+      "median_depth_at_touch_usd": 9450000.0
+    }
+  },
+  "per_tier": {
+    "custom": {
+      "tickers": 6,
+      "median_rel_spread_bps": 7.421,
+      "round_trip_bps": 7.421,
+      "median_depth_at_touch_usd": 9060888.0
+    }
+  },
+  "median_bps_by_et_time": {
+    "09:45": 7.59,
+    "10:30": 7.318,
+    "11:30": 7.361,
+    "13:00": 7.265,
+    "14:30": 7.388,
+    "15:30": 7.388,
+    "15:50": 7.399
+  },
+  "n_observations": 749,
+  "note": "round_trip_bps = one full quoted spread (cross to enter, cross to exit). Excludes impact beyond the displayed touch, adverse selection, and fees. Check median_depth_at_touch_usd against intended order size before using.",
+  "sessions_sampled": [
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21",
+    "2026-09-22"
+  ],
+  "et_times_sampled": [
+    "09:45",
+    "10:30",
+    "11:30",
+    "13:00",
+    "14:30",
+    "15:30",
+    "15:50"
+  ]
+}

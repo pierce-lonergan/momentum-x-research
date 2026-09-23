@@ -92,18 +92,27 @@ only in the regime where certification is expensive.** The book's current σ is 
 ## 2. The identity that governs everything (doc 297 — replaces the old per-ticket table)
 
     account daily return  ≡  deployment × turns × (net per-ticket return)
-    required NET per ticket = 0.001 / (deployment × turns)
+    required NET per ticket = 0.0005 / (deployment × turns)      # 5 bps/day (amended doc 305; was 0.001)
     achieved NET per ticket = gross per-ticket edge − round-trip cost
 
 **Deployment and turns appear on the requirement side only. They are sign-preserving multipliers: they
 cannot make a negative edge positive.** The old "+10.0%/ticket net" headline assumed one 5% ticket per
-day; measured turnover is 3.9–17.2% of equity per session, so the honest requirement is 25–183 bps/ticket
-depending on regime. That correction was real — and it changes no verdict, because the same multiplier
-scales what is actually earned. Verified against realised dollars: post-LASE predicted −37.07 bps/day vs
-−36.18 realised.
+day. At the standing **5 bps/day** the honest requirement is **12.5–92 bps/ticket net**. The low end is
+the maximum permitted deployment × turns (40%: 8 positions × 5%); the high end is the **measured
+effective** deployment × turns of 5.46% (doc 297; its verification artifact measured 5.336% all-session,
+`data/research/doc297/verify_requirement_arithmetic.md`:13-17, 264). That correction was real, and it
+changes no verdict, because the same multiplier scales what is actually earned. Verified against
+realised dollars: post-LASE predicted −37.07 bps/day vs −36.18 realised.
+
+> *Amended 2026-09-22 on Pierce's written direction (doc 305).* This section previously used 0.001, the
+> superseded 10 bps/day, and so quoted **25–183 bps/ticket**: twice the standing requirement. The same
+> amendment corrects the prose. It had said "measured turnover is 3.9–17.2% of equity per session, so…
+> 25–183", but 3.9–17.2% is a **both-legs turnover** that the verification artifact says double-counts
+> (:307). At either constant it would give a different range (58–256 bps at 0.001). The endpoints were
+> always 40% and 5.46%.
 
 Turns divide the requirement **and multiply the cost**. One full round-trip turn of the account currently
-costs 52.7 bps of equity = 5.3 days of target. At 26–53 bps/turn the cost term dominates.
+costs 52.7 bps of equity = **10.5 days of the 5 bps/day target** (5.3 days at the superseded 10 bps/day). At 26–53 bps/turn the cost term dominates.
 
 ### 2b. The cost condition (this, not deployment, is what binds)
 
@@ -129,22 +138,29 @@ $0.0000206 × value on sells, TAF $0.000195/share on sells, CAT $0.000003/share 
 1,343 real fills): it bills TAF at a retired rate and never charges the SEC fee at all. Any cost
 figure taken from paper activity is optimistic by that factor.
 
-**Intraday timing, TIERED** (doc 303; 3,471 true-NBBO observations, 5 tiers × 20 sessions × 7 ET
-instants; quoted spread, fees not included):
+**Intraday timing, TIERED** (doc 303, **re-measured doc 305**: 4,185 true-NBBO observations, 5 tiers ×
+20 sessions × 7 ET instants, one symbol per request; quoted spread, fees not included):
 
-| tier | 09:45 | 10:30 | 11:30 | 13:00 | 14:30 | 15:30 | **15:50** | close vs 14:30 |
-|---|---|---|---|---|---|---|---|---|
-| **index ETFs** (9 names) | 0.939 | 0.679 | 0.674 | 0.570 | 0.578 | 0.559 | **0.862** | 1.49× |
-| **mega caps** | 2.371 | 1.741 | 1.516 | 1.225 | 1.200 | 0.944 | **0.902** | **0.75×** |
-| **large caps** | 5.519 | 2.806 | 2.364 | 1.958 | 1.838 | 1.847 | **1.821** | 0.99× |
-| **mid-liquid** | 7.550 | 7.302 | 7.345 | 7.260 | 7.321 | 7.307 | **7.372** | 1.01× |
-| **low-priced** | 22.346 | 21.884 | 21.164 | 22.701 | 22.080 | 22.247 | **22.858** | 1.04× |
+> *Corrected 2026-09-22 (doc 305), measurement only.* Doc 303's probe requested quotes for many symbols at
+> once under a single 1,000-quote cap and never paged, so busy seconds silently dropped the
+> alphabetically later tickers (SPY survived in 3 of 19 sessions). The index-ETF row was a composition
+> artifact: its 15:30 cell was 0.559 and is **0.945**; its close premium was 1.49× and is **1.01×**. The
+> stock tiers moved by a few percent. Every conclusion below survives, and the close-vs-open one gets
+> stronger.
+
+| tier | 09:45 | 10:30 | 11:30 | 13:00 | 14:30 | 15:30 | **15:50** | close vs 14:30 | n (old → new) |
+|---|---|---|---|---|---|---|---|---|---|
+| index ETFs (9 names) | 1.223 | 1.099 | 1.160 | 1.031 | 0.996 | 0.945 | **1.010** | 1.01× | 576 → 1189 |
+| mega caps | 2.344 | 1.772 | 1.516 | 1.227 | 1.182 | 0.950 | **0.918** | 0.78× | 713 → 789 |
+| large caps | 5.519 | 2.807 | 2.449 | 1.958 | 1.838 | 1.840 | **1.825** | 0.99× | 753 → 775 |
+| mid-liquid | 7.590 | 7.318 | 7.361 | 7.265 | 7.388 | 7.388 | **7.399** | 1.00× | 747 → 749 |
+| low-priced | 22.346 | 22.198 | 21.299 | 23.068 | 22.232 | 22.805 | **22.962** | 1.03× | 682 → 683 |
 
 ⚠⚠ **RETRACTED (doc 303): "intraday timing matters ~4×; median 1.62 bps at 14:30–15:30 versus 6.42 bps
 at 15:50; trading near the close costs four times trading mid-afternoon."** That claim was a **pooled
 cross-tier median over 613 observations**, and it is **wrong in magnitude and wrong in direction.**
 
-* **No tier shows a 4× close premium. Not one.** The largest is index ETFs at **1.49×**; mega caps are
+* **No tier shows a 4× close premium. Not one.** The largest is low-priced at **1.03×** (index ETFs: 1.01×, corrected from 1.49×); mega caps are
   **cheaper** at the close (0.75×) and the three illiquid tiers are flat to within 4%.
 * **The OPEN is the expensive instant, not the close.** Large caps cost **5.519 bps at 09:45 against
   1.821 at 15:50 — the open is 3.0× the close.** Every liquid tier is monotonically cheaper through

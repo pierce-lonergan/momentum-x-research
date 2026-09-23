@@ -549,6 +549,63 @@ def _stones() -> list[dict]:
             docs=["293"],
             closed_on="2026-07-12",
         ),
+        dict(
+            family="SEVP scheduled-event vol carry (trial T00029)",
+            claim="Shorting an ATM straddle from T-1 to T+1 around single-name earnings carries a positive net.",
+            closure=Closure.INSTRUMENT_LIMITED,
+            rationale="Closed on Pierce's disposition (doc 305) after its frozen death date "
+                      "(2026-09-01) passed at 205/300 two-leg events. The IV collector feeding it was "
+                      "never scheduled and last ran 2026-07-13. No gate was ever computed, so blindness "
+                      "is intact and NOTHING is known about the effect. The frozen structure is a naked "
+                      "short straddle, which Alpaca cannot express at any options level; the runner "
+                      "still conditioned G2 on realized outcomes. Deadline NOT slid, nothing re-tuned.",
+            keystones=[K("executable_prereg_fixture",
+                         "a runner that implements the frozen prose, with a fixture",
+                         "the conformed runner still conditions G2 on realized outcomes"),
+                       K("historical_option_nbbo",
+                         "event-window option quotes to cost the trade",
+                         "option cost measured on 15 of 205 covered events' names, one non-event day"),
+                       K("clean_iv_surface",
+                         "synchronous, parity-checked IV legs at T-1 and T+1",
+                         "legs were month-start strikes and non-synchronous EOD closes")],
+            docs=["293", "294", "296", "304", "305"],
+            closed_on="2026-09-22",
+        ),
+        dict(
+            family="Kalshi zero-capital LLM shadow (trial T00028)",
+            claim="An LLM's probability forecasts beat Kalshi market prices net of fees.",
+            closure=Closure.REFUTED_BY_NATURE,
+            rationale="Its own frozen gate (doc 284:30: >=200 resolved; Brier(LLM) < Brier(market) AND "
+                      "fee-adjusted day-blocked P&L CI > 0) FAILED at n=237 and at every re-score to n=793. "
+                      "Brier LLM 0.2451 vs market 0.1101; the gap is +0.1350 (LLM worse) with a "
+                      "forecast-day-blocked 95% CI [+0.1142, +0.1575] over 32 days (doc 305, seed 305). "
+                      "The divergence rule lost $22.58 over 631 one-contract trades. The collector then "
+                      "went dark on 2026-08-10 (parse failures) and was decommissioned in doc 305.",
+            effect=0.1350,
+            ci=(0.1142, 0.1575),
+            n_obs=793,
+            docs=["284", "298", "305"],
+            closed_on="2026-09-22",
+        ),
+        dict(
+            family="Rocket-gate conditional exit posture (trial T00027)",
+            claim="For gapper entries with entry-time rvol>100 in hour 9 ET, holding to the close beats the BAR-1 exit.",
+            closure=Closure.REFUTED_BY_NATURE,
+            rationale="Its frozen acceptance test (7f003f6: day-blocked bootstrap of the per-session delta, "
+                      "CI lower bound > 0 AND both chronological halves > 0, at n >= 30 gated forward "
+                      "sessions) returned NOT PASSED at n=36: mean -$2,032/session, 95% CI "
+                      "[-$11,084, +$7,582]; halves +$60,053 / -$133,205; about -69 bps per filled ticket. "
+                      "The forward interval EXCLUDES the retrospectively mined +$21,912/session the gate "
+                      "was built on. Replicated from the frozen prose, and 5 sessions re-priced from raw "
+                      "bars to the cent (doc 305). Frozen status was FAILING-SO-FAR (kill horizon n=60); "
+                      "closed early as a futility stop on Pierce's written direction. A pass would have "
+                      "needed the next 24 sessions to average about +$21K each.",
+            effect=-2031.9967,
+            ci=(-11084.34, 7582.18),
+            n_obs=36,
+            docs=["280", "284", "305"],
+            closed_on="2026-09-22",
+        ),
     ]
 
 

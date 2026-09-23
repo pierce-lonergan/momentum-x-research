@@ -37,8 +37,8 @@ Established doc 293.
 | family | state | bar | doc |
 |---|---|---|---|
 | Volatility door: RV forecasting → options | Stage-3 unblind VOID at h=1 / negative at frozen h=21 → moved to CLOSED-recommended (see CLOSED table); only the forward RV shadow-ledger and the HELD Stage-1 proposal remain live from this door | closes with CLOSED-table entry on Pierce's ratification | 291, 292, 296 |
-| Rocket-gate conditional (rvol>100 × hour-9 hold) | forward ledger collecting, n=3/30 | CI-lo>0 + halves at n≥30; DEAD at 60; re-tune=kill | 284 |
-| Kalshi zero-capital shadow | collecting (~2/200 resolved) | ≥200 resolved, fee-adj CI>0 + Brier beat | 284 |
+| Rocket-gate conditional (rvol>100 × hour-9 hold), trial **T00027** | ⛔ **CLOSED, `REFUTED_BY_NATURE` (doc 305).** The frozen acceptance test is NOT PASSED at n=36 (≥30): mean −$2,032/session, CI [−$11,084, +$7,582], halves +$60,053 / −$133,205, ≈ −69 bps/filled ticket. The forward CI excludes the mined +$21,912/session. The result was replicated from the frozen prose and 5 sessions re-priced from bars to the cent. Frozen status FAILING-SO-FAR; closed as a futility stop on Pierce's direction; nightly append stopped. This row had read "n=3/30" since July | NOT PASSED → CLOSED | 284, 305 |
+| Kalshi zero-capital shadow (trial **T00028**) | ⛔ **CLOSED, `REFUTED_BY_NATURE` (doc 305).** Its frozen gate FAILED at n=237 and at every re-score to n=793. Brier LLM 0.2451 vs market 0.1101 (gap +0.135, day-blocked CI [+0.114, +0.158]); fee-adjusted P&L −$22.58 over 631 trades. This row had read "collecting (~2/200 resolved)" since July. Collector decommissioned (task disabled) | gate FAILED → CLOSED | 284, 305 |
 | RV forward shadow-ledger (doc-291 confirmation) | LIVE, PENDING-COLLECTION (forward from 7/13) | n≥60, CI>0, ≥2%; review-dead at 120 | 292 |
 | In-universe vol-score risk-shaping (veto/inverse-sizing) | gates passed; proposal HELD (mean-point negative) | Pierce's disposition | 291 |
 
@@ -56,7 +56,7 @@ Established doc 293.
 
 | family | validated ceiling | gate |
 |---|---|---|
-| SEVP scheduled-event vol carry (trial **T00029**) | ⛔ **UNRESOLVED-BY-DEATH, 2026-09-01 — reported to Pierce in doc 304, three weeks late.** Its frozen rule (`_doc294_PREREG.md` L35-36, private copy; the public copy's hash differs) says "DEATH DATE: 2026-09-01 → report UNRESOLVED to Pierce". Coverage stalled at **205/300**: the IV collector was never scheduled and last ran 2026-07-13. Gates were never computed, so blindness is intact. The frozen structure is a **naked** short ATM straddle, which Alpaca cannot express at any level; the 'defined-risk' label here was wrong. The '~70% / ~18%' ceiling is an unrecorded assumption chain (M4: "UNMEAS"), and '~1,200 events' does not exist (603 known, 205 covered). The runner still conditions G2 on realized outcomes. Disposition is Pierce's | UNRESOLVED — Pierce |
+| SEVP scheduled-event vol carry (trial **T00029**) | ⛔ **CLOSED, `INSTRUMENT_LIMITED` (doc 305, Pierce's disposition).** Death date 2026-09-01 passed at 205/300 two-leg events; its IV collector was never scheduled. No gate was ever computed, so nothing is known about the effect. The frozen naked straddle cannot be traded at Alpaca, and the runner conditioned G2 on outcomes. Deadline not slid, nothing re-tuned. The UNRESOLVED report was made in doc 304 | CLOSED | 293, 294, 296, 304, 305 |
 | Stage-3 dated accept/kill (10–45d RV-vs-IV, HLN λ + QLIKE + power gate, collector death dates) | CONSUMED (doc 296): unblind VOID (h=1 deviation), frozen-horizon negative | closure recommended |
 | Conditional VRP ladder (21–30d delta-hedged straddles, RV-gated) | ~13% now; ~44% conditional on Stage-3 pass | did NOT unqueue (Stage-3 pass void); closes with the family on Pierce's ratification (296) |
 | LETF close-window rebalance-flow harvest | 12.5% ceiling, central <5% | QUEUE optional; flow-vs-raw-return rank-calibration mandatory |

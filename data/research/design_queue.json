@@ -59,44 +59,6 @@
  "_history_note": "Mechanism-class histogram of the 25 archived closures. Entropy is what diversity_bonus() moves; price_momentum at 8/25 is the crowding the term penalises.",
  "designs": [
   {
-   "name": "sevp_event_vol_carry",
-   "family": "volatility",
-   "n_obs": 205,
-   "cluster_size": 4,
-   "icc": 0.25,
-   "prior_mean": 0.8,
-   "prior_sd": 0.7,
-   "cost_days": 6.0,
-   "keystones_required": [
-    "executable_prereg_fixture"
-   ],
-   "_note": "doc 304 CORRECTION: n_obs was 1200, which is not on disk (603 events known, 205 with two-leg coverage). This file's own rule is that n_obs is the sample that ACTUALLY EXISTS. The '~70%/~18% validated ceiling' was an unrecorded doc-293 assumption chain (M4: UNMEAS). SEVP is trial T00029, UNRESOLVED-BY-DEATH since 2026-09-01; its frozen structure is a naked short straddle Alpaca cannot express. Disposition is Pierce's. Do NOT build from this row."
-  },
-  {
-   "name": "rocket_gate_forward_ledger",
-   "family": "price_momentum",
-   "n_obs": 30,
-   "cluster_size": 1,
-   "icc": 0.0,
-   "prior_mean": 0.0,
-   "prior_sd": 0.4,
-   "cost_days": 0.2,
-   "keystones_required": [],
-   "_note": "Already armed and collecting (n=3/30, DEAD at 60). Listed to show what a 30-observation gate can and cannot establish. prior_mean 0.0 because its parent family is closed."
-  },
-  {
-   "name": "kalshi_zero_capital_shadow",
-   "family": "prediction_markets",
-   "n_obs": 200,
-   "cluster_size": 1,
-   "icc": 0.0,
-   "prior_mean": 0.3,
-   "prior_sd": 0.5,
-   "cost_days": 0.5,
-   "keystones_required": [],
-   "_note": "Collecting (~2/200 resolved). A genuinely new mechanism class, so the diversity term rewards it; zero capital at risk while it collects."
-  },
-  {
    "name": "rv_forward_shadow_ledger",
    "family": "volatility",
    "n_obs": 60,
@@ -186,6 +148,47 @@
    ],
    "_note": "The same design on the full minute sample. n_obs = 2690, MEASURED after the 2026-09-21 backfill (2,691 sessions in the warehouse, 2016-01-04..2026-09-17), not the nominal 11x252=2772 this file originally carried. NOTE: intraday_tape_pre_2020 HAS NOW LANDED, so this design is no longer infeasible - it is the live counterfactual made real.",
    "_retired": "doc 304: retired. doc 303 VOIDED the LETF family (REFUTED_BY_ARITHMETIC: R^2 >= 47.6% needed vs 2-3% published; 5.8-9.2x Sharpe short with denominators matched) but did not retire these rows, so the planner kept ranking the voided family #1 and #2 ADMISSIBLE. Found by rerunning the planner while writing doc 304."
+  },
+  {
+   "name": "sevp_event_vol_carry",
+   "family": "volatility",
+   "n_obs": 205,
+   "cluster_size": 4,
+   "icc": 0.25,
+   "prior_mean": 0.8,
+   "prior_sd": 0.7,
+   "cost_days": 6.0,
+   "keystones_required": [
+    "executable_prereg_fixture"
+   ],
+   "_note": "doc 304 CORRECTION: n_obs was 1200, which is not on disk (603 events known, 205 with two-leg coverage). This file's own rule is that n_obs is the sample that ACTUALLY EXISTS. The '~70%/~18% validated ceiling' was an unrecorded doc-293 assumption chain (M4: UNMEAS). SEVP is trial T00029, UNRESOLVED-BY-DEATH since 2026-09-01; its frozen structure is a naked short straddle Alpaca cannot express. Disposition is Pierce's. Do NOT build from this row.",
+   "_retired": "doc 305: CLOSED INSTRUMENT_LIMITED on Pierce's disposition (death date passed at 205/300; naked straddle unexecutable; runner conditioned G2 on outcomes)."
+  },
+  {
+   "name": "kalshi_zero_capital_shadow",
+   "family": "prediction_markets",
+   "n_obs": 200,
+   "cluster_size": 1,
+   "icc": 0.0,
+   "prior_mean": 0.3,
+   "prior_sd": 0.5,
+   "cost_days": 0.5,
+   "keystones_required": [],
+   "_note": "Collecting (~2/200 resolved). A genuinely new mechanism class, so the diversity term rewards it; zero capital at risk while it collects.",
+   "_retired": "doc 305: CLOSED REFUTED_BY_NATURE by its own frozen gate (FAILED at n=237 and through n=793; Brier gap +0.135, CI [+0.114, +0.158]); collector decommissioned."
+  },
+  {
+   "name": "rocket_gate_forward_ledger",
+   "family": "price_momentum",
+   "n_obs": 30,
+   "cluster_size": 1,
+   "icc": 0.0,
+   "prior_mean": 0.0,
+   "prior_sd": 0.4,
+   "cost_days": 0.2,
+   "keystones_required": [],
+   "_note": "Already armed and collecting (n=3/30, DEAD at 60). Listed to show what a 30-observation gate can and cannot establish. prior_mean 0.0 because its parent family is closed.",
+   "_retired": "doc 305: T00027 CLOSED REFUTED_BY_NATURE (NOT PASSED at n=36; CI [-11,084, +7,582] $/session; futility stop)."
   }
  ]
 }
