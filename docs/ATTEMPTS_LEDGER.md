@@ -46,6 +46,7 @@ Established doc 293.
 
 | family | reason | doc |
 |---|---|---|
+| Large-cap (S&P-100) earnings-quality long/short from 10-Q/10-K/8-K text (C2) | rejected before build, doc 307: filing-text channel of row 17 (UNDERPOWERED; SS0006 NO-GO doc 306) and a price-feature hedged spread per row 12's reading; ~413 events/yr in the clean window give an MDE of 236–1,072 bps TOP−BOTTOM per ticket against a faded large-cap PEAD literature; the model has memorised the issuers' histories; short leg adds Rule 201 (≥12%) | 307 |
 | Turns-compressor (RV-gated passive liquidity provision, intraday capital turns) | validated 4–8% of requirement — fails the ≥10% filter at honest central assumptions | 293 |
 | Market-neutral 3σ residual-reversion spreads on liquids | closed-family variant (per-name directional prediction, price-feature, hedged); reopening requires doc-289/290-class novelty + Pierce sign-off | 293 |
 | Adversary "NULL-CERT" blanket certificate | rejected as premature (its shape-(b) bound missed the event-vol channel); its Stage-3 dated accept/kill payload salvaged | 293 |
@@ -56,6 +57,7 @@ Established doc 293.
 
 | family | validated ceiling | gate |
 |---|---|---|
+| LLM macro-regime core tilter (C1; `c1_llm_macro_regime_core_tilter`, draft 307p) | none measured; MDE IR 2.64 ≈ 86% weekly hit rate under the 2-changes/month cap; a literature-sized timing IR (~0.25) needs 340–476 yr to certify | **QUEUED as an information-value option, doc 307 — NOT for registration.** Planner: INFEASIBLE (keystone `point_in_time_macro_text_corpus`); UNDISCRIMINATING on the 447 clean sessions (Llama 3.3 released 2024-12-06); ADMISSIBLE only at the 1,077-session retro+30-month design, CEREMONIAL under N(0,0.3). Skeptic: 'register neither' better supported — the core already meets the target |
 | SEVP scheduled-event vol carry (trial **T00029**) | ⛔ **CLOSED, `INSTRUMENT_LIMITED` (doc 305, Pierce's disposition).** Death date 2026-09-01 passed at 205/300 two-leg events; its IV collector was never scheduled. No gate was ever computed, so nothing is known about the effect. The frozen naked straddle cannot be traded at Alpaca, and the runner conditioned G2 on outcomes. Deadline not slid, nothing re-tuned. The UNRESOLVED report was made in doc 304 | CLOSED | 293, 294, 296, 304, 305 |
 | Stage-3 dated accept/kill (10–45d RV-vs-IV, HLN λ + QLIKE + power gate, collector death dates) | CONSUMED (doc 296): unblind VOID (h=1 deviation), frozen-horizon negative | closure recommended |
 | Conditional VRP ladder (21–30d delta-hedged straddles, RV-gated) | ~13% now; ~44% conditional on Stage-3 pass | did NOT unqueue (Stage-3 pass void); closes with the family on Pierce's ratification (296) |

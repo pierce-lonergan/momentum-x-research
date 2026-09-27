@@ -56,7 +56,23 @@
   "concentration": 1
  },
  "_history_note": "Mechanism-class histogram of the 25 archived closures. Entropy is what diversity_bonus() moves; price_momentum at 8/25 is the crowding the term penalises.",
- "designs": [],
+ "designs": [
+  {
+   "name": "c1_llm_macro_regime_core_tilter",
+   "family": "macro_regime_timing",
+   "n_obs": 1077,
+   "cluster_size": 1,
+   "icc": 0.0,
+   "prior_mean": 0.0,
+   "prior_sd": 0.5,
+   "cost_days": 8.0,
+   "keystones_required": [
+    "executable_prereg_fixture",
+    "point_in_time_macro_text_corpus"
+   ],
+   "_note": "doc 307 DRAFT (307p), not frozen, no trial registered. Weekly Llama-3.3-70B-Instruct-Turbo multi-agent read of point-in-time Fed / macro-release / 8-K EX-99 text -> w_SPY in {0.60, 0.80, 1.00}; overlay r_t = (w_t - 0.80)(R_SPY - R_BIL) - cost vs the static 80/20 shadow core; primary = its annualised IR. n_obs 1077 = retro-clean half 447 sessions (2024-12-09..2026-09-22; the weights were released 2024-12-06, pretraining cutoff Dec 2023 per the HF model card; returns exist, labels and corpus do NOT) + 630 forward paper-shadow sessions. It is the n the design would HAVE at EVAL, like the forward entries before it, not a sample on disk: at n_obs 447 (what exists) the verdict is UNDISCRIMINATING (informativeness 1.240), and every stand-alone variant fails (fwd 12m CEREMONIAL, 24m/36m UNDISCRIMINATING). At 1077: ADMISSIBLE at N(0,0.5), p_cert 0.0470, informativeness 1.582, EIG 0.1184, BAR@34 1.8233, toll 0.0059; holds to r_NW 1.10 (n_eff 979); smallest admissible n is 927. Threshold prior sd 0.464. CEREMONIAL under a literature-shaped prior N(0,0.3) or N(0.1,0.3). MDE IR 2.64 (omega 0.25) = ~86% weekly hit rate under the draft's 2-changes/month cap (~92% on the retro half; doc-307 skeptic; 77% was uncapped) = ~9.4%/yr of overlay alpha at +-0.20; perfect weekly foresight is IR 5.04. prior_mean 0.0 is the program default and needs no defence; nothing in the ledger or literature supports more (Goyal-Welch; a Campbell-Thompson R^2 of 0.5% maps to timing IR ~0.25). 'point_in_time_macro_text_corpus' is NOT in available_keystones, so `plan` reports INFEASIBLE until the corpus builder (P-1) lands - verified (s10). Family is new (no ledger row); closest neighbour doc-298 M2 vol-managed SPY, IR +0.08/-0.04. Model-retirement risk over ~31 months (freeze to EVAL) is the most likely non-statistical end (UNRESOLVED-INSTRUMENT). Scripts: scratch doc307/overlay/s01-s09. | doc 307 DISPOSITION: submitted as an information-value option, NOT for registration; the skeptic judged 'register neither' better supported (the core already meets the target). Amendments in 307p: bar N = max(34, trial_count at EVAL); weekly-reversal baseline B3 added to G2b; PASS-UNATTRIBUTED never promotable; F-half one-sided 90% lower bound > 0 (retro-leak false-pass up to 6.2%)."
+  }
+ ],
  "retired": [
   {
    "name": "anomaly_vol_scale_monetisation",

@@ -96,6 +96,8 @@ with a −27.5% drawdown, and 40.5% of its trailing-252 windows missed it. Any a
 as an **overlay**: its contribution is (strategy − shadow), not (strategy − target). Since 2026-07-06 that
 difference is **−5.31 pp (−$10,229) over 55 sessions** (STRATEGY −1.88% vs SHADOW +3.44%).
 
+**Paper cannot show the core meeting the target (doc 307).** Alpaca paper credits no dividends or interest (0 DIV/INT activities ever; Alpaca's paper docs say so), and BIL's total return is 99.1% distribution. A paper 80/20 sleeve therefore earns PRICE return: **4.079 bps/day geometric (10.82% CAGR) against 4.7394**, and 3.506 at the 0.85 sleeve fraction. The shadow (total return) remains the scoreboard; the tracker's CORE line reports the real paper sleeve and, separately, "+ uncredited distributions", so a simulator artifact is never read as tracking error. On a live account the distributions are paid.
+
 ## 1. The compounding fact
 
 1%/month compounds to **+12.68%/yr** (binding definition in §0a). For scale: the only audited 12-year live retail systematic track
