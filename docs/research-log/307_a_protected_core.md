@@ -210,3 +210,56 @@ The C1 draft carries the skeptic's amendments:
   - the launcher and watchdog `.ps1`, `shadow_benchmark_tracker.py`, QUARANTINE.md and the operator runbook.
 - **Research repo:** this doc, `307p_c1_core_tilter_prereg_DRAFT.md`, the `design_queue.json` C1 entry, TARGET.md §0a (paper distributions), and ATTEMPTS_LEDGER (C1 queued, C2 filtered).
 - **Workflow artifacts:** scratch `doc307/` (audit1, audit2, merge, exemptions, rebalancer, jumps, overlay, fix_*, fix2_*, and every verify / reverify / reverify2 directory).
+
+---
+
+## 9. Addendum (2026-09-27): "Choice B" and the call
+
+Pierce asked for a final call on a proposal ("Choice B") to push profit to the maximum. It had three parts. The
+call, part by part, is below. Every figure is from this session, computed on the tracker's Polygon cache from
+2016-01-04 to 2026-09-22 with a monthly reset. This simplified run gives the 80/20 total return as 12.67%,
+against the tracker's 12.74%.
+
+| sleeve | account type | CAGR | geo bps/day | MaxDD | trailing-252 windows ≥ 4.7394 |
+|---|---|---|---|---|---|
+| 80/20 SPY/BIL | real (total return) | 12.67% | 4.734 | −27.5% | 59.5% |
+| 80/20 SPY/BIL | paper (price only) | 10.75% | 4.053 | −27.8% | 45.2% |
+| 80/20 SPY/cash | paper (price only) | 10.75% | 4.052 | −27.9% | 45.2% |
+| **95/5 SPY/cash (Choice B)** | paper (price only) | 12.69% | 4.743 | **−32.6%** | 59.7% |
+| 95/5 SPY/cash | real (total return) | 14.45% | 5.356 | −32.2% | 67.2% |
+
+**Phase 1, deploy the capital.**
+- **ADOPTED: fully invest.** `MOMENTUM_CORE_SLEEVE_FRACTION=0.98` (it was 0.85). The 15% left idle earned 0% on paper.
+  - The first allocation now plans BUY SPY 191 + BIL 404 ($184,474, 97.6% of equity; SPY 79.9% of the sleeve).
+  - QUARANTINE.md's un-quarantine checklist gains step 1b: lower the fraction before lifting the strategy halt.
+- **ADOPTED: size on broker equity.** This includes the $40,003.59 CRCA phantom, which is real buying power in the simulator. Measurement still excludes it (the admin registry, §3).
+- **REJECTED: 95/5 SPY/cash in place of 80/20 SPY/BIL.** Its premise was that BIL is dead weight on paper. That is true, but cash is exactly as dead: on paper BIL and cash give identical returns (4.053 vs 4.052 bps/day). **Swapping BIL for cash recovers nothing.**
+  - All of 95/5's gain comes from 15 points more equity beta. It adds 0.69 bps/day and 5 points of drawdown.
+  - That is a risk-appetite choice, not a fix for the drag and not an edge. The paper shortfall is the simulator's missing distributions, and the tracker already reports it on its own line.
+  - Moving the core off 80/20 would also break the identity doc 306 pinned: the core *is* the target, and the shadow benchmark is 80/20. A 95/5 core would make CORE−SHADOW measure beta rather than tracking.
+  - If Pierce wants a higher equity weight for its own sake, that is his call, as a separate, explicit risk decision (not investment advice).
+- **ADOPTED: execute Monday.** A one-time scheduled task runs the guarded allocation at 10:05 ET on 2026-09-28:
+  - it runs `--check`, then executes only if seven preconditions hold, then verifies;
+  - read-only checks follow at 16:40 ET (EOD exemptions) and at 09:45 ET 09-29 (the first overnight-held boot);
+  - the tasks run only while the Claude app is open.
+
+**Phase 2, "LGD-100": REJECTED.** It is C2 (§4) under a new name, and its load-bearing claims fail against this program's own measurements.
+- **Rule 201.** It claims "< 1%". The doc-307 overlay workstream measured ≥ 12.1% of top-100-ADV earnings events as a daily-bar lower bound, and 6.3% even after dropping the 20 most volatile names.
+- **Expected gross spread.** It claims "180–300 bps per ticket" and cites no evidence. The literature has large-cap PEAD largely gone (Martineau 2022; McLean-Pontiff 2016). Doc 260's 240 bps was a contaminated small-cap median.
+- **"Net edge > 175 bps sidesteps the power trap."** This confuses a cost hurdle with statistical power. Power depends on n and σ, not on the size one assumes.
+  - At ~413 events a year and ~1,148 bps per-ticket sd, the minimum detectable TOP−BOTTOM spread is 236–1,072 bps per ticket.
+  - The clean window is only 447 sessions, because Llama 3.3 was released 2024-12-06 and has memorised earlier issuer histories.
+- The spread figures (mega 0.918 / large 1.825 bps all-in, TARGET §2b) and 100% easy-to-borrow at 0% are correct. They were never the binding constraint.
+
+**Phase 3, the autonomous LLM "Crucible": REJECTED.** A nightly tournament of LLM-generated strategies on the same 2,691 sessions is the multiplicity machine the trial registry exists to prevent.
+- Every candidate tested is a trial, and the registry's own arithmetic prices it:
+  - the null-expected best annualised Sharpe is 0.65 at 34 trials, 1.00 at 1,000 and 1.18 at 10,000;
+  - the operative bar rises to 1.50 at 1,000 trials and 1.69 at 10,000.
+- The filter, "Sharpe > 1.8 **gross**" from in-sample parameter search, selects precisely the survivors of that noise.
+- The EIG appraisal prices one design's information under a prior. It does not correct for selection across thousands of mined candidates.
+- Every survivor would still need its own forward test of ≥ 927 effective sessions at the default prior (doc 306).
+- It would also break the standing rule: no new epistemics code without a candidate in flight.
+
+**The 72-hour roadmap.**
+- **ADOPTED (operational):** Monday 09:35 Mode B check, 10:05 core, 16:30 scorecard; Tuesday 04:30 boot check (the scheduled tasks above).
+- **REJECTED (research):** the Tuesday/Wednesday LGD-100 build.
