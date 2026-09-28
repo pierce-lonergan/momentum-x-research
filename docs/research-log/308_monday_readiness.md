@@ -71,3 +71,18 @@
 - Private `47423af`, on top of `40560e9` + `fb2b4e7` (doc 307).
 - The one-time Claude tasks: `momentum-x-core-initial-allocation` (Mon 10:05), `momentum-x-core-eod-verify` (Mon 16:40), `momentum-x-core-overnight-boot-verify` (Tue 09:45).
 - Scratch: `doc308/` (rebalancer, distributions, schedule, fix_*, final_*, every verify / reverify directory, and verify_isolation).
+
+---
+
+## 5. Monday 2026-09-28: what actually happened
+
+- **Observe mode was clean for a third session.** Boot at 04:30:01. `verify_observe_mode.py`: 0 FAIL, 0 WARN, 253 evaluations. 11 buy verdicts reached the executor and all 11 were refused (`BLOCKED_OPERATOR_HALT_EXEC`). **0 broker orders and 0 fills.** The EOD failsafes were clean, and the nightly chain ran end to end: `[distributions] no core fills yet`, shadow +1 session, CORE n/a.
+- **The core was NOT bought.**
+  - The one-time Claude task started at 10:05:22 and went idle at 10:05:29, waiting on a tool-permission prompt no one answered. It had never been pre-approved with "Run now". The 16:40 check stalled the same way.
+  - The in-session fallback armed for 10:12 did run, and found no ledger. But its result reached the session only at 18:21, after the close.
+  - The guards did their job: nothing traded by accident, and a late approval of the stalled task is a no-op because of its Monday-only time gate.
+- **The fix, and the lesson.** Time-critical actions go on Windows Task Scheduler, which needs no approvals and can wake the PC, never on Claude scheduled tasks.
+  - The first build now runs from a **one-time trigger added to `MomentumX-CoreRebalancer` for Tuesday 2026-09-29 at 10:05 ET**. It uses the same launcher and guards, and the rebalancer sends its Discord fill report.
+  - The weekly 15:15 runs follow from Wednesday 09-30, the month-end.
+  - The stalled Claude task is disabled. The two read-only Claude checks are retargeted to Tuesday 16:40 (EOD) and Wednesday 09:45 (the first overnight-held boot). They still need a one-time pre-approval.
+
